@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Seserahan Nikah</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align:center;">Tabel Persiapan Nikah</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Ceklis</th>
+        <th>Item</th>
+      </tr>
+    </thead>
+    <tbody id="checklist-table">
+      <!-- Akan diisi oleh JavaScript -->
+    </tbody>
+  </table>
+
+  <script>
+    const items = [
+      "Mas Kawin",
+      "Seperangkat Alat Shalat + Alquran",
+      "Baju Couple",
+      "Kerudung",
+      "Daleman",
+      "Tas",
+      "Sendal",
+      "Sepatu",
+      "Make Up",
+      "Set Mandi + Handuk",
+      "Jajanan Coklat",
+      "Jam Tangan Couple",
+      "Bad Cover Sprei",
+      "Samping Kebat dan Samping Sarung",
+      "Parcel Buah",
+      "Bucket Bunga",
+      "Mejicom",
+      "Kasur Springbed",
+      "Lemari"
+    ];
+
+    const tableBody = document.getElementById("checklist-table");
+
+    items.forEach((item, index) => {
+      const row = document.createElement("tr");
+
+      const checkboxCell = document.createElement("td");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "item_" + index;
+
+      // Cek status dari localStorage
+      const saved = localStorage.getItem(checkbox.id);
+      if (saved === "true") {
+        checkbox.checked = true;
+      }
+
+      // Simpan ke localStorage saat berubah
+      checkbox.addEventListener("change", () => {
+        localStorage.setItem(checkbox.id, checkbox.checked);
+      });
+
+      checkboxCell.appendChild(checkbox);
+
+      const itemCell = document.createElement("td");
+      itemCell.textContent = item;
+
+      row.appendChild(checkboxCell);
+      row.appendChild(itemCell);
+      tableBody.appendChild(row);
+    });
+  </script>
+
+</body>
+</html>
