@@ -12,64 +12,130 @@
   <link href="assets/img/favicon.png" rel="icon">
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
   
-  <title>RINCIAN PENGELUARAN BULANAN</title>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Rincian Pengeluaran Bulanan</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; }
-    h1, h2 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-    .total { font-weight: bold; background-color: #f2f2f2; }
+    body { 
+      font-family: 'Inter', Arial, sans-serif; 
+      margin: 0;
+      padding: 1rem;
+      background-color: #f7fafc;
+      color: #1a202c;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    h1, h2 { 
+      text-align: center; 
+      color: #2d3748;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-bottom: 25px; 
+    }
+    th, td { 
+      border: 1px solid #e2e8f0; 
+      padding: 0.75rem; 
+      text-align: left;
+    }
+    th {
+      background-color: #edf2f7;
+      font-weight: 600;
+    }
+    td:last-child { 
+      text-align: right; 
+      font-weight: 500;
+    }
+    .total td { 
+      font-weight: bold; 
+      background-color: #e2e8f0;
+      color: #1a202c;
+    }
+    .sisa-plus td:last-child {
+        color: #38a169; /* Green for positive balance */
+    }
+    .sisa-minus td:last-child {
+        color: #e53e3e; /* Red for negative balance */
+    }
+    .footer-text {
+      text-align: center;
+      margin-top: 2rem;
+      font-style: italic;
+      color: #4a5568;
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <h1>RINCIAN PENGELUARAN BULANAN</h1>
+  <div class="container">
+    <h1>RINCIAN PENGELUARAN BULANAN</h1>
 
-  <h2>PENDAPATAN</h2>
-  <table>
-    <tr><td>Gaji bulanan</td><td>Rp6.000.000</td></tr>
-    <tr><td>Uang makan mingguan (Rp &nbsp;&nbsp;&nbsp;150.000 × 4)</td><td>Rp 600.000</td></tr>
-    <tr class="total"><td>Total Pendapatan</td><td>Rp6.600.000</td></tr>
-  </table>
+    <h2>PENDAPATAN</h2>
+    <table>
+      <tr><td>Gaji bulanan</td><td>Rp 6.000.000</td></tr>
+      <tr><td>Uang makan mingguan (Rp 150.000 x 4)</td><td>Rp 600.000</td></tr>
+      <tr class="total"><td>Total Pendapatan</td><td>Rp 6.600.000</td></tr>
+    </table>
 
-  <h2>PENGELUARAN BULANAN (JIKA PAKAI MOTOR)</h2>
-  <table>
-    <tr><th>Keperluan</th><th>Jumlah</th></tr>
-    <tr><td>Uang makan kerja (22x40rb) </td><td>Rp &nbsp;&nbsp;&nbsp;660.000</td></tr>
-    <tr><td>Transport kerja (4x60rb) </td><td>Rp &nbsp;&nbsp;&nbsp;240.000</td></tr>
-    <tr><td>Pulang kampung (4x100rb)</td><td>Rp &nbsp;&nbsp;&nbsp;400.000</td></tr>
-    <tr><td><strong>Tabungan nikah</strong></td><td><strong>Rp 1.500.000</strong></td></tr>
-    <tr><td>Untuk orang tua</td><td>Rp 1.250.000</td></tr>
-    <tr><td>Bayar listrik</td><td>Rp &nbsp;&nbsp;&nbsp;150.000</td></tr>
-    <tr><td>Zakat mal</td><td>Rp &nbsp;&nbsp;&nbsp;150.000</td></tr>
-    <tr><td>Seserahan</td><td>Rp &nbsp;&nbsp;&nbsp;500.000</td></tr>
-    <tr><td>Pulsa</td><td>Rp &nbsp;&nbsp;&nbsp;50.000</td></tr>
-    <tr><td>Jajan (22x10rb) </td><td>Rp &nbsp;&nbsp;&nbsp;220.000</td></tr>
-    <tr><td>Rokok (30×30rb) </td><td>Rp &nbsp;&nbsp;&nbsp;900.000</td></tr>
-    <tr class="total"><td>Total Pengeluaran</td><td>Rp 6.020.000</td></tr>
-    <tr class="total"><td>Sisa Bulanan</td><td>Rp 580.000</td></tr>
-  </table>
+    <h2>PENGELUARAN BULANAN (JIKA PAKAI MOTOR)</h2>
+    <table>
+      <tr><th>Keperluan</th><th>Jumlah</th></tr>
+      <tr><td>Uang makan kerja (22 x 40.000)</td><td>Rp 880.000</td></tr>
+      <tr><td>Transport kerja (4 x 60.000)</td><td>Rp 240.000</td></tr>
+      <tr><td>Pulang kampung (4 x 80.000)</td><td>Rp 320.000</td></tr>
+      <tr><td><strong>Tabungan nikah</strong></td><td><strong>Rp 1.500.000</strong></td></tr>
+      <tr><td>Untuk orang tua</td><td>Rp 1.250.000</td></tr>
+      <tr><td>Bayar listrik</td><td>Rp 150.000</td></tr>
+      <tr><td>Zakat mal</td><td>Rp 150.000</td></tr>
+      <tr><td>Seserahan</td><td>Rp 500.000</td></tr>
+      <tr><td>Pulsa</td><td>Rp 50.000</td></tr>
+      <tr><td>Jajan (22 x 10.000)</td><td>Rp 220.000</td></tr>
+      <tr><td>Rokok (30 x 30.000)</td><td>Rp 900.000</td></tr>
+      <tr class="total"><td>Total Pengeluaran</td><td>Rp 6.160.000</td></tr>
+      <tr class="total sisa-plus"><td>Sisa Bulanan</td><td>Rp 440.000</td></tr>
+    </table>
 
-  <h2>PENGELUARAN BULANAN (JIKA NAIK OJEK)</h2>
-  <table>
-    <tr><th>Keperluan</th><th>Jumlah</th></tr>
-    <tr><td>Uang makan kerja(22x40rb) </td><td>Rp &nbsp;&nbsp;&nbsp;660.000</td></tr>
-    <tr><td>Transport kerja (22x30rb)</td><td>Rp &nbsp;&nbsp;&nbsp;616.000</td></tr>
-    <tr><td>Pulang kampung (4x100rb) </td><td>Rp &nbsp;&nbsp;&nbsp;400.000</td></tr>
-    <tr><td><strong>Tabungan nikah</strong></td><td><strong>Rp 1.500.000</strong></td></tr>
-    <tr><td>Untuk orang tua</td><td>Rp 1.250.000</td></tr>
-    <tr><td>Bayar listrik</td><td>Rp &nbsp;&nbsp;&nbsp;150.000</td></tr>
-    <tr><td>Zakat mal</td><td>Rp &nbsp;&nbsp;&nbsp;150.000</td></tr>
-    <tr><td>Seserahan</td><td>Rp &nbsp;&nbsp;&nbsp;500.000</td></tr>
-    <tr><td>Pulsa</td><td>Rp &nbsp;&nbsp;&nbsp;50.000</td></tr>
-    <tr><td>Jajan (22x10rb)</td><td>Rp &nbsp;&nbsp;&nbsp;220.000</td></tr>
-    <tr><td>Rokok (30×30rb) </td><td>Rp &nbsp;&nbsp;&nbsp;900.000</td></tr>
-    <tr class="total"><td>Total Pengeluaran</td><td>Rp 6.396.000</td></tr>
-    <tr class="total"><td>Sisa Bulanan</td><td>Rp &nbsp;&nbsp;&nbsp;204.000</td></tr>
-  </table>
+    <h2>PENGELUARAN BULANAN (JIKA NAIK OJEK)</h2>
+    <table>
+      <tr><th>Keperluan</th><th>Jumlah</th></tr>
+      <tr><td>Uang makan kerja (22 x 40.000)</td><td>Rp 880.000</td></tr>
+      <tr><td>Transport kerja (22 x 30.000)</td><td>Rp 660.000</td></tr>
+      <tr><td>Pulang kampung (4 x 80.000)</td><td>Rp 320.000</td></tr>
+      <tr><td><strong>Tabungan nikah</strong></td><td><strong>Rp 1.500.000</strong></td></tr>
+      <tr><td>Untuk orang tua</td><td>Rp 1.250.000</td></tr>
+      <tr><td>Bayar listrik</td><td>Rp 150.000</td></tr>
+      <tr><td>Zakat mal</td><td>Rp 150.000</td></tr>
+      <tr><td>Seserahan</td><td>Rp 500.000</td></tr>
+      <tr><td>Pulsa</td><td>Rp 50.000</td></tr>
+      <tr><td>Jajan (22 x 10.000)</td><td>Rp 220.000</td></tr>
+      <tr><td>Rokok (30 x 30.000)</td><td>Rp 900.000</td></tr>
+      <tr class="total"><td>Total Pengeluaran</td><td>Rp 6.580.000</td></tr>
+      <tr class="total sisa-plus"><td>Sisa Bulanan</td><td>Rp 20.000</td></tr>
+    </table>
 
-<p style="text-align:center;"><strong><em>Perhitungan tabungan nikah: Rp1.500.000 x 12 bulan = Rp18.000.000</em></strong></p>
-<p style="text-align:center;"><strong><em>Target Nikah 26 Juni 2026.</em></strong></p>
+    <p class="footer-text"><strong><em>Perhitungan tabungan nikah: Rp 1.500.000 x 12 bulan = Rp 18.000.000</em></strong></p>
+    <p class="footer-text"><strong><em>Target Nikah 26 Juni 2026.</em></strong></p>
+  </div>
 
 </body>
 </html>
