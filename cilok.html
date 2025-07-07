@@ -13,10 +13,170 @@
     <title>Cilok Usaha</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #f7f9fb;
+            --bg-white: #ffffff;
+            --border-color: #e0e0e0;
+            --profit-color: #27ae60;
+            --cost-color: #c0392b;
+            --warning-color: #f0ad4e;
         }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: auto;
+            background-color: var(--bg-white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #ff8e53);
+            color: var(--bg-white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1px;
+            background-color: var(--border-color);
+        }
+
+        .canvas-card {
+            background-color: var(--bg-white);
+            padding: 25px;
+        }
+
+        .canvas-card h2 {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .canvas-card h2 svg {
+            margin-right: 10px;
+        }
+
+        .canvas-card ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .canvas-card ul li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .canvas-card ul li::before {
+            content: '✓';
+            color: var(--secondary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .highlight {
+            background-color: #fffbe6;
+            border-left: 5px solid var(--warning-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .highlight strong {
+            color: #8a6d3b;
+        }
+
+        .financial-summary {
+            grid-column: 1 / -1;
+            background: linear-gradient(to right, #6dd5ed, #2193b0);
+            color: white;
+        }
+        
+        .financial-summary .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .summary-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .summary-item h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            font-weight: 400;
+            text-transform: uppercase;
+        }
+        
+        .summary-item .amount {
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        
+        td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .total-row td {
+            font-weight: 700;
+            border-top: 2px solid var(--text-dark);
+            font-size: 1.1em;
+        }
+        
+        .cost { color: var(--cost-color); }
+        .profit { color: var(--profit-color); }
+
     </style>
 </head>
 <body class="bg-gray-50">
