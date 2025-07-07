@@ -155,135 +155,107 @@
                 </div>
             </div>
 
-            <div class="mt-8 overflow-x-auto">
-                <h3 class="text-xl font-semibold mb-3 text-gray-700">Ringkasan Total Biaya Harian</h3>
+           <div class="mt-8 overflow-x-auto">
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Ringkasan Total Modal Harian</h3>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="p-4 font-semibold text-gray-700 border-b-2 border-gray-200">Kategori Biaya</th>
-                            <th class="p-4 font-semibold text-gray-700 border-b-2 border-gray-200 text-right">Estimasi Biaya</th>
+                            <th class="p-4 font-semibold text-gray-700">Kategori Biaya</th>
+                            <th class="p-4 font-semibold text-gray-700 text-right">Estimasi Biaya</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-gray-200">
-                            <td class="p-4">Total Biaya Bahan (Adonan + Saus)</td>
-                            <td class="p-4 text-right">Rp 133.000</td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td class="p-4">Biaya Operasional (Gas, Air, Kemasan dll.)</td>
-                            <td class="p-4 text-right">Rp 25.000</td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td class="p-4">Biaya Karyawan (1 orang)</td>
-                            <td class="p-4 text-right">Rp 70.000</td>
-                        </tr>
-                        <tr class="bg-gray-100 font-bold">
+                        <tr class="border-b"><td class="p-4">Total Biaya Bahan (Adonan + Saus)</td><td class="p-4 text-right">Rp 133.000</td></tr>
+                        <tr class="border-b"><td class="p-4">Biaya Operasional (Gas, Air, Kemasan)</td><td class="p-4 text-right">Rp 25.000</td></tr>
+                        <tr class="border-b"><td class="p-4">Biaya Karyawan (1 orang)</td><td class="p-4 text-right">Rp 70.000</td></tr>
+                        <tr class="bg-red-100 font-bold">
                             <td class="p-4">TOTAL MODAL HARIAN</td>
                             <td class="p-4 text-right text-lg text-red-600">Rp 228.000</td>
+                        </tr>
+                         <tr class="bg-yellow-100 font-bold">
+                            <td class="p-4">Harga Pokok Produksi (HPP) per Butir</td>
+                            <td class="p-4 text-right text-lg text-yellow-800">Rp 456</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <hr class="my-8 border-gray-200">
-
-        <!-- Estimasi Keuntungan -->
-        <section>
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4 border-l-4 border-blue-500 pl-4">Model 1: Jualan Langsung ke Konsumen</h2>
-            <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
-                <p class="text-center mb-6">Dengan asumsi harga jual <strong>Rp 1.000 per butir</strong> dan penjualan harian konsisten.</p>
-                <div class="grid md:grid-cols-3 gap-6 text-center">
-                    <div>
-                        <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Total Pendapatan Harian</h4>
-                        <p class="text-3xl font-bold text-blue-800 mt-1">Rp 500.000</p>
-                        <p class="text-xs text-gray-500 mt-1">(500 butir x Rp 1.000)</p>
-                    </div>
-                    <div class="border-t md:border-t-0 md:border-l md:border-r px-6">
-                        <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Keuntungan Bersih Harian</h4>
-                        <p class="text-3xl font-bold text-green-600 mt-1">Rp 272.000</p>
-                        <p class="text-xs text-gray-500 mt-1">(Pendapatan - Modal)</p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Margin Keuntungan Bersih</h4>
-                        <p class="text-3xl font-bold text-blue-800 mt-1">54.4%</p>
-                        <p class="text-xs text-gray-500 mt-1">(Keuntungan / Pendapatan)</p>
+        <!-- Analisis Keuntungan -->
+        <section id="keuntungan">
+            <h2 class="section-title border-blue-500">Bagian 3: Analisis Keuntungan</h2>
+            
+            <!-- Model 1: Jualan Langsung -->
+            <div class="mb-10">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Model 1: Jualan Langsung ke Konsumen</h3>
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+                    <p class="text-center mb-6">Asumsi harga jual <strong>Rp 1.000 per butir</strong> dan penjualan harian konsisten.</p>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div>
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Pendapatan Harian</h4>
+                            <p class="text-3xl font-bold text-blue-800 mt-1">Rp 500.000</p>
+                        </div>
+                        <div class="border-t md:border-t-0 md:border-l md:border-r px-6">
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Keuntungan Bersih Harian</h4>
+                            <p class="text-3xl font-bold text-green-600 mt-1">Rp 272.000</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Margin Keuntungan</h4>
+                            <p class="text-3xl font-bold text-blue-800 mt-1">54.4%</p>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-6 bg-purple-50 border border-purple-200 p-6 rounded-lg">
-                    <p class="text-center mb-6 font-semibold">Proyeksi Keuntungan (Asumsi 30 Hari Kerja/Bulan)</p>
-                    <div class="grid md:grid-cols-2 gap-6 text-center">
-                        <div class="p-4 bg-white rounded-lg shadow">
-                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-lg">Bulanan</h4>
-                            <p class="text-2xl font-bold text-green-600 mt-2">Rp 8.160.000</p>
+            </div>
+
+            <!-- Model 2: Menjadi Pemasok -->
+            <div>
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Model 2: Menjadi Pemasok (Supplier)</h3>
+                <div class="bg-gray-100 border border-gray-200 p-6 rounded-lg">
+                    <p class="text-center mb-6">Asumsi harga jual <strong>Rp 600 per butir</strong> ke penjual lain.</p>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div>
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Pendapatan Harian</h4>
+                            <p class="text-3xl font-bold text-gray-800 mt-1">Rp 300.000</p>
                         </div>
-                        <div class="p-4 bg-white rounded-lg shadow">
-                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-lg">Tahunan</h4>
-                            <p class="text-2xl font-bold text-green-600 mt-2">Rp 97.920.000</p>
+                        <div class="border-t md:border-t-0 md:border-l md:border-r px-6">
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Keuntungan Bersih Harian</h4>
+                            <p class="text-3xl font-bold text-green-600 mt-1">Rp 72.000</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-sm">Margin Keuntungan</h4>
+                            <p class="text-3xl font-bold text-gray-800 mt-1">24%</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <hr class="my-8 border-gray-200">
-        
-        <!-- Rencana Bisnis Pemasok -->
-        <section>
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4 border-l-4 border-gray-700 pl-4">Model 2: Menjadi Pemasok (Supplier)</h2>
-            <div class="space-y-6">
-                <div class="bg-gray-100 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">1. Analisis Harga Pokok Produksi (HPP)</h3>
-                    <p class="text-gray-600">Ini adalah modal Anda untuk membuat 1 butir cilok lengkap dengan saus dan biaya tenaga kerja.</p>
-                    <div class="mt-4 text-center bg-white p-4 rounded-lg shadow-inner">
-                        <p class="text-lg">Rp 228.000 (Total Modal) / 500 butir</p>
-                        <p class="text-3xl font-bold text-red-600 mt-1">Rp 456 per butir</p>
+         <!-- Proyeksi Tahunan -->
+        <section id="proyeksi" class="mt-12">
+            <h2 class="section-title border-purple-500">Bagian 4: Proyeksi Keuntungan Tahunan</h2>
+            <div class="bg-purple-50 border border-purple-200 p-6 rounded-lg">
+                <p class="text-center mb-6">Dengan asumsi <strong>30 hari kerja per bulan</strong> (360 hari kerja per tahun).</p>
+                <div class="grid md:grid-cols-2 gap-8 text-center">
+                    <!-- Proyeksi Jualan Langsung -->
+                    <div class="p-6 bg-white rounded-lg shadow">
+                        <h4 class="font-semibold text-gray-700 text-xl mb-4">Model Jualan Langsung</h4>
+                        <p class="text-sm text-gray-500">Keuntungan Bersih Bulanan</p>
+                        <p class="text-3xl font-bold text-green-600">Rp 8.160.000</p>
+                        <p class="text-sm text-gray-500 mt-4">Keuntungan Bersih Tahunan</p>
+                        <p class="text-4xl font-bold text-green-700 mt-1">Rp 97.920.000</p>
                     </div>
-                </div>
-
-                <div class="bg-gray-100 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">2. Rekomendasi Harga Jual ke Penjual Lain</h3>
-                    <p class="text-gray-600">Anda perlu memberikan ruang bagi penjual lain (reseller) untuk mendapatkan keuntungan. Margin keuntungan yang sehat untuk pemasok adalah 30-40% dari HPP.</p>
-                    <div class="mt-4 text-center bg-white p-4 rounded-lg shadow-inner">
-                        <p class="text-lg">Harga Jual Ideal untuk Pemasok:</p>
-                        <p class="text-3xl font-bold text-green-600 mt-1">Rp 600 - Rp 650 per butir</p>
-                        <p class="mt-2 text-gray-600">Dengan harga jual <strong>Rp 600</strong>, keuntungan reseller adalah <strong>Rp 400</strong> per butir jika mereka menjual Rp 1.000. Ini sangat menarik bagi mereka.</p>
+                    <!-- Proyeksi Pemasok -->
+                    <div class="p-6 bg-white rounded-lg shadow">
+                        <h4 class="font-semibold text-gray-700 text-xl mb-4">Model Pemasok (Supplier)</h4>
+                        <p class="text-sm text-gray-500">Keuntungan Bersih Bulanan</p>
+                        <p class="text-3xl font-bold text-green-600">Rp 2.160.000</p>
+                        <p class="text-sm text-gray-500 mt-4">Keuntungan Bersih Tahunan</p>
+                        <p class="text-4xl font-bold text-green-700 mt-1">Rp 25.920.000</p>
                     </div>
-                </div>
-
-                <div class="bg-gray-100 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">3. Proyeksi Keuntungan Bersih Sebagai Pemasok</h3>
-                    <p class="text-center text-sm text-gray-600 mb-4">Berdasarkan harga jual <strong>Rp 600/butir</strong> ke penjual lain dan asumsi 30 hari kerja/bulan.</p>
-                    <div class="grid md:grid-cols-3 gap-4 text-center">
-                        <div class="p-4 bg-white rounded-lg shadow-inner">
-                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-md">Harian</h4>
-                            <p class="text-2xl font-bold text-green-600 mt-2">Rp 72.000</p>
-                            <p class="text-xs text-gray-500 mt-1">(500 butir x Rp 144 untung)</p>
-                        </div>
-                        <div class="p-4 bg-white rounded-lg shadow-inner">
-                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-md">Bulanan</h4>
-                            <p class="text-2xl font-bold text-green-600 mt-2">Rp 2.160.000</p>
-                            <p class="text-xs text-gray-500 mt-1">(Rp 72.000 x 30 hari)</p>
-                        </div>
-                        <div class="p-4 bg-white rounded-lg shadow-inner">
-                            <h4 class="font-semibold text-gray-600 uppercase tracking-wider text-md">Tahunan</h4>
-                            <p class="text-2xl font-bold text-green-600 mt-2">Rp 25.920.000</p>
-                            <p class="text-xs text-gray-500 mt-1">(Rp 2.160.000 x 12 bulan)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gray-100 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">4. Tips Strategi Bisnis</h3>
-                    <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Sistem Paket:</strong> Tawarkan dalam paket yang mudah dihitung, misalnya <strong>Rp 60.000 untuk 100 butir</strong> (cilok + saus terpisah).</li>
-                        <li><strong>Harga Grosir:</strong> Berikan diskon kecil (misal, Rp 580/butir) untuk pembelian dalam jumlah sangat besar (di atas 500 butir) untuk mengikat pelanggan besar.</li>
-                        <li><strong>Jaga Kualitas:</strong> Konsistensi rasa, ukuran, dan kebersihan adalah kunci utama untuk bisnis pemasok. Pelanggan Anda bergantung pada kualitas produk Anda.</li>
-                        <li><strong>Kemasan Praktis:</strong> Sediakan saus dalam kemasan plastik terpisah yang higienis dan mudah dituang oleh penjual.</li>
-                    </ul>
                 </div>
             </div>
         </section>
+
     </div>
 
 </body>
