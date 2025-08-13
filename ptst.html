@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografis: Proyek Pabrik Daur Ulang Sampah Terpadu (PDST)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F2F2F2;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flowchart-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 100px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .flowchart-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            left: -2.375rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 9999px;
+            border: 4px solid #00B1B0;
+            background-color: #F2F2F2;
+            z-index: 10;
+        }
+        .timeline-line {
+            position: absolute;
+            top: 0;
+            left: -1.875rem;
+            width: 4px;
+            height: 100%;
+            background-color: #00B1B0;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-[#006EAD]">Proyek Pabrik Daur Ulang Sampah Terpadu (PDST)</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Solusi Inovatif untuk Pengelolaan Sampah, Penciptaan Lapangan Kerja, dan Kemandirian Energi Terbarukan.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="urgency" class="mb-12">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-6">Latar Belakang & Urgensi Masalah Sampah</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-yellow-50 border-l-4 border-[#FFC700] p-4 rounded-r-lg">
+                        <p class="text-5xl font-black text-[#FFC700]">⚠️</p>
+                        <h3 class="text-xl font-semibold mt-2">Pencemaran Lingkungan</h3>
+                        <p class="mt-2 text-gray-600">Sampah non-organik yang terus menumpuk menjadi ancaman serius bagi kelestarian tanah, air, dan udara di sekitar kita.</p>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-[#006EAD] p-4 rounded-r-lg">
+                        <p class="text-5xl font-black text-[#006EAD]">📉</p>
+                        <h3 class="text-xl font-semibold mt-2">Pengelolaan Belum Optimal</h3>
+                        <p class="mt-2 text-gray-600">Sistem yang ada belum terintegrasi, kurang produktif, dan seringkali hanya memindahkan masalah ke tempat lain (TPA).</p>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-[#88C241] p-4 rounded-r-lg">
+                        <p class="text-5xl font-black text-[#88C241]">💔</p>
+                        <h3 class="text-xl font-semibold mt-2">Dampak Sosial & Ekonomi</h3>
+                        <p class="mt-2 text-gray-600">Menurunkan kualitas kesehatan, merusak estetika lingkungan, dan menjadi beban ekonomi bagi pemerintah daerah.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="process" class="mb-12">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-2">Proses Pengolahan Sampah Terpadu</h2>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">PDST mengubah sampah menjadi sumber daya berharga melalui lima tahapan utama yang efisien dan ramah lingkungan.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+                    <div class="flowchart-item bg-[#00B1B0] text-white">
+                        <p class="font-semibold">1. Pengumpulan & Pemilahan Sampah</p>
+                    </div>
+                    <div class="hidden lg:block text-5xl text-center text-[#00B1B0] font-light">→</div>
+                    <div class="flowchart-item bg-[#88C241] text-white">
+                        <p class="font-semibold">2. Daur Ulang Plastik, Logam & Kertas</p>
+                    </div>
+                    <div class="hidden lg:block text-5xl text-center text-[#88C241] font-light">→</div>
+                    <div class="flowchart-item bg-[#FFC700] text-gray-800">
+                        <p class="font-semibold">3. Produksi Bahan Bakar Gas dari Limbah</p>
+                    </div>
+                </div>
+                <div class="flex justify-center my-4 lg:hidden">
+                    <div class="text-5xl text-center text-gray-400 font-light">↓</div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center sm:mt-4 lg:mt-0">
+                    <div class="col-span-1 lg:col-span-2"></div>
+                    <div class="hidden lg:block text-5xl text-center text-[#FFC700] font-light transform rotate-90">→</div>
+                     <div class="col-span-1 lg:col-span-2"></div>
+                </div>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center sm:mt-4 lg:mt-0">
+                    <div class="flowchart-item bg-[#006EAD] text-white lg:col-start-5">
+                        <p class="font-semibold">5. Pembangkit Listrik Mandiri</p>
+                    </div>
+                    <div class="hidden lg:block text-5xl text-center text-[#006EAD] font-light transform rotate-180">→</div>
+                    <div class="flowchart-item bg-orange-400 text-white lg:col-start-3">
+                        <p class="font-semibold">4. Produksi Bahan Baku Baru</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="blueprint" class="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-2">Alokasi Anggaran Proyek</h2>
+                <p class="text-center text-gray-600 mb-6">Total investasi sebesar **65 Miliar IDR** dialokasikan secara strategis untuk memastikan keberhasilan proyek.</p>
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-2">Kebutuhan Sumber Daya Manusia</h2>
+                <p class="text-center text-gray-600 mb-6">Proyek ini akan menyerap **190 tenaga kerja lokal** di berbagai bidang keahlian.</p>
+                <div class="chart-container">
+                    <canvas id="hrChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <section id="detailed-budget" class="mb-12">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-6">Rincian Anggaran Proyek Sampai Rampung</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-[#006EAD] text-white">
+                            <tr>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Kegiatan</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Estimasi Biaya (IDR)</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr>
+                                <td class="text-left py-3 px-4">Studi Kelayakan & Survei</td>
+                                <td class="text-left py-3 px-4">2 Miliar</td>
+                                <td class="text-left py-3 px-4">Analisis kebutuhan dan lokasi</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="text-left py-3 px-4">Desain & Perencanaan</td>
+                                <td class="text-left py-3 px-4">3 Miliar</td>
+                                <td class="text-left py-3 px-4">Gambar teknis dan rencana detail</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left py-3 px-4">Penggalangan Dana</td>
+                                <td class="text-left py-3 px-4">1 Miliar</td>
+                                <td class="text-left py-3 px-4">Biaya administrasi dan komunikasi</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="text-left py-3 px-4">Konstruksi Fasilitas</td>
+                                <td class="text-left py-3 px-4">15 Miliar</td>
+                                <td class="text-left py-3 px-4">Bangunan pabrik dan fasilitas pendukung</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left py-3 px-4">Pengadaan Mesin & Peralatan</td>
+                                <td class="text-left py-3 px-4">20 Miliar</td>
+                                <td class="text-left py-3 px-4">Mesin daur ulang dan alat pendukung</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="text-left py-3 px-4">Pelatihan Tenaga Kerja</td>
+                                <td class="text-left py-3 px-4">3 Miliar</td>
+                                <td class="text-left py-3 px-4">Pendidikan dan pelatihan operasional</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left py-3 px-4">Pengadaan Bahan Baku & Logistik</td>
+                                <td class="text-left py-3 px-4">5 Miliar</td>
+                                <td class="text-left py-3 px-4">Transportasi dan bahan baku awal</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="text-left py-3 px-4">Operasional & Monitoring</td>
+                                <td class="text-left py-3 px-4">5 Miliar</td>
+                                <td class="text-left py-3 px-4">Biaya operasional dan pengawasan awal</td>
+                            </tr>
+                             <tr>
+                                <td class="text-left py-3 px-4">Pembangunan Fasilitas Sosial</td>
+                                <td class="text-left py-3 px-4">7 Miliar</td>
+                                <td class="text-left py-3 px-4">Rumah pekerja, sekolah, dan tempat ibadah</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="text-left py-3 px-4">Cadangan & Kontinjensi</td>
+                                <td class="text-left py-3 px-4">4 Miliar</td>
+                                <td class="text-left py-3 px-4">Biaya tak terduga dan pengamanan</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="font-bold">
+                             <tr class="bg-[#00B1B0] text-white">
+                                <td class="text-left py-3 px-4 text-lg">Total Anggaran Keseluruhan</td>
+                                <td class="text-left py-3 px-4 text-lg" colspan="2">65 Miliar IDR</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline" class="mb-12">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-8">Rencana Aksi Tahun Pertama</h2>
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <h3 class="font-bold text-lg text-[#00B1B0]">Bulan 1-2: Studi & Survei</h3>
+                        <p class="text-gray-600">Melakukan studi kelayakan mendalam dan survei untuk menentukan lokasi terbaik.</p>
+                    </div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <h3 class="font-bold text-lg text-[#00B1B0]">Bulan 2-4: Desain & Pendanaan</h3>
+                        <p class="text-gray-600">Merancang fasilitas secara rinci sambil melakukan penggalangan dana dari berbagai sumber.</p>
+                    </div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <h3 class="font-bold text-lg text-[#00B1B0]">Bulan 4-7: Konstruksi & Rekrutmen</h3>
+                        <p class="text-gray-600">Memulai konstruksi fasilitas dan secara paralel merekrut serta melatih tenaga kerja.</p>
+                    </div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <h3 class="font-bold text-lg text-[#00B1B0]">Bulan 8-9: Uji Coba Sistem</h3>
+                        <p class="text-gray-600">Melakukan pengujian menyeluruh pada semua mesin dan sistem operasional.</p>
+                    </div>
+                    <div class="timeline-item relative pl-8">
+                        <h3 class="font-bold text-lg text-[#00B1B0]">Bulan 9-12: Operasional & Evaluasi</h3>
+                        <p class="text-gray-600">Memulai operasional awal, melakukan monitoring, dan evaluasi untuk pengembangan berkelanjutan.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="mb-12">
+             <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-6">Proyeksi Dampak Positif</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="border-t-4 border-[#88C241] pt-4">
+                        <p class="text-5xl font-black text-[#88C241]">50-70%</p>
+                        <h3 class="text-xl font-semibold mt-2">Pengurangan Sampah</h3>
+                        <p class="text-gray-600">Menurunkan volume sampah non-organik yang berakhir di TPA secara signifikan.</p>
+                    </div>
+                    <div class="border-t-4 border-[#006EAD] pt-4">
+                        <p class="text-5xl font-black text-[#006EAD]">1000+</p>
+                        <h3 class="text-xl font-semibold mt-2">Penyerapan Tenaga Kerja</h3>
+                        <p class="text-gray-600">Menciptakan lapangan kerja baru baik secara langsung maupun tidak langsung.</p>
+                    </div>
+                    <div class="border-t-4 border-[#FFC700] pt-4">
+                        <p class="text-5xl font-black text-[#FFC700]">💡</p>
+                        <h3 class="text-xl font-semibold mt-2">Energi Mandiri</h3>
+                        <p class="text-gray-600">Mengurangi biaya operasional dan polusi dengan energi terbarukan dari gas olahan.</p>
+                    </div>
+                    <div class="border-t-4 border-[#00B1B0] pt-4">
+                        <p class="text-5xl font-black text-[#00B1B0]">📈</p>
+                        <h3 class="text-xl font-semibold mt-2">Peningkatan Kesejahteraan</h3>
+                        <p class="text-gray-600">Meningkatkan kualitas hidup masyarakat melalui pekerjaan dan fasilitas sosial.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="risks" class="mb-12">
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#006EAD] mb-6">Risiko & Mitigasi</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-red-600">Risiko Pendanaan</h3>
+                        <p class="mt-2 text-gray-600">Diversifikasi sumber dana dari pemerintah, swasta, dan CSR untuk menjamin stabilitas finansial.</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-red-600">Risiko Teknis</h3>
+                        <p class="mt-2 text-gray-600">Pelatihan rutin bagi operator dan jadwal perawatan mesin yang ketat untuk menjaga performa.</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-red-600">Risiko Sosial</h3>
+                        <p class="mt-2 text-gray-600">Komunikasi transparan dan pelibatan aktif masyarakat sejak awal untuk membangun kepercayaan.</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-red-600">Risiko Lingkungan</h3>
+                        <p class="mt-2 text-gray-600">Penerapan standar operasional yang ketat dan audit lingkungan rutin oleh pihak independen.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#006EAD] text-white text-center p-6">
+        <p>Mari Bersama Wujudkan Lingkungan Bersih dan Masyarakat Sejahtera.</p>
+        <p class="text-sm opacity-75 mt-2">Infografis Proyek PDST &copy; 2025</p>
+    </footer>
+
+    <script>
+        function wrapLabel(label) {
+            const maxLength = 16;
+            if (typeof label !== 'string' || label.length <= maxLength) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const palette = {
+            blue: '#006EAD',
+            teal: '#00B1B0',
+            green: '#88C241',
+            yellow: '#FFC700',
+            orange: '#F37736',
+            purple: '#7A52C7',
+            pink: '#E64A83',
+            lightGray: '#F2F2F2'
+        };
+
+        const budgetData = {
+            labels: [
+                'Studi & Survei', 
+                'Desain & Perencanaan',
+                'Penggalangan Dana',
+                'Konstruksi Fasilitas', 
+                'Mesin & Peralatan', 
+                'Pelatihan Tenaga Kerja', 
+                'Bahan Baku & Logistik', 
+                'Operasional & Monitoring', 
+                'Fasilitas Sosial', 
+                'Cadangan & Kontinjensi'
+            ],
+            datasets: [{
+                label: 'Anggaran (Miliar IDR)',
+                data: [2, 3, 1, 15, 20, 3, 5, 5, 7, 4],
+                backgroundColor: [
+                    palette.teal,
+                    palette.blue,
+                    '#63B3ED',
+                    palette.green,
+                    palette.yellow,
+                    palette.orange,
+                    palette.purple,
+                    '#A0AEC0',
+                    palette.pink,
+                    '#CCCCCC'
+                ],
+                hoverOffset: 4
+            }]
+        };
+
+        const hrData = {
+            labels: [
+                'Manajemen & Administrasi', 
+                'Teknisi & Operator', 
+                'Tenaga Pengumpul', 
+                'Staf Pendukung', 
+                'Tenaga Pelatihan', 
+                'Tenaga Sosial'
+            ],
+            datasets: [{
+                label: 'Jumlah Orang',
+                data: [10, 50, 100, 20, 5, 5],
+                backgroundColor: [
+                    palette.blue,
+                    palette.green,
+                    palette.teal,
+                    palette.yellow,
+                    palette.orange,
+                    palette.pink
+                ],
+                hoverOffset: 4
+            }]
+        };
+        
+        budgetData.labels = budgetData.labels.map(wrapLabel);
+        hrData.labels = hrData.labels.map(wrapLabel);
+
+        const budgetChartCtx = document.getElementById('budgetChart').getContext('2d');
+        new Chart(budgetChartCtx, {
+            type: 'doughnut',
+            data: budgetData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                           padding: 15,
+                           boxWidth: 12,
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+
+        const hrChartCtx = document.getElementById('hrChart').getContext('2d');
+        new Chart(hrChartCtx, {
+            type: 'pie',
+            data: hrData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                           padding: 15,
+                           boxWidth: 12,
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
