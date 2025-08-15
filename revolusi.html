@@ -159,131 +159,31 @@
             <p class="mt-4 text-lg italic">Semoga gagasan ini dapat membuka jalan bagi perubahan yang sesungguhnya.</p>
         </section>
 
-        <!-- View Counter Display (Moved to bottom) -->
+        <!-- Histats.com  (div with counter) -->
         <div class="text-center mt-8 p-4 bg-gray-200 rounded-xl shadow-md">
-            <div id="view-counter" class="text-lg font-medium text-gray-700">
-                Memuat jumlah tampilan...
-            </div>
-            <div id="user-id-display" class="mt-2 text-xs text-gray-500"></div>
+            <div id="histats_counter" class="text-lg font-medium text-gray-700"></div>
         </div>
 
     </div>
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase configuration and app ID (provided by the environment)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let app;
-        let db;
-        let auth;
-        let userId;
-
-        // Function to display messages (instead of alert)
-        function displayMessage(message) {
-            const counterElement = document.getElementById('view-counter');
-            if (counterElement) {
-                counterElement.textContent = message;
-            }
-        }
-
-        // Function to increment and display view count
-        const updateViewCount = async () => {
-            if (!db || !userId) {
-                // Firebase not initialized yet, or user not authenticated
-                return;
-            }
-
-            const pageId = "revolusi-html"; // Unique ID for this page's view count
-            const viewCounterRef = doc(db, "artifacts", appId, "public", "data", "views", pageId);
-
-            try {
-                // Implement exponential backoff for API calls
-                const MAX_RETRIES = 5;
-                let retries = 0;
-                let success = false;
-
-                while (!success && retries < MAX_RETRIES) {
-                    try {
-                        const docSnap = await getDoc(viewCounterRef);
-                        let currentViews = 0;
-
-                        if (docSnap.exists()) {
-                            currentViews = docSnap.data().count || 0;
-                        }
-
-                        const newViews = currentViews + 1;
-                        await setDoc(viewCounterRef, { count: newViews });
-
-                        // Display the updated view count
-                        document.getElementById('view-counter').textContent = `Jumlah Tampilan: ${newViews}`;
-                        success = true; // Mark as successful
-                    } catch (error) {
-                        console.error(`Error updating view count (retry ${retries + 1}):`, error);
-                        retries++;
-                        const delay = Math.pow(2, retries) * 1000; // Exponential backoff
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                }
-
-                if (!success) {
-                    displayMessage("Gagal memperbarui jumlah tampilan setelah beberapa kali coba.");
-                }
-
-            } catch (error) {
-                console.error("Error accessing Firestore for view count:", error);
-                displayMessage("Gagal memperbarui jumlah tampilan.");
-            }
-        };
-
-        // Initialize Firebase and handle authentication
-        const initializeFirebase = async () => {
-            try {
-                // Initialize Firebase app
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Sign in the user
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Get current user ID and set up auth state listener
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid; // Update userId if authenticated
-                        document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
-                        updateViewCount(); // Call updateViewCount once authenticated
-                    } else {
-                        // User is signed out or anonymous.
-                        // If it's an anonymous sign-in, userId would have been set by signInAnonymously.
-                        // If not, it means the initialAuthToken didn't work and no anonymous sign-in happened.
-                        if (!userId) { // Fallback if userId wasn't set by initial sign-in attempt
-                            userId = crypto.randomUUID();
-                            document.getElementById('user-id-display').textContent = `User ID (Anonymous): ${userId}`;
-                        }
-                        updateViewCount(); // Still try to update count, even if anonymous
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error initializing Firebase or signing in:", error);
-                displayMessage("Gagal memuat penghitung tampilan.");
-            }
-        };
-
-
-        // Initialize Firebase when the window loads
-        window.onload = initializeFirebase;
+    <!-- Histats.com  START  (aync)-->
+    <script type="text/javascript">
+        var _Hasync= _Hasync|| [];
+        _Hasync.push(['Histats.start', '1,4970047,4,15,170,40,00011111']);
+        _Hasync.push(['Histats.fasi', '1']);
+        _Hasync.push(['Histats.track_hits', '']);
+        (function() {
+        var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+        hs.src = ('//s10.histats.com/js15_as.js');
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+        })();
     </script>
+    <noscript>
+        <a href="/" target="_blank">
+            <img src="//sstatic1.histats.com/0.gif?4970047&101" alt="" border="0">
+        </a>
+    </noscript>
+    <!-- Histats.com  END  -->
+
 </body>
 </html>
