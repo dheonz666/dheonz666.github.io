@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografis Interaktif: Cek Tipe Hubungan Anda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .result-card {
+            transition: all 0.3s ease-in-out;
+            border-width: 2px;
+            border-color: transparent;
+        }
+        .highlight-result {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #FF6B6B;
+        }
+    </style>
+</head>
+<body class="bg-[#F9F9F9] text-[#333333]">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#FF6B6B] mb-2">Kenali Diri, Pahami Hubungan</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Jawab 10 pertanyaan singkat ini untuk melihat gambaran kecenderungan Anda dalam hubungan romantis. Apakah Anda tipe setia, penuh keingintahuan, atau seorang pencari validasi?</p>
+        </header>
+
+        <main>
+            <section id="kuesioner" class="mb-12">
+                <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#45B7D1]">Kuesioner Refleksi Diri</h2>
+                    <div id="questions-container" class="space-y-6"></div>
+                    <div class="text-center mt-8">
+                        <button id="calculate-btn" class="bg-[#FF6B6B] text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-[#e05a5a] transition-colors duration-300">Lihat Hasil Saya</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hasil" class="hidden">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-[#FF6B6B] mb-2">Hasil Analisis Anda</h2>
+                    <p class="text-lg text-gray-600">Total skor Anda adalah <strong id="total-score" class="text-2xl">0</strong>. Berikut adalah interpretasinya.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-center">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold text-center mb-4 text-[#45B7D1]">Spektrum Tipe Hubungan</h3>
+                        <p class="text-center text-gray-500 mb-4">Grafik ini menunjukkan posisi skor Anda dalam spektrum tipe hubungan, dari yang paling stabil hingga yang paling dinamis mencari validasi.</p>
+                        <div class="chart-container h-48 md:h-64">
+                            <canvas id="scoreSpectrumChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold text-center mb-4 text-[#45B7D1]">Distribusi Umum (Estimasi)</h3>
+                         <p class="text-center text-gray-500 mb-4">Visualisasi ini memberikan gambaran umum tentang bagaimana ketiga tipe ini terdistribusi di masyarakat. Ini membantu memberikan konteks pada hasil Anda.</p>
+                        <div class="chart-container">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                     <h3 class="text-2xl font-bold text-center mb-6 text-[#45B7D1]">Perbandingan Karakteristik Utama</h3>
+                     <p class="text-center text-gray-500 mb-6 max-w-3xl mx-auto">Radar chart ini membandingkan "sidik jari" dari setiap tipe berdasarkan beberapa dimensi kunci. Lihat bagaimana setiap profil berbeda dalam hal komitmen, kebutuhan validasi, dan pencarian tantangan.</p>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="chart-container h-96">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-bold text-center mb-8 text-[#45B7D1]">Telusuri Tiga Profil Hubungan</h3>
+                    <div id="results-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div id="result-0" class="result-card bg-white rounded-lg shadow-md p-6">
+                            <h4 class="text-xl font-bold text-[#4ECDC4] mb-3">Skor 0–7: Bukan Pemain / Setia</h4>
+                            <p class="mb-4 text-gray-600">Anda bukan tipe Pemain. Anda lebih cenderung setia dan fokus membangun satu hubungan yang berkualitas dan mendalam.</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Fokus Utama:</strong> Kualitas hubungan jangka panjang.</li>
+                                <li><strong>Perilaku:</strong> Jujur, dapat dipercaya, dan tidak tertarik pada drama.</li>
+                                <li><strong>Kepuasan:</strong> Ikatan emosional yang kuat dan aman.</li>
+                            </ul>
+                        </div>
+                        <div id="result-1" class="result-card bg-white rounded-lg shadow-md p-6">
+                            <h4 class="text-xl font-bold text-[#FED766] mb-3">Skor 8–14: Kecenderungan Pemain Ringan</h4>
+                            <p class="mb-4 text-gray-600">Anda memiliki kecenderungan Pemain ringan. Anda suka mendapat perhatian lebih, namun kecenderungan ini masih bisa Anda kendalikan.</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Fokus Utama:</strong> Keseimbangan antara stabilitas dan kegembiraan.</li>
+                                <li><strong>Perilaku:</strong> Terkadang suka digoda atau menyukai sensasi "dikejar".</li>
+                                <li><strong>Kepuasan:</strong> Campuran antara keamanan dan validasi dari luar.</li>
+                            </ul>
+                        </div>
+                        <div id="result-2" class="result-card bg-white rounded-lg shadow-md p-6">
+                            <h4 class="text-xl font-bold text-[#FF6B6B] mb-3">Skor 15–20: Kecenderungan Pemain Tinggi</h4>
+                            <p class="mb-4 text-gray-600">Anda memiliki kecenderungan Pemain yang tinggi. Kemungkinan besar Anda sulit merasa puas hanya dengan satu pasangan dan suka "main hati".</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Fokus Utama:</strong> Validasi eksternal dan "permainan" romantis.</li>
+                                <li><strong>Perilaku:</strong> Cenderung tidak setia, manipulatif, dan mencari "cadangan".</li>
+                                <li><strong>Kepuasan:</strong> Fase "bulan madu" dan gairah pengejaran.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 text-gray-500">
+            <p class="font-bold">⚠️ Catatan Penting</p>
+            <p class="max-w-3xl mx-auto">Hasil ini adalah cerminan, bukan label permanen. Gunakan sebagai alat untuk refleksi diri yang jujur. Jika hasilnya menimbulkan kekhawatiran, pertimbangkan untuk berkomunikasi dengan pasangan atau profesional.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = [
+                "Saya merasa cepat bosan hanya dengan satu pasangan.",
+                "Saya senang kalau ada banyak orang yang tertarik atau ngejar saya.",
+                "Saya pernah chat genit/flirty dengan orang lain padahal sudah punya pasangan.",
+                "Saya merasa bangga kalau bisa bikin lawan jenis cemburu.",
+                "Saya suka menyembunyikan obrolan atau pertemuan dari pasangan.",
+                "Saya pernah menjalin hubungan dengan lebih dari satu orang sekaligus.",
+                "Saya suka tantangan mengejar yang “sulit didapat”.",
+                "Saya lebih senang perasaan “dikejar-kejar” daripada hubungan stabil.",
+                "Saya merasa lebih senang kalau punya temen beda jenis yang banyak.",
+                "Saya sering beralasan atau memanipulasi agar pasangan tidak curiga."
+            ];
+
+            const questionsContainer = document.getElementById('questions-container');
+            questions.forEach((q, index) => {
+                const questionHTML = `
+                    <div class="question-item border-t pt-4">
+                        <p class="font-semibold mb-3">${index + 1}. ${q}</p>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="question-${index}" value="0" class="mr-2 h-4 w-4">
+                                <span>Tidak pernah / tidak sesuai (0)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="question-${index}" value="1" class="mr-2 h-4 w-4">
+                                <span>Kadang-kadang (1)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="question-${index}" value="2" class="mr-2 h-4 w-4">
+                                <span>Sering / hampir selalu (2)</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                questionsContainer.innerHTML += questionHTML;
+            });
+
+            const calculateBtn = document.getElementById('calculate-btn');
+            const hasilSection = document.getElementById('hasil');
+            const totalScoreEl = document.getElementById('total-score');
+            const resultCards = document.querySelectorAll('.result-card');
+
+            let distributionChart, scoreSpectrumChart, radarChart;
+
+            const wrapLabel = (label) => {
+                if (label.length <= 16) {
+                    return label;
+                }
+                const words = label.split(' ');
+                const lines = [];
+                let currentLine = '';
+                words.forEach(word => {
+                    if ((currentLine + word).length > 16) {
+                        lines.push(currentLine.trim());
+                        currentLine = '';
+                    }
+                    currentLine += word + ' ';
+                });
+                lines.push(currentLine.trim());
+                return lines;
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+            
+            const chartOptionsTemplate = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            };
+
+            calculateBtn.addEventListener('click', () => {
+                let totalScore = 0;
+                let allAnswered = true;
+                for (let i = 0; i < questions.length; i++) {
+                    const selected = document.querySelector(`input[name="question-${i}"]:checked`);
+                    if (selected) {
+                        totalScore += parseInt(selected.value);
+                    } else {
+                        allAnswered = false;
+                        break;
+                    }
+                }
+
+                if (!allAnswered) {
+                    alert('Mohon jawab semua pertanyaan terlebih dahulu.');
+                    return;
+                }
+
+                totalScoreEl.textContent = totalScore;
+                hasilSection.classList.remove('hidden');
+                window.scrollTo({ top: document.getElementById('hasil').offsetTop - 20, behavior: 'smooth' });
+
+                resultCards.forEach(card => card.classList.remove('highlight-result'));
+                let resultIndex;
+                if (totalScore <= 7) {
+                    resultIndex = 0;
+                } else if (totalScore <= 14) {
+                    resultIndex = 1;
+                } else {
+                    resultIndex = 2;
+                }
+                document.getElementById(`result-${resultIndex}`).classList.add('highlight-result');
+
+                renderCharts(totalScore);
+            });
+
+            function renderCharts(userScore) {
+                if (distributionChart) distributionChart.destroy();
+                if (scoreSpectrumChart) scoreSpectrumChart.destroy();
+                if (radarChart) radarChart.destroy();
+
+                const distCtx = document.getElementById('distributionChart').getContext('2d');
+                distributionChart = new Chart(distCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Setia', 'Kecenderungan Ringan', 'Kecenderungan Tinggi'],
+                        datasets: [{
+                            label: 'Distribusi Umum',
+                            data: [45, 35, 20],
+                            backgroundColor: ['#4ECDC4', '#FED766', '#FF6B6B'],
+                            borderColor: '#F9F9F9',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: chartOptionsTemplate
+                });
+
+                const spectrumCtx = document.getElementById('scoreSpectrumChart').getContext('2d');
+                scoreSpectrumChart = new Chart(spectrumCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Tipe Setia', 'Kecenderungan Ringan', 'Kecenderungan Tinggi', 'Skor Anda'],
+                        datasets: [{
+                            label: 'Skor Maksimum per Tipe',
+                            data: [7, 14, 20, 0],
+                            backgroundColor: ['#4ECDC4', '#FED766', '#FF6B6B', 'rgba(0,0,0,0.7)'],
+                            barPercentage: 0.5,
+                        },
+                        {
+                            label: 'Skor Anda',
+                            data: [0, 0, 0, userScore],
+                            backgroundColor: '#45B7D1',
+                            barPercentage: 0.5,
+                        }]
+                    },
+                    options: {
+                        ...chartOptionsTemplate,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                stacked: true,
+                                max: 20,
+                                grid: { display: false }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            ...chartOptionsTemplate.plugins,
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                const radarCtx = document.getElementById('radarChart').getContext('2d');
+                radarChart = new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Komitmen', 'Kebutuhan Validasi', 'Pencarian Tantangan', 'Kejujuran', 'Stabilitas'],
+                        datasets: [
+                            {
+                                label: 'Setia',
+                                data: [9, 2, 1, 9, 10],
+                                fill: true,
+                                backgroundColor: 'rgba(78, 205, 196, 0.2)',
+                                borderColor: '#4ECDC4',
+                                pointBackgroundColor: '#4ECDC4',
+                            },
+                            {
+                                label: 'Kecenderungan Ringan',
+                                data: [6, 6, 7, 6, 6],
+                                fill: true,
+                                backgroundColor: 'rgba(254, 215, 102, 0.2)',
+                                borderColor: '#FED766',
+                                pointBackgroundColor: '#FED766',
+                            },
+                             {
+                                label: 'Kecenderungan Tinggi',
+                                data: [2, 9, 9, 3, 1],
+                                fill: true,
+                                backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                                borderColor: '#FF6B6B',
+                                pointBackgroundColor: '#FF6B6B',
+                            }
+                        ]
+                    },
+                    options: {
+                        ...chartOptionsTemplate,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                pointLabels: { font: { size: 14 } },
+                                suggestedMin: 0,
+                                suggestedMax: 10
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
