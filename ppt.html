@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi Perhitungan Balance Cairan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6;
+        }
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.7s ease-in-out;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+        /* Style untuk judul slide */
+        .slide-title {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-btn {
+            background-color: #E5E7EB;
+            color: #1F2937;
+            padding: 1rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
+        }
+        .nav-btn:hover {
+            background-color: #D1D5DB;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen overflow-hidden p-4">
+
+    <!-- Container Utama Presentasi -->
+    <div class="relative w-full h-full max-w-6xl max-h-[80vh] flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl">
+
+        <!-- Area Slide -->
+        <div id="slides-container" class="w-full h-full flex items-center justify-center relative">
+
+            <!-- Slide 1: Halaman Judul -->
+            <div id="slide1" class="slide active flex-col text-center">
+                <h1 class="text-5xl md:text-7xl font-bold text-gray-800 slide-title mb-4">Perhitungan Balance Cairan</h1>
+                <h3 class="text-xl md:text-3xl text-gray-600">Oleh: [Nama Anda]</h3>
+                <h3 class="text-xl md:text-3xl text-gray-600 mt-2">[Tanggal]</h3>
+            </div>
+
+            <!-- Slide 2: Pendahuluan -->
+            <div id="slide2" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Pendahuluan</h1>
+                <div class="space-y-6 text-2xl md:text-3xl text-gray-700">
+                    <p><strong>Apa itu Balance Cairan?</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Keseimbangan antara jumlah cairan yang masuk (intake) dan cairan yang keluar (output) dari tubuh dalam periode waktu tertentu.</li>
+                    </ul>
+                    <p><strong>Mengapa Ini Penting?</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Membantu memantau status hidrasi pasien.</li>
+                        <li>Mendeteksi dini ketidakseimbangan cairan (kelebihan atau kekurangan).</li>
+                        <li>Panduan penting dalam terapi cairan, terutama pada pasien kritis, pasien dengan gagal ginjal, atau pasien pasca-operasi.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 3: Komponen Intake -->
+            <div id="slide3" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Komponen Intake (Cairan Masuk)</h1>
+                <ul class="list-disc text-2xl md:text-3xl text-gray-700 space-y-4 ml-8">
+                    <li>**Cairan Oral:** Air minum, jus, teh, sup, dll.</li>
+                    <li>**Cairan Parenteral:** Infus (cairan IV seperti NaCl, Dextrose, Ringer Lactate).</li>
+                    <li>**Cairan dari Makanan:** Cairan yang terkandung dalam makanan padat (200-500 ml/hari).</li>
+                    <li>**Cairan Metabolisme:** Cairan yang dihasilkan oleh tubuh (sekitar 500 ml/24 jam).</li>
+                </ul>
+            </div>
+
+            <!-- Slide 4: Komponen Output -->
+            <div id="slide4" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Komponen Output (Cairan Keluar)</h1>
+                <ul class="list-disc text-2xl md:text-3xl text-gray-700 space-y-4 ml-8">
+                    <li>**Urine:** Jumlah urine yang dikeluarkan.</li>
+                    <li>**Drainase:** Cairan dari selang drainase (WSD, NGT, dll.).</li>
+                    <li>**Feses:** Cairan yang keluar bersama feses (diare).</li>
+                    <li>**Perdarahan:** Jumlah darah yang hilang.</li>
+                    <li>**Insensible Water Loss (IWL):** Kehilangan cairan tak terasa melalui keringat dan pernapasan (15 ml/kgBB/24 jam).</li>
+                </ul>
+            </div>
+
+            <!-- Slide 5: Rumus Perhitungan -->
+            <div id="slide5" class="slide flex-col text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Rumus Perhitungan Balance Cairan</h1>
+                <div class="space-y-6 text-2xl md:text-3xl text-gray-700">
+                    <p class="font-bold">Balance Cairan = Total Intake - Total Output</p>
+                    <p>Hasil:</p>
+                    <ul class="list-disc text-left md:text-center space-y-2">
+                        <li>**Positif:** Intake > Output (Retensi cairan)</li>
+                        <li>**Negatif:** Intake < Output (Dehidrasi)</li>
+                        <li>**Seimbang:** Intake = Output (Ideal)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 6: Contoh Kasus -->
+            <div id="slide6" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Contoh Kasus (1x24 jam)</h1>
+                <div class="text-2xl md:text-3xl text-gray-700 flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
+                    <div class="flex-1">
+                        <p class="font-bold text-sky-600 mb-2">Intake:</p>
+                        <ul class="list-disc ml-8">
+                            <li>Infus NaCl: 500 ml</li>
+                            <li>Air minum: 750 ml</li>
+                            <li>Cairan dari makanan: 200 ml</li>
+                            <li>Cairan metabolisme: 500 ml</li>
+                            <li class="font-bold mt-4">Total Intake = 1.950 ml</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-red-600 mb-2">Output:</p>
+                        <ul class="list-disc ml-8">
+                            <li>Urine: 1.200 ml</li>
+                            <li>Drainase: 100 ml</li>
+                            <li>IWL: 500 ml</li>
+                            <li class="font-bold mt-4">Total Output = 1.800 ml</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-purple-700 mt-8 text-center">Balance Cairan = 1.950 ml - 1.800 ml = +150 ml</p>
+            </div>
+
+            <!-- Slide 7: Interpretasi Hasil -->
+            <div id="slide7" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Interpretasi Hasil</h1>
+                <div class="space-y-6 text-2xl md:text-3xl text-gray-700">
+                    <p><strong>Balance Positif (+150 ml):</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Pasien mengalami sedikit retensi cairan.</li>
+                        <li>Jika angkanya besar, bisa mengindikasikan kelebihan cairan (hipervolemia).</li>
+                    </ul>
+                    <p><strong>Tanda & Gejala Hipervolemia:</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Edema (pembengkakan)</li>
+                        <li>Sesak napas (dispnea)</li>
+                        <li>Peningkatan berat badan</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 8: Kesimpulan -->
+            <div id="slide8" class="slide flex-col text-left">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-8 slide-title">Kesimpulan</h1>
+                <div class="space-y-6 text-2xl md:text-3xl text-gray-700">
+                    <p><strong>Pentingnya Balance Cairan:</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Perhitungan balance cairan adalah alat vital untuk memantau status hidrasi dan kondisi pasien secara menyeluruh.</li>
+                    </ul>
+                    <p><strong>Pemantauan Berkelanjutan:</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Pemantauan yang akurat dan berkelanjutan memungkinkan deteksi dini ketidakseimbangan, baik itu kelebihan maupun kekurangan cairan.</li>
+                    </ul>
+                    <p><strong>Tindakan Cepat:</strong></p>
+                    <ul class="list-disc ml-8 space-y-2">
+                        <li>Tindakan cepat diperlukan untuk mencegah komplikasi serius seperti gagal ginjal, edema paru, atau syok hipovolemik.</li>
+                    </ul>
+                </div>
+            </div>
+        </div></div></div></div>
+
+        <!-- Tombol Navigasi -->
+        <button id="prevBtn" class="absolute left-8 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+        </button>
+        <button id="nextBtn" class="absolute right-8 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10l-3.293-3.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                // Sembunyikan semua slide
+                slides.forEach(slide => slide.classList.remove('active'));
+                // Tampilkan slide yang aktif
+                slides[index].classList.add('active');
+            }
+
+            function navigate(direction) {
+                currentSlide = (currentSlide + direction + slides.length) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            // Event listener untuk tombol
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                navigate(-1);
+            });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                navigate(1);
+            });
+
+            // Event listener untuk keyboard
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    navigate(1);
+                } else if (e.key === 'ArrowLeft') {
+                    navigate(-1);
+                }
+            });
+
+            // Tampilkan slide pertama saat halaman dimuat
+            showSlide(currentSlide);
+        });
+    </script>
+</body>
+</html>
