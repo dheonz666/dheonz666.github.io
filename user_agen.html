@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penganalisis User Agent</title>
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-2">Penganalisis Detail Perangkat</h1>
+            <p class="text-gray-600">Lihat User Agent dan detail perangkat Anda saat ini.</p>
+        </header>
+
+        <!-- Bagian Raw User Agent -->
+        <div class="mb-8 border border-gray-200 rounded-xl p-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                User Agent Mentah
+            </h2>
+            <div id="raw-user-agent" class="bg-gray-100 text-gray-700 p-4 rounded-lg break-all text-sm overflow-x-auto select-all cursor-text">
+                Memuat...
+            </div>
+            <button id="copy-ua-btn" class="mt-3 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-150 shadow-md">
+                Salin User Agent
+            </button>
+            <p id="copy-message" class="text-green-600 mt-2 hidden text-sm"></p>
+        </div>
+
+        <!-- Bagian Informasi Analisis -->
+        <div class="space-y-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-7.5 0h15" />
+                </svg>
+                Informasi Perangkat (Analisis)
+            </h2>
+
+            <!-- Komponen Info Card -->
+            <div id="os-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
+                <span class="text-blue-600 text-2xl mr-4">&#x1F4BB;</span>
+                <div>
+                    <p class="font-medium text-gray-700">Sistem Operasi (OS):</p>
+                    <p class="text-lg font-bold text-blue-800" id="display-os">Menganalisis...</p>
+                </div>
+            </div>
+
+            <div id="device-type-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
+                <span class="text-blue-600 text-2xl mr-4">&#x1F4F1;</span>
+                <div>
+                    <p class="font-medium text-gray-700">Jenis Perangkat:</p>
+                    <p class="text-lg font-bold text-blue-800" id="display-device-type">Menganalisis...</p>
+                </div>
+            </div>
+
+            <div id="brand-model-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
+                <span class="text-blue-600 text-2xl mr-4">&#x1F3F7;</span>
+                <div>
+                    <p class="font-medium text-gray-700">Merk/Model (Perkiraan):</p>
+                    <p class="text-lg font-bold text-blue-800" id="display-brand-model">Menganalisis...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
+            <p>Data User Agent ini disediakan oleh browser Anda.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Inisialisasi variabel global untuk akses User Agent
+        const userAgent = navigator.userAgent;
+
+        // Fungsi untuk menyalin teks ke clipboard (digunakan sebagai pengganti alert/prompt)
+        function copyToClipboard(text, messageElement) {
+            try {
+                // Menggunakan document.execCommand('copy') karena navigator.clipboard mungkin dibatasi di iFrame
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed'; // Agar tidak terlihat
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                // Tampilkan pesan sukses
+                messageElement.textContent = 'User Agent berhasil disalin!';
+                messageElement.classList.remove('hidden');
+                setTimeout(() => {
+                    messageElement.classList.add('hidden');
+                }, 3000);
+
+            } catch (err) {
+                console.error('Gagal menyalin:', err);
+                messageElement.textContent = 'Gagal menyalin (Periksa konsol).';
+                messageElement.classList.remove('hidden');
+            }
+        }
+
+        // Fungsi utama untuk menganalisis User Agent
+        function analyzeUserAgent(ua) {
+            let os = "Lainnya/Tidak Dikenal";
+            let deviceType = "Desktop";
+            let brandModel = "Tidak teridentifikasi";
+
+            // 1. Deteksi Sistem Operasi (OS)
+            if (/Windows NT/.test(ua)) {
+                os = ua.match(/Windows NT ([\d\.]+)/) ? `Windows ${ua.match(/Windows NT ([\d\.]+)/)[1]}` : "Windows";
+            } else if (/Macintosh|Mac OS X/.test(ua)) {
+                os = ua.match(/Mac OS X ([\d_\.]+)/) ? `macOS ${ua.match(/Mac OS X ([\d_\.]+)/)[1].replace(/_/g, '.')}` : "macOS";
+            } else if (/Android/.test(ua)) {
+                os = ua.match(/Android ([\d\.]+)/) ? `Android ${ua.match(/Android ([\d\.]+)/)[1]}` : "Android";
+            } else if (/iPhone|iPad|iPod/.test(ua)) {
+                os = ua.match(/OS ([\d_\.]+) like Mac OS X/) ? `iOS ${ua.match(/OS ([\d_\.]+) like Mac OS X/)[1].replace(/_/g, '.')}` : "iOS";
+            } else if (/Linux/.test(ua)) {
+                os = "Linux";
+            }
+
+            // 2. Deteksi Jenis Perangkat
+            if (/Mobile|Android|iP(hone|od)/.test(ua)) {
+                deviceType = "Mobile (HP)";
+            } else if (/Tablet|iPad|Android;.*(Tablet|Mobile)/.test(ua)) {
+                deviceType = "Tablet";
+            } else if (/Desktop|Windows|Macintosh|Linux/.test(ua) && !/Mobile/.test(ua)) {
+                 deviceType = "Desktop/Laptop";
+            }
+
+            // 3. Deteksi Merk/Model (Heuristik, terutama untuk Android)
+            // Deteksi Apple
+            if (/iPhone/.test(ua)) {
+                brandModel = "Apple iPhone";
+            } else if (/iPad/.test(ua)) {
+                brandModel = "Apple iPad";
+            } else if (/Android/.test(ua)) {
+                // Mencari model di dalam kurung kurawal, yang seringkali merupakan model perangkat Android
+                const androidMatch = ua.match(/Android [^;]+; ([^;)]+)/);
+                if (androidMatch && androidMatch[1]) {
+                    const modelInfo = androidMatch[1].trim();
+
+                    // Coba mencari merk spesifik
+                    if (/SM-|Galaxy|Samsung/.test(modelInfo)) {
+                        brandModel = `Samsung (${modelInfo})`;
+                    } else if (/Pixel/.test(modelInfo)) {
+                        brandModel = `Google Pixel (${modelInfo})`;
+                    } else if (/Redmi|Mi|Xiaomi/.test(modelInfo)) {
+                        brandModel = `Xiaomi/Mi (${modelInfo})`;
+                    } else if (/HUAWEI|HONOR/.test(modelInfo)) {
+                         brandModel = `Huawei/Honor (${modelInfo})`;
+                    } else if (/LG/.test(modelInfo)) {
+                        brandModel = `LG (${modelInfo})`;
+                    } else {
+                        // Jika tidak ada merk spesifik, tampilkan informasi model saja
+                        brandModel = `Android Model: ${modelInfo}`;
+                    }
+                } else {
+                    brandModel = "Android (Model tidak dapat diekstrak)";
+                }
+            } else {
+                 brandModel = `Browser: ${navigator.appName || 'Tidak Diketahui'} / OS: ${os}`;
+            }
+
+            return { os, deviceType, brandModel };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tampilkan User Agent mentah
+            const rawUserAgentElement = document.getElementById('raw-user-agent');
+            rawUserAgentElement.textContent = userAgent;
+
+            // Analisis dan tampilkan hasilnya
+            const analysis = analyzeUserAgent(userAgent);
+
+            document.getElementById('display-os').textContent = analysis.os;
+            document.getElementById('display-device-type').textContent = analysis.deviceType;
+            document.getElementById('display-brand-model').textContent = analysis.brandModel;
+
+            // Tambahkan event listener untuk tombol salin
+            const copyButton = document.getElementById('copy-ua-btn');
+            const copyMessage = document.getElementById('copy-message');
+
+            copyButton.addEventListener('click', () => {
+                copyToClipboard(userAgent, copyMessage);
+            });
+        });
+    </script>
+</body>
+</html>
+
