@@ -18,7 +18,7 @@
 
     <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-2">Penganalisis Detail Perangkat</h1>
+            <h1 class="3xl sm:text-4xl font-extrabold text-blue-800 mb-2">Penganalisis Detail Perangkat</h1>
             <p class="text-gray-600">Lihat User Agent, Merk, dan Model perangkat Anda saat ini.</p>
         </header>
 
@@ -157,36 +157,53 @@
                 brand = "Apple";
                 model = "iPad";
             } else if (/Android/.test(ua)) {
-                // Mencari model di dalam kurung kurawal, yang seringkali merupakan model perangkat Android
                 const androidMatch = ua.match(/Android [^;]+; ([^;)]+)/);
                 if (androidMatch && androidMatch[1]) {
                     let modelInfo = androidMatch[1].trim();
+                    let foundBrand = false;
 
-                    // Mencoba mengidentifikasi Merk dari model string
-                    if (/SM-|Galaxy|Samsung/.test(modelInfo)) {
-                        brand = "Samsung";
-                        // Bersihkan model string
-                        model = modelInfo.replace(/Samsung/i, '').trim() || "Tidak Spesifik";
-                    } else if (/Pixel/.test(modelInfo)) {
-                        brand = "Google";
-                        model = modelInfo.replace(/Google|Pixel/i, '').trim() || "Pixel";
-                    } else if (/Redmi|Mi|Xiaomi/.test(modelInfo)) {
-                        brand = "Xiaomi";
-                        model = modelInfo.replace(/Xiaomi|Redmi|Mi/i, '').trim() || "Redmi/Mi";
-                    } else if (/HUAWEI|HONOR/.test(modelInfo)) {
-                        brand = "Huawei";
-                        model = modelInfo.replace(/HUAWEI|HONOR/i, '').trim() || "Tidak Spesifik";
-                    } else if (/LG/.test(modelInfo)) {
-                        brand = "LG";
-                        model = modelInfo.replace(/LG/i, '').trim() || "Tidak Spesifik";
-                    } else {
-                        // Jika tidak ada merk spesifik, anggap seluruhnya sebagai model
+                    // === LOGIKA BARU UNTUK AKURASI MERK ===
+                    const brandMappings = [
+                        { name: "Samsung", keywords: /SM-|SAMSUNG|Galaxy/i },
+                        { name: "Google", keywords: /Pixel|Google/i },
+                        { name: "Xiaomi", keywords: /Redmi|Mi|Xiaomi/i },
+                        { name: "Huawei", keywords: /HUAWEI|HONOR/i },
+                        { name: "Motorola", keywords: /Moto|Motorola/i },
+                        { name: "OnePlus", keywords: /ONEPLUS|A0001|A6000|HD1903/i }, // Tambah beberapa kode model OnePlus lama
+                        { name: "OPPO", keywords: /OPPO|CPH|PBDM/i },
+                        { name: "vivo", keywords: /VIVO|V1|Y83|PD/i },
+                        { name: "LG", keywords: /LG/i },
+                        { name: "Sony", keywords: /Xperia/i }
+                        // Jika Anda ingin menambahkan merk lain, tambahkan di sini
+                    ];
+
+                    for (const mapping of brandMappings) {
+                        if (mapping.keywords.test(modelInfo)) {
+                            brand = mapping.name;
+                            
+                            // Bersihkan modelInfo dari keyword merk untuk mendapatkan model spesifik
+                            // Hapus semua keyword merk dan kata yang mungkin generik
+                            let modelTemp = modelInfo.replace(mapping.keywords, '').trim();
+                            
+                            // Hapus karakter yang sering mengikuti brand/model (misalnya: ' Build/', ' Version ')
+                            model = modelTemp.replace(/ Build.*| Version.*/i, '').trim();
+                            
+                            // Jika model bersih kosong, gunakan info mentah sebagai model
+                            if (model.length === 0) {
+                                model = modelInfo;
+                            } else if (model.includes("Android")) {
+                                // Jika hasil pembersihan masih mengandung kata Android, gunakan model mentah
+                                model = modelInfo;
+                            }
+                            
+                            foundBrand = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundBrand) {
                         brand = "Android Generik";
                         model = modelInfo;
-                    }
-                     // Kasus khusus untuk Model yang sama dengan Merk setelah pembersihan
-                    if (model === "") {
-                         model = "Tidak Spesifik";
                     }
                 } else {
                     brand = "Android";
