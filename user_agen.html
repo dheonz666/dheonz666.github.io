@@ -162,39 +162,42 @@
                     let modelInfo = androidMatch[1].trim();
                     let foundBrand = false;
 
-                    // === LOGIKA BARU UNTUK AKURASI MERK ===
+                    // === LOGIKA BARU UNTUK AKURASI MERK (PENAMBAHAN VENDOR POPULER) ===
                     const brandMappings = [
                         { name: "Samsung", keywords: /SM-|SAMSUNG|Galaxy/i },
-                        { name: "Google", keywords: /Pixel|Google/i },
-                        { name: "Xiaomi", keywords: /Redmi|Mi|Xiaomi/i },
+                        { name: "Google", keywords: /Pixel|Google|Nexus/i },
+                        { name: "Xiaomi", keywords: /Redmi|Mi|Xiaomi|POCO/i },
                         { name: "Huawei", keywords: /HUAWEI|HONOR/i },
-                        { name: "Motorola", keywords: /Moto|Motorola/i },
-                        { name: "OnePlus", keywords: /ONEPLUS|A0001|A6000|HD1903/i }, // Tambah beberapa kode model OnePlus lama
+                        { name: "OnePlus", keywords: /ONEPLUS|A0001|HD1903/i }, 
                         { name: "OPPO", keywords: /OPPO|CPH|PBDM/i },
                         { name: "vivo", keywords: /VIVO|V1|Y83|PD/i },
+                        { name: "Motorola", keywords: /Moto|Motorola|XT/i },
+                        { name: "Lenovo", keywords: /Lenovo|TAB/i },
+                        { name: "Nokia", keywords: /Nokia|TA-/i },
+                        { name: "Asus", keywords: /ASUS|Zenfone/i }, // Ditambahkan
                         { name: "LG", keywords: /LG/i },
                         { name: "Sony", keywords: /Xperia/i }
-                        // Jika Anda ingin menambahkan merk lain, tambahkan di sini
                     ];
 
                     for (const mapping of brandMappings) {
+                        // Menggunakan regex.test() untuk deteksi vendor
                         if (mapping.keywords.test(modelInfo)) {
                             brand = mapping.name;
                             
-                            // Bersihkan modelInfo dari keyword merk untuk mendapatkan model spesifik
-                            // Hapus semua keyword merk dan kata yang mungkin generik
-                            let modelTemp = modelInfo.replace(mapping.keywords, '').trim();
+                            // 1. Bersihkan modelInfo dari semua keyword merk dan kata generik
+                            let modelTemp = modelInfo;
                             
-                            // Hapus karakter yang sering mengikuti brand/model (misalnya: ' Build/', ' Version ')
-                            model = modelTemp.replace(/ Build.*| Version.*/i, '').trim();
+                            // Gunakan regex global untuk menghapus semua kemunculan keyword brand
+                            modelTemp = modelTemp.replace(new RegExp(mapping.keywords, 'gi'), '').trim();
+
+                            // 2. Hapus string yang sering ada di User Agent Android yang mengganggu model
+                            modelTemp = modelTemp.replace(/ Build.*| Version.*/i, '').trim();
+                            modelTemp = modelTemp.replace(/Android/i, '').trim();
+                            // Hapus karakter non-alphanumeric (kecuali spasi, strip, dan titik)
+                            modelTemp = modelTemp.replace(/[^\w\s\-\.]/g, '').trim(); 
                             
-                            // Jika model bersih kosong, gunakan info mentah sebagai model
-                            if (model.length === 0) {
-                                model = modelInfo;
-                            } else if (model.includes("Android")) {
-                                // Jika hasil pembersihan masih mengandung kata Android, gunakan model mentah
-                                model = modelInfo;
-                            }
+                            // 3. Tentukan Model: Jika string bersih, gunakan itu. Jika tidak, gunakan info mentah.
+                            model = modelTemp.length > 0 ? modelTemp : modelInfo;
                             
                             foundBrand = true;
                             break;
@@ -202,8 +205,10 @@
                     }
                     
                     if (!foundBrand) {
+                        // Jika tidak ada merk spesifik yang terdeteksi
+                        const modelClean = modelInfo.replace(/ Build.*| Version.*|Android/i, '').trim();
                         brand = "Android Generik";
-                        model = modelInfo;
+                        model = modelClean.length > 0 ? modelClean : modelInfo;
                     }
                 } else {
                     brand = "Android";
