@@ -162,7 +162,7 @@
                     let modelInfo = androidMatch[1].trim();
                     let foundBrand = false;
 
-                    // === LOGIKA BARU UNTUK AKURASI MERK (PENAMBAHAN VENDOR POPULER) ===
+                    // === LOGIKA UNTUK AKURASI MERK (PENAMBAHAN VENDOR POPULER, termasuk TECNO) ===
                     const brandMappings = [
                         { name: "Samsung", keywords: /SM-|SAMSUNG|Galaxy/i },
                         { name: "Google", keywords: /Pixel|Google|Nexus/i },
@@ -174,7 +174,8 @@
                         { name: "Motorola", keywords: /Moto|Motorola|XT/i },
                         { name: "Lenovo", keywords: /Lenovo|TAB/i },
                         { name: "Nokia", keywords: /Nokia|TA-/i },
-                        { name: "Asus", keywords: /ASUS|Zenfone/i }, // Ditambahkan
+                        { name: "Asus", keywords: /ASUS|Zenfone/i },
+                        { name: "Tecno", keywords: /TECNO|CM7|KF|LB|LE|LH|PH|LC|LD|CG|CC|CD/i }, // Tecno Ditambahkan
                         { name: "LG", keywords: /LG/i },
                         { name: "Sony", keywords: /Xperia/i }
                     ];
