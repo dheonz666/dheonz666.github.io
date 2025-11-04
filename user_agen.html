@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penganalisis User Agent</title>
+    <title>Penganalisis User Agent (Merk & Model Terpisah)</title>
     <!-- Memuat Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -19,7 +19,7 @@
     <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-2">Penganalisis Detail Perangkat</h1>
-            <p class="text-gray-600">Lihat User Agent dan detail perangkat Anda saat ini.</p>
+            <p class="text-gray-600">Lihat User Agent, Merk, dan Model perangkat Anda saat ini.</p>
         </header>
 
         <!-- Bagian Raw User Agent -->
@@ -48,7 +48,7 @@
                 Informasi Perangkat (Analisis)
             </h2>
 
-            <!-- Komponen Info Card -->
+            <!-- OS Info Card -->
             <div id="os-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
                 <span class="text-blue-600 text-2xl mr-4">&#x1F4BB;</span>
                 <div>
@@ -57,6 +57,7 @@
                 </div>
             </div>
 
+            <!-- Jenis Perangkat Info Card -->
             <div id="device-type-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
                 <span class="text-blue-600 text-2xl mr-4">&#x1F4F1;</span>
                 <div>
@@ -65,11 +66,21 @@
                 </div>
             </div>
 
-            <div id="brand-model-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
+            <!-- Merk (Brand) Info Card -->
+            <div id="brand-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
                 <span class="text-blue-600 text-2xl mr-4">&#x1F3F7;</span>
                 <div>
-                    <p class="font-medium text-gray-700">Merk/Model (Perkiraan):</p>
-                    <p class="text-lg font-bold text-blue-800" id="display-brand-model">Menganalisis...</p>
+                    <p class="font-medium text-gray-700">Merk (Perkiraan):</p>
+                    <p class="text-lg font-bold text-blue-800" id="display-brand">Menganalisis...</p>
+                </div>
+            </div>
+
+            <!-- Model Info Card -->
+            <div id="model-info" class="bg-blue-50 p-4 rounded-xl flex items-start shadow-sm">
+                <span class="text-blue-600 text-2xl mr-4">&#x1F527;</span>
+                <div>
+                    <p class="font-medium text-gray-700">Model (Perkiraan):</p>
+                    <p class="text-lg font-bold text-blue-800" id="display-model">Menganalisis...</p>
                 </div>
             </div>
         </div>
@@ -83,13 +94,13 @@
         // Inisialisasi variabel global untuk akses User Agent
         const userAgent = navigator.userAgent;
 
-        // Fungsi untuk menyalin teks ke clipboard (digunakan sebagai pengganti alert/prompt)
+        // Fungsi untuk menyalin teks ke clipboard
         function copyToClipboard(text, messageElement) {
             try {
                 // Menggunakan document.execCommand('copy') karena navigator.clipboard mungkin dibatasi di iFrame
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
-                textarea.style.position = 'fixed'; // Agar tidak terlihat
+                textarea.style.position = 'fixed'; 
                 document.body.appendChild(textarea);
                 textarea.select();
                 document.execCommand('copy');
@@ -113,7 +124,8 @@
         function analyzeUserAgent(ua) {
             let os = "Lainnya/Tidak Dikenal";
             let deviceType = "Desktop";
-            let brandModel = "Tidak teridentifikasi";
+            let brand = "Tidak Teridentifikasi";
+            let model = "Tidak Teridentifikasi";
 
             // 1. Deteksi Sistem Operasi (OS)
             if (/Windows NT/.test(ua)) {
@@ -136,42 +148,57 @@
             } else if (/Desktop|Windows|Macintosh|Linux/.test(ua) && !/Mobile/.test(ua)) {
                  deviceType = "Desktop/Laptop";
             }
-
-            // 3. Deteksi Merk/Model (Heuristik, terutama untuk Android)
-            // Deteksi Apple
+            
+            // Atur Merk dan Model berdasarkan jenis perangkat
             if (/iPhone/.test(ua)) {
-                brandModel = "Apple iPhone";
+                brand = "Apple";
+                model = "iPhone";
             } else if (/iPad/.test(ua)) {
-                brandModel = "Apple iPad";
+                brand = "Apple";
+                model = "iPad";
             } else if (/Android/.test(ua)) {
                 // Mencari model di dalam kurung kurawal, yang seringkali merupakan model perangkat Android
                 const androidMatch = ua.match(/Android [^;]+; ([^;)]+)/);
                 if (androidMatch && androidMatch[1]) {
-                    const modelInfo = androidMatch[1].trim();
+                    let modelInfo = androidMatch[1].trim();
 
-                    // Coba mencari merk spesifik
+                    // Mencoba mengidentifikasi Merk dari model string
                     if (/SM-|Galaxy|Samsung/.test(modelInfo)) {
-                        brandModel = `Samsung (${modelInfo})`;
+                        brand = "Samsung";
+                        // Bersihkan model string
+                        model = modelInfo.replace(/Samsung/i, '').trim() || "Tidak Spesifik";
                     } else if (/Pixel/.test(modelInfo)) {
-                        brandModel = `Google Pixel (${modelInfo})`;
+                        brand = "Google";
+                        model = modelInfo.replace(/Google|Pixel/i, '').trim() || "Pixel";
                     } else if (/Redmi|Mi|Xiaomi/.test(modelInfo)) {
-                        brandModel = `Xiaomi/Mi (${modelInfo})`;
+                        brand = "Xiaomi";
+                        model = modelInfo.replace(/Xiaomi|Redmi|Mi/i, '').trim() || "Redmi/Mi";
                     } else if (/HUAWEI|HONOR/.test(modelInfo)) {
-                         brandModel = `Huawei/Honor (${modelInfo})`;
+                        brand = "Huawei";
+                        model = modelInfo.replace(/HUAWEI|HONOR/i, '').trim() || "Tidak Spesifik";
                     } else if (/LG/.test(modelInfo)) {
-                        brandModel = `LG (${modelInfo})`;
+                        brand = "LG";
+                        model = modelInfo.replace(/LG/i, '').trim() || "Tidak Spesifik";
                     } else {
-                        // Jika tidak ada merk spesifik, tampilkan informasi model saja
-                        brandModel = `Android Model: ${modelInfo}`;
+                        // Jika tidak ada merk spesifik, anggap seluruhnya sebagai model
+                        brand = "Android Generik";
+                        model = modelInfo;
+                    }
+                     // Kasus khusus untuk Model yang sama dengan Merk setelah pembersihan
+                    if (model === "") {
+                         model = "Tidak Spesifik";
                     }
                 } else {
-                    brandModel = "Android (Model tidak dapat diekstrak)";
+                    brand = "Android";
+                    model = "Model Tidak Terekstrak";
                 }
             } else {
-                 brandModel = `Browser: ${navigator.appName || 'Tidak Diketahui'} / OS: ${os}`;
+                // Untuk Desktop/Lainnya
+                brand = "Desktop/Browser";
+                model = navigator.appName || 'Tidak Diketahui';
             }
 
-            return { os, deviceType, brandModel };
+            return { os, deviceType, brand, model };
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -184,7 +211,8 @@
 
             document.getElementById('display-os').textContent = analysis.os;
             document.getElementById('display-device-type').textContent = analysis.deviceType;
-            document.getElementById('display-brand-model').textContent = analysis.brandModel;
+            document.getElementById('display-brand').textContent = analysis.brand; // MERK
+            document.getElementById('display-model').textContent = analysis.model; // MODEL
 
             // Tambahkan event listener untuk tombol salin
             const copyButton = document.getElementById('copy-ua-btn');
@@ -197,4 +225,3 @@
     </script>
 </body>
 </html>
-
