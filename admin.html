@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Stock Opname Cloud</title>
+    <title>Admin Dashboard - Stock Opname</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -44,6 +44,7 @@
                     </svg>
                 </div>
                 <h2 class="text-2xl font-extrabold text-slate-900">Admin</h2>
+                <p class="text-slate-500 text-sm mt-1">Masuk untuk mengelola data cloud.</p>
             </div>
             
             <form id="loginForm" class="space-y-4">
@@ -65,7 +66,7 @@
         </div>
     </div>
 
-    <!-- Main Content (Hidden by default) -->
+    <!-- Main Content (Protected) -->
     <div id="adminContent" class="hidden">
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
@@ -89,7 +90,7 @@
                     </div>
                     <div class="flex items-center gap-6">
                         <div class="hidden sm:flex items-center gap-4 border-r border-slate-200 pr-6 mr-2">
-                            <a href="index2.html" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Buka Scanner</a>
+                            <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Buka Scanner</a>
                         </div>
                         <div id="connectionBadge" class="hidden md:flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                             <div id="statusDot" class="h-2 w-2 rounded-full bg-slate-300"></div>
@@ -255,10 +256,13 @@
         // --- AUTH LOGIC ---
 
         async function checkSession() {
+            // Cek sesi secara langsung saat halaman dimuat
             const { data: { session } } = await supabaseClient.auth.getSession();
-            handleUI(session);
+            if (session) {
+                handleUI(session);
+            }
 
-            // Listen for changes
+            // Listen untuk perubahan sesi di masa mendatang
             supabaseClient.auth.onAuthStateChanged((_event, session) => {
                 handleUI(session);
             });
@@ -271,10 +275,13 @@
             if (session) {
                 loginSection.classList.add('hidden');
                 adminContent.classList.remove('hidden');
+                // Jalankan fetching data secara eksplisit setelah login
                 initConnection();
             } else {
                 loginSection.classList.remove('hidden');
                 adminContent.classList.add('hidden');
+                allData = [];
+                renderTable([]); // Bersihkan tabel
             }
         }
 
@@ -287,19 +294,30 @@
             errorEl.classList.add('hidden');
             toggleLoading(true);
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            if (error) {
-                errorEl.innerText = error.message;
+                if (error) {
+                    errorEl.innerText = error.message;
+                    errorEl.classList.remove('hidden');
+                    toggleLoading(false);
+                } else if (data.session) {
+                    // Update UI secara eksplisit agar instan tanpa refresh
+                    handleUI(data.session);
+                }
+            } catch (err) {
+                errorEl.innerText = "Terjadi kesalahan koneksi.";
                 errorEl.classList.remove('hidden');
+                toggleLoading(false);
             }
-
-            toggleLoading(false);
         });
 
         async function handleLogout() {
-            if (!confirm('Apakah Anda yakin ingin keluar?')) return;
+            toggleLoading(true);
+            // Fix: Perlu .auth sebelum .signOut()
             await supabaseClient.auth.signOut();
+            handleUI(null); // Paksa UI kembali ke login secara instan
+            toggleLoading(false);
         }
 
         // --- DATA LOGIC ---
@@ -327,7 +345,8 @@
         }
 
         function toggleLoading(show) {
-            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.classList.toggle('hidden', !show);
         }
 
         async function loadData() {
@@ -350,23 +369,29 @@
             const uniqueBarcodes = new Set(data.map(i => i.barcode)).size;
             const uniqueAreas = new Set(data.map(i => i.area)).size;
             
-            document.getElementById('statTotalQty').innerText = totalQty.toLocaleString();
-            document.getElementById('statTotalItems').innerText = uniqueBarcodes;
-            document.getElementById('statTotalAreas').innerText = uniqueAreas;
-            document.getElementById('statLastUpdate').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const elQty = document.getElementById('statTotalQty');
+            const elItems = document.getElementById('statTotalItems');
+            const elAreas = document.getElementById('statTotalAreas');
+            const elUpdate = document.getElementById('statLastUpdate');
+
+            if(elQty) elQty.innerText = totalQty.toLocaleString();
+            if(elItems) elItems.innerText = uniqueBarcodes;
+            if(elAreas) elAreas.innerText = uniqueAreas;
+            if(elUpdate) elUpdate.innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('dataTableBody');
             const emptyState = document.getElementById('emptyState');
+            if(!tbody) return;
             
             if (data.length === 0) {
                 tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
+                if(emptyState) emptyState.classList.remove('hidden');
                 return;
             }
 
-            emptyState.classList.add('hidden');
+            if(emptyState) emptyState.classList.add('hidden');
             tbody.innerHTML = data.map(item => `
                 <tr class="hover:bg-slate-50/80 transition-colors">
                     <td class="px-6 py-4">
@@ -398,8 +423,12 @@
         }
 
         function filterData() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const area = document.getElementById('areaFilter').value;
+            const searchInput = document.getElementById('searchInput');
+            const areaFilter = document.getElementById('areaFilter');
+            if(!searchInput || !areaFilter) return;
+
+            const search = searchInput.value.toLowerCase();
+            const area = areaFilter.value;
 
             const filtered = allData.filter(item => {
                 const matchSearch = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
@@ -412,6 +441,7 @@
 
         function populateAreaOptions() {
             const select = document.getElementById('areaFilter');
+            if(!select) return;
             for(let i=65; i<=90; i++) {
                 const char = String.fromCharCode(i);
                 const opt = document.createElement('option');
@@ -423,18 +453,24 @@
 
         // --- CRUD ACTIONS ---
 
-        function openEditModal(id, barcode, qty) {
-            document.getElementById('editId').value = id;
-            document.getElementById('editBarcode').value = barcode;
-            document.getElementById('editQty').value = qty;
-            document.getElementById('editModal').classList.remove('hidden');
-        }
+        window.openEditModal = function(id, barcode, qty) {
+            const elId = document.getElementById('editId');
+            const elBarcode = document.getElementById('editBarcode');
+            const elQty = document.getElementById('editQty');
+            const elModal = document.getElementById('editModal');
 
-        function closeModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
+            if(elId) elId.value = id;
+            if(elBarcode) elBarcode.value = barcode;
+            if(elQty) elQty.value = qty;
+            if(elModal) elModal.classList.remove('hidden');
+        };
 
-        async function updateQty() {
+        window.closeModal = function() {
+            const elModal = document.getElementById('editModal');
+            if(elModal) elModal.classList.add('hidden');
+        };
+
+        window.updateQty = async function() {
             const id = document.getElementById('editId').value;
             const newQty = parseInt(document.getElementById('editQty').value);
 
@@ -452,7 +488,7 @@
             await loadData();
         }
 
-        async function deleteItem(id) {
+        window.deleteItem = async function(id) {
             if (!confirm('Hapus item ini secara permanen?')) return;
             toggleLoading(true);
             const { error } = await supabaseClient.from('stock_opname').delete().eq('id', id);
@@ -460,7 +496,7 @@
             await loadData();
         }
 
-        async function confirmReset() {
+        window.confirmReset = async function() {
             const pass = prompt('Konfirmasi: Ketik "HAPUS SEMUA" untuk menghapus seluruh database stock opname.');
             if (pass !== "HAPUS SEMUA") return;
 
@@ -481,7 +517,7 @@
 
         // --- EXPORT ---
 
-        function exportExcel() {
+        window.exportExcel = function() {
             if (allData.length === 0) return alert('Tidak ada data untuk di-export');
             
             const exportData = allData.map(item => ({
@@ -501,5 +537,4 @@
         }
     </script>
 </body>
-
 </html>
