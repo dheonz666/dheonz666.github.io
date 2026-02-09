@@ -114,6 +114,12 @@
                     <p class="text-slate-500">Kelola dan pantau hasil stock opname real-time.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <button onclick="exportWord()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Word
+                    </button>
                     <button onclick="exportExcel()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -124,7 +130,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Reset Semua Data
+                        Reset Data
                     </button>
                 </div>
             </div>
@@ -192,14 +198,14 @@
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left">
+                    <table class="w-full text-left" id="mainDataTable">
                         <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                             <tr>
                                 <th class="px-6 py-4">Area</th>
                                 <th class="px-6 py-4">Kode Barcode</th>
                                 <th class="px-6 py-4">Kuantitas</th>
                                 <th class="px-6 py-4">Tanggal Input</th>
-                                <th class="px-6 py-4 text-right">Aksi</th>
+                                <th class="px-6 py-4 text-right print:hidden">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="dataTableBody" class="divide-y divide-slate-100">
@@ -256,13 +262,11 @@
         // --- AUTH LOGIC ---
 
         async function checkSession() {
-            // Cek sesi secara langsung saat halaman dimuat
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 handleUI(session);
             }
 
-            // Listen untuk perubahan sesi di masa mendatang
             supabaseClient.auth.onAuthStateChanged((_event, session) => {
                 handleUI(session);
             });
@@ -275,13 +279,12 @@
             if (session) {
                 loginSection.classList.add('hidden');
                 adminContent.classList.remove('hidden');
-                // Jalankan fetching data secara eksplisit setelah login
                 initConnection();
             } else {
                 loginSection.classList.remove('hidden');
                 adminContent.classList.add('hidden');
                 allData = [];
-                renderTable([]); // Bersihkan tabel
+                renderTable([]); 
             }
         }
 
@@ -302,7 +305,6 @@
                     errorEl.classList.remove('hidden');
                     toggleLoading(false);
                 } else if (data.session) {
-                    // Update UI secara eksplisit agar instan tanpa refresh
                     handleUI(data.session);
                 }
             } catch (err) {
@@ -314,9 +316,8 @@
 
         async function handleLogout() {
             toggleLoading(true);
-            // Fix: Perlu .auth sebelum .signOut()
             await supabaseClient.auth.signOut();
-            handleUI(null); // Paksa UI kembali ke login secara instan
+            handleUI(null);
             toggleLoading(false);
         }
 
@@ -534,6 +535,84 @@
             
             const fileName = `Laporan_Admin_Stock_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
+        }
+
+        window.exportWord = function() {
+            if (allData.length === 0) return alert('Tidak ada data untuk di-export');
+            
+            const dateStr = new Date().toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            // Bangun HTML untuk Word
+            let htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Laporan Stock Opname</title>
+                    <style>
+                        body { font-family: 'Arial', sans-serif; line-height: 1.6; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        h1 { color: #1e293b; margin-bottom: 5px; }
+                        p { margin: 0; color: #64748b; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th { background-color: #f8fafc; color: #475569; font-weight: bold; text-align: left; border: 1px solid #e2e8f0; padding: 10px; }
+                        td { border: 1px solid #e2e8f0; padding: 10px; color: #334155; }
+                        .footer { margin-top: 50px; text-align: right; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>LAPORAN HASIL STOCK OPNAME</h1>
+                        <p>Dicetak pada tanggal: ${dateStr}</p>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Area</th>
+                                <th>Kode Barcode</th>
+                                <th>Kuantitas (PCS)</th>
+                                <th>Waktu Input</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allData.map((item, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>Area ${item.area}</td>
+                                    <td>${item.barcode}</td>
+                                    <td>${item.qty}</td>
+                                    <td>${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        <p>Penanggung Jawab,</p>
+                        <br><br><br>
+                        <p>____________________</p>
+                        <p>( Admin Gudang )</p>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', htmlContent], {
+                type: 'application/msword'
+            });
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Laporan_Stock_Opname_${new Date().toISOString().split('T')[0]}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
