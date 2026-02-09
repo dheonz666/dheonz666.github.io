@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Stock Opname Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Library Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spinner 0.6s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .login-bg {
+            background: radial-gradient(circle at top right, #eef2ff 0%, #ffffff 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Login Section -->
+    <div id="loginSection" class="fixed inset-0 z-[60] login-bg flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 p-8 border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Admin</h2>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="admin@example.com"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-[0.98] mt-2">
+                    Masuk
+                </button>
+            </form>
+            <p id="loginError" class="text-rose-500 text-xs font-semibold text-center mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden by default) -->
+    <div id="adminContent" class="hidden">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
+            <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                <div class="loader w-10 h-10 border-4 border-slate-200 rounded-full mb-3"></div>
+                <p class="text-slate-600 font-medium">Memproses Data...</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-indigo-600 p-1.5 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <span class="text-xl font-extrabold tracking-tight">Admin <span class="text-indigo-600">Stock</span></span>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="hidden sm:flex items-center gap-4 border-r border-slate-200 pr-6 mr-2">
+                            <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Buka Scanner</a>
+                        </div>
+                        <div id="connectionBadge" class="hidden md:flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                            <div id="statusDot" class="h-2 w-2 rounded-full bg-slate-300"></div>
+                            <span id="statusText" class="text-[10px] font-bold uppercase text-slate-500">Connecting</span>
+                        </div>
+                        <button onclick="handleLogout()" class="text-rose-500 hover:text-rose-700 font-bold text-sm flex items-center gap-1">
+                            Keluar
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Header & Quick Actions -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Dashboard Manajemen</h1>
+                    <p class="text-slate-500">Kelola dan pantau hasil stock opname real-time.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="exportExcel()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Excel
+                    </button>
+                    <button onclick="confirmReset()" class="inline-flex items-center px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-bold rounded-xl transition-all border border-rose-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Reset Semua Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Unit Terdata</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalQty" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-indigo-50 text-indigo-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tipe Barcode</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalItems" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-blue-50 text-blue-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Area Aktif</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalAreas" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-amber-50 text-amber-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Update Terakhir</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statLastUpdate" class="text-lg font-bold text-slate-700 leading-tight">--:--</h3>
+                        <div class="bg-slate-50 text-slate-400 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
+                    <div class="relative flex-1 max-w-md">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </span>
+                        <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau area..." 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Area</option>
+                        </select>
+                        <button onclick="loadData()" class="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4">Area</th>
+                                <th class="px-6 py-4">Kode Barcode</th>
+                                <th class="px-6 py-4">Kuantitas</th>
+                                <th class="px-6 py-4">Tanggal Input</th>
+                                <th class="px-6 py-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="divide-y divide-slate-100">
+                            <!-- Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="hidden py-20 text-center">
+                    <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                    </div>
+                    <p class="text-slate-500 font-medium">Tidak ada data ditemukan.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Edit -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Edit Item</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="p-8 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Barcode</label>
+                    <input type="text" id="editBarcode" disabled class="w-full bg-slate-100 border-0 rounded-xl p-3 text-slate-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kuantitas (Qty)</label>
+                    <input type="number" id="editQty" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <input type="hidden" id="editId">
+                <button onclick="updateQty()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-95">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI SUPABASE ---
+        const SB_URL = 'https://wqgqyrqjtazqkdellkbo.supabase.co'; 
+        const SB_KEY = 'sb_publishable_y2KBNtIQG1e7TWrJbiQFJg_jjykI3bC'; 
+        
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let allData = [];
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', async () => {
+            checkSession();
+            populateAreaOptions();
+        });
+
+        // --- AUTH LOGIC ---
+
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            handleUI(session);
+
+            // Listen for changes
+            supabaseClient.auth.onAuthStateChanged((_event, session) => {
+                handleUI(session);
+            });
+        }
+
+        function handleUI(session) {
+            const loginSection = document.getElementById('loginSection');
+            const adminContent = document.getElementById('adminContent');
+            
+            if (session) {
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                initConnection();
+            } else {
+                loginSection.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            errorEl.classList.add('hidden');
+            toggleLoading(true);
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+            }
+
+            toggleLoading(false);
+        });
+
+        async function handleLogout() {
+            if (!confirm('Apakah Anda yakin ingin keluar?')) return;
+            await supabaseClient.auth.signOut();
+        }
+
+        // --- DATA LOGIC ---
+
+        async function initConnection() {
+            try {
+                updateStatus('bg-amber-500', 'Connecting...');
+                const { error } = await supabaseClient.from('stock_opname').select('id').limit(1);
+                if (error) throw error;
+                
+                updateStatus('bg-green-500', 'Online');
+                await loadData();
+            } catch (err) {
+                updateStatus('bg-red-500', 'Database Error');
+            }
+        }
+
+        function updateStatus(colorClass, text) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if(dot && txt) {
+                dot.className = `h-2 w-2 rounded-full ${colorClass}`;
+                txt.innerText = text;
+            }
+        }
+
+        function toggleLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        }
+
+        async function loadData() {
+            toggleLoading(true);
+            const { data, error } = await supabaseClient
+                .from('stock_opname')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                allData = data;
+                calculateStats(data);
+                renderTable(data);
+            }
+            toggleLoading(false);
+        }
+
+        function calculateStats(data) {
+            const totalQty = data.reduce((acc, curr) => acc + curr.qty, 0);
+            const uniqueBarcodes = new Set(data.map(i => i.barcode)).size;
+            const uniqueAreas = new Set(data.map(i => i.area)).size;
+            
+            document.getElementById('statTotalQty').innerText = totalQty.toLocaleString();
+            document.getElementById('statTotalItems').innerText = uniqueBarcodes;
+            document.getElementById('statTotalAreas').innerText = uniqueAreas;
+            document.getElementById('statLastUpdate').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200 uppercase">
+                            Area ${item.area}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm text-slate-600 font-medium">${item.barcode}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-lg font-bold text-slate-900">${item.qty}</span>
+                        <span class="text-xs text-slate-400 font-bold ml-1">PCS</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500">
+                        ${new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}<br>
+                        <span class="opacity-60">${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="openEditModal('${item.id}', '${item.barcode}', ${item.qty})" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Qty">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                            </button>
+                            <button onclick="deleteItem('${item.id}')" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Data">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const area = document.getElementById('areaFilter').value;
+
+            const filtered = allData.filter(item => {
+                const matchSearch = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
+                const matchArea = area === "" || item.area === area;
+                return matchSearch && matchArea;
+            });
+
+            renderTable(filtered);
+        }
+
+        function populateAreaOptions() {
+            const select = document.getElementById('areaFilter');
+            for(let i=65; i<=90; i++) {
+                const char = String.fromCharCode(i);
+                const opt = document.createElement('option');
+                opt.value = char;
+                opt.innerText = `Area ${char}`;
+                select.appendChild(opt);
+            }
+        }
+
+        // --- CRUD ACTIONS ---
+
+        function openEditModal(id, barcode, qty) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editBarcode').value = barcode;
+            document.getElementById('editQty').value = qty;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        async function updateQty() {
+            const id = document.getElementById('editId').value;
+            const newQty = parseInt(document.getElementById('editQty').value);
+
+            if (isNaN(newQty) || newQty < 0) return alert('Jumlah tidak valid');
+
+            toggleLoading(true);
+            const { error } = await supabaseClient
+                .from('stock_opname')
+                .update({ qty: newQty })
+                .eq('id', id);
+
+            if (error) alert('Gagal mengupdate data');
+            
+            closeModal();
+            await loadData();
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Hapus item ini secara permanen?')) return;
+            toggleLoading(true);
+            const { error } = await supabaseClient.from('stock_opname').delete().eq('id', id);
+            if (error) alert('Gagal menghapus data');
+            await loadData();
+        }
+
+        async function confirmReset() {
+            const pass = prompt('Konfirmasi: Ketik "HAPUS SEMUA" untuk menghapus seluruh database stock opname.');
+            if (pass !== "HAPUS SEMUA") return;
+
+            toggleLoading(true);
+            const { error } = await supabaseClient
+                .from('stock_opname')
+                .delete()
+                .neq('id', '00000000-0000-0000-0000-000000000000');
+
+            if (error) {
+                console.error(error);
+                alert('Gagal membersihkan database');
+            } else {
+                alert('Database berhasil dibersihkan');
+            }
+            await loadData();
+        }
+
+        // --- EXPORT ---
+
+        function exportExcel() {
+            if (allData.length === 0) return alert('Tidak ada data untuk di-export');
+            
+            const exportData = allData.map(item => ({
+                "Area": `Area ${item.area}`,
+                "Kode Barcode": item.barcode,
+                "Jumlah (Qty)": item.qty,
+                "Satuan": "PCS",
+                "Waktu Input": new Date(item.created_at).toLocaleString('id-ID')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Stock Opname");
+            
+            const fileName = `Laporan_Admin_Stock_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+    </script>
+</body>
+</html>
