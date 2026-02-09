@@ -225,20 +225,29 @@
             errorBox.classList.add('hidden');
             toggleLoading(true, "Memproses Masuk...");
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            if (error) {
-                errorEl.innerText = error.message;
+                if (error) {
+                    errorEl.innerText = error.message;
+                    errorBox.classList.remove('hidden');
+                    toggleLoading(false);
+                } else if (data.session) {
+                    // Update UI secara eksplisit agar instan
+                    updateUIBasedOnAuth(data.session);
+                    toggleLoading(false);
+                }
+            } catch (err) {
+                errorEl.innerText = "Kesalahan jaringan.";
                 errorBox.classList.remove('hidden');
                 toggleLoading(false);
             }
-            // Jika berhasil, onAuthStateChanged akan otomatis mengalihkan tampilan
         });
 
         async function handleLogout() {
-            // Dibuat instan tanpa confirm untuk pengalaman "langsung"
             toggleLoading(true, "Memproses Keluar...");
             await supabaseClient.auth.signOut();
+            updateUIBasedOnAuth(null); // Paksa update UI ke login
             toggleLoading(false);
         }
 
