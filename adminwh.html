@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <link href="assets/img/scanner.png" rel="icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Dashboard - Stock Opname</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Library Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spinner 0.6s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .login-bg {
+            background: radial-gradient(circle at top right, #eef2ff 0%, #ffffff 100%);
+        }
+
+        .toast {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .sort-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .sort-header:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[100] space-y-3 pointer-events-none"></div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="fixed inset-0 z-[60] login-bg flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 p-8 border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Warehouse Login</h2>
+                <p class="text-slate-500 text-sm mt-1">Masuk untuk mengelola data stock opname gudang.</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="admin@warehouse.com"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-[0.98] mt-2">
+                    Masuk Ke Sistem
+                </button>
+            </form>
+            <p id="loginError" class="text-rose-500 text-xs font-semibold text-center mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Main Content (Protected) -->
+    <div id="adminContent" class="hidden">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
+            <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                <div class="loader w-10 h-10 border-4 border-slate-200 rounded-full mb-3"></div>
+                <p class="text-slate-600 font-medium">Memproses Data...</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-indigo-600 p-1.5 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <span class="text-xl font-extrabold tracking-tight text-slate-900">Stock Opname  <span class="text-indigo-600">Warehouse</span></span>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="hidden sm:flex items-center gap-4 border-r border-slate-200 pr-6 mr-2">
+                            <a href="index2.html" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Buka Scanner</a>
+                        </div>
+                        <div id="connectionBadge" class="hidden md:flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                            <div id="statusDot" class="h-2 w-2 rounded-full bg-slate-300"></div>
+                            <span id="statusText" class="text-[10px] font-bold uppercase text-slate-500">Menghubungkan</span>
+                        </div>
+                        <button onclick="handleLogout()" class="text-rose-500 hover:text-rose-700 font-bold text-sm flex items-center gap-1">
+                            Keluar
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Header & Quick Actions -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Dashboard Stock Opname</h1>
+                    <p class="text-slate-500">Rekapitulasi data stok Warehouse.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="exportWord()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Word
+                    </button>
+                    <button onclick="exportExcel()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Excel
+                    </button>
+                    <button onclick="confirmReset()" class="inline-flex items-center px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-bold rounded-xl transition-all border border-rose-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus Semua
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Unit Terdata</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalQty" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-indigo-50 text-indigo-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Jenis Item</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalItems" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-blue-50 text-blue-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Area Aktif</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statTotalAreas" class="text-3xl font-black text-slate-900">0</h3>
+                        <div class="bg-amber-50 text-amber-600 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Update Terakhir</p>
+                    <div class="flex items-end justify-between">
+                        <h3 id="statLastUpdate" class="text-lg font-bold text-slate-700 leading-tight">--:--</h3>
+                        <div class="bg-slate-50 text-slate-400 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
+                    <div class="relative flex-1 max-w-md">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </span>
+                        <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau lokasi..." 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px]">
+                            <option value="">Semua Area</option>
+                        </select>
+                        <button onclick="loadData()" class="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors" title="Refresh Data">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left" id="mainDataTable">
+                        <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4 sort-header" onclick="toggleSort('area')">
+                                    <div class="flex items-center gap-1">
+                                        Area / Rak
+                                        <span id="sort-icon-area" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 sort-header" onclick="toggleSort('barcode')">
+                                    <div class="flex items-center gap-1">
+                                        ID Barcode
+                                        <span id="sort-icon-barcode" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 sort-header" onclick="toggleSort('qty')">
+                                    <div class="flex items-center gap-1">
+                                        Qty
+                                        <span id="sort-icon-qty" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 sort-header" onclick="toggleSort('created_at')">
+                                    <div class="flex items-center gap-1">
+                                        Waktu Input
+                                        <span id="sort-icon-created_at" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-right print:hidden">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="divide-y divide-slate-100">
+                            <!-- Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="hidden py-20 text-center">
+                    <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                    </div>
+                    <p class="text-slate-500 font-medium">Data warehouse tidak tersedia.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Edit -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-800">Edit Kuantitas Stok</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-8 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">ID Barcode</label>
+                    <input type="text" id="editBarcode" disabled class="w-full bg-slate-100 border-0 rounded-xl p-3 text-slate-500 font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kuantitas Baru</label>
+                    <input type="number" id="editQty" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-lg">
+                </div>
+                <input type="hidden" id="editId">
+                <button onclick="updateQty()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-95">
+                    Update Stok
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI SUPABASE ---
+        const SB_URL = 'https://wqgqyrqjtazqkdellkbo.supabase.co'; 
+        const SB_KEY = 'sb_publishable_y2KBNtIQG1e7TWrJbiQFJg_jjykI3bC'; 
+        const TABLE_NAME = 'stock_opname'; // Perubahan nama tabel ke stock_opname
+        
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let allData = [];
+        
+        // State Pengurutan
+        let currentSortColumn = 'created_at';
+        let currentSortDirection = 'desc';
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', async () => {
+            checkSession();
+        });
+
+        // --- AUTH LOGIC ---
+
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            handleUI(session);
+
+            supabaseClient.auth.onAuthStateChanged((_event, session) => {
+                handleUI(session);
+            });
+        }
+
+        function handleUI(session) {
+            const loginSection = document.getElementById('loginSection');
+            const adminContent = document.getElementById('adminContent');
+            
+            if (session) {
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                initConnection();
+            } else {
+                loginSection.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+                allData = [];
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+            
+            errorEl.classList.add('hidden');
+            btn.innerText = 'Verifikasi...';
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+                if (error) {
+                    errorEl.innerText = "Email atau password warehouse tidak valid.";
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                showToast('Terjadi gangguan jaringan', 'error');
+            } finally {
+                btn.innerText = 'Masuk Ke Sistem';
+                btn.disabled = false;
+            }
+        });
+
+        async function handleLogout() {
+            toggleLoading(true);
+            await supabaseClient.auth.signOut();
+            toggleLoading(false);
+            showToast('Sesi berakhir');
+        }
+
+        // --- DATA LOGIC ---
+
+        async function initConnection() {
+            try {
+                updateStatus('bg-amber-500', 'Menghubungkan...');
+                const { error } = await supabaseClient.from(TABLE_NAME).select('id').limit(1);
+                if (error) throw error;
+                
+                updateStatus('bg-green-500', 'Online');
+                await loadData();
+            } catch (err) {
+                updateStatus('bg-red-500', 'Database Error');
+                showToast('Tabel stock_opname tidak ditemukan', 'error');
+            }
+        }
+
+        function updateStatus(colorClass, text) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if(dot && txt) {
+                dot.className = `h-2 w-2 rounded-full ${colorClass}`;
+                txt.innerText = text;
+            }
+        }
+
+        function toggleLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.classList.toggle('hidden', !show);
+        }
+
+        async function loadData() {
+            toggleLoading(true);
+            try {
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*');
+
+                if (error) throw error;
+
+                allData = data || [];
+                calculateStats(allData);
+                populateAreaFilter(allData);
+                filterData();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal memproses database', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function calculateStats(data) {
+            const totalQty = data.reduce((acc, curr) => acc + (parseInt(curr.qty) || 0), 0);
+            const uniqueBarcodes = new Set(data.map(i => i.barcode)).size;
+            const uniqueAreas = new Set(data.map(i => i.area)).size;
+            
+            document.getElementById('statTotalQty').innerText = totalQty.toLocaleString();
+            document.getElementById('statTotalItems').innerText = uniqueBarcodes;
+            document.getElementById('statTotalAreas').innerText = uniqueAreas;
+            document.getElementById('statLastUpdate').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function populateAreaFilter(data) {
+            const select = document.getElementById('areaFilter');
+            const currentVal = select.value;
+            const areas = [...new Set(data.map(item => item.area))].sort();
+            
+            select.innerHTML = '<option value="">Semua Area</option>';
+            areas.forEach(area => {
+                const opt = document.createElement('option');
+                opt.value = area;
+                opt.innerText = area;
+                select.appendChild(opt);
+            });
+            select.value = currentVal;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-slate-50/80 transition-colors group">
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase">
+                            ${item.area}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm text-slate-600 font-bold">${item.barcode}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-lg font-black text-slate-900">${item.qty}</span>
+                        <span class="text-[10px] text-slate-400 font-bold ml-1 uppercase">Unit</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500">
+                        <div class="font-semibold">${new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                        <div class="opacity-60 text-[10px] mt-0.5">${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openEditModal('${item.id}', '${item.barcode}', ${item.qty})" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="Edit Stok">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                            </button>
+                            <button onclick="deleteItem('${item.id}')" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" title="Hapus Baris">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- SORTING LOGIC ---
+
+        function toggleSort(column) {
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            updateSortIcons();
+            filterData();
+        }
+
+        function updateSortIcons() {
+            const columns = ['area', 'barcode', 'qty', 'created_at'];
+            columns.forEach(col => {
+                const icon = document.getElementById(`sort-icon-${col}`);
+                if (col === currentSortColumn) {
+                    icon.className = 'text-indigo-600';
+                    icon.innerHTML = currentSortDirection === 'asc' 
+                        ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>' 
+                        : '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>';
+                } else {
+                    icon.className = 'text-slate-300';
+                    icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>';
+                }
+            });
+        }
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const area = document.getElementById('areaFilter').value;
+
+            let filtered = allData.filter(item => {
+                const matchSearch = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
+                const matchArea = area === "" || item.area === area;
+                return matchSearch && matchArea;
+            });
+
+            // Apply Sorting
+            filtered.sort((a, b) => {
+                let valA = a[currentSortColumn];
+                let valB = b[currentSortColumn];
+
+                if (currentSortColumn === 'qty') {
+                    valA = parseInt(valA) || 0;
+                    valB = parseInt(valB) || 0;
+                } else if (currentSortColumn === 'created_at') {
+                    valA = new Date(valA).getTime();
+                    valB = new Date(valB).getTime();
+                } else {
+                    valA = valA.toString().toLowerCase();
+                    valB = valB.toString().toLowerCase();
+                }
+
+                if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTable(filtered);
+        }
+
+        // --- CRUD ACTIONS ---
+
+        window.openEditModal = function(id, barcode, qty) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editBarcode').value = barcode;
+            document.getElementById('editQty').value = qty;
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('editModal').classList.add('hidden');
+        };
+
+        window.updateQty = async function() {
+            const id = document.getElementById('editId').value;
+            const newQty = parseInt(document.getElementById('editQty').value);
+
+            if (isNaN(newQty) || newQty < 0) return showToast('Jumlah tidak valid', 'error');
+
+            toggleLoading(true);
+            try {
+                const { error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({ qty: newQty })
+                    .eq('id', id);
+
+                if (error) throw error;
+                
+                showToast('Stok berhasil diperbarui');
+                closeModal();
+                await loadData();
+            } catch (err) {
+                showToast('Gagal update stok', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        window.deleteItem = async function(id) {
+            if (!confirm('Hapus data stock opname ini?')) return;
+            
+            toggleLoading(true);
+            try {
+                const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('id', id);
+                if (error) throw error;
+                showToast('Data dihapus');
+                await loadData();
+            } catch (err) {
+                showToast('Gagal menghapus data', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        window.confirmReset = async function() {
+            const pass = prompt('Keamanan Warehouse: Ketik "HAPUS SEMUA" untuk membersihkan tabel stock_opname.');
+            if (pass !== "HAPUS SEMUA") return;
+
+            toggleLoading(true);
+            try {
+                const { error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .delete()
+                    .neq('barcode', 'NONE_EXISTENT_FILTER'); 
+
+                if (error) throw error;
+                showToast('Tabel warehouse dibersihkan');
+                await loadData();
+            } catch (err) {
+                showToast('Gagal reset database', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- UI HELPERS ---
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-rose-600';
+            
+            toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 toast translate-x-10 opacity-0`;
+            toast.innerHTML = `<span class="text-sm font-bold">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-10', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- EXPORT LOGIC ---
+
+        window.exportExcel = function() {
+            if (allData.length === 0) return showToast('Data kosong', 'error');
+            
+            const exportData = allData.map(item => ({
+                "Area/Rak": item.area,
+                "Barcode ID": item.barcode,
+                "Jumlah": item.qty,
+                "Satuan": "Unit",
+                "Waktu Input": new Date(item.created_at).toLocaleString('id-ID')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Warehouse");
+            
+            const fileName = `Warehouse_Opname_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            showToast('Laporan Excel siap');
+        }
+
+        window.exportWord = function() {
+            if (allData.length === 0) return showToast('Data kosong', 'error');
+            
+            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            let htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset="utf-8"><title>Laporan Warehouse</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; }
+                    h1 { text-align: center; color: #1e293b; text-transform: uppercase; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th { background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-size: 12px; }
+                    td { border: 1px solid #cbd5e1; padding: 10px; font-size: 11px; }
+                    .footer { margin-top: 40px; text-align: right; }
+                </style>
+                </head>
+                <body>
+                    <h1>LAPORAN STOCK OPNAME WAREHOUSE</h1>
+                    <p style="text-align: center">Dicetak pada: ${dateStr}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Area / Rak</th>
+                                <th>ID Barcode</th>
+                                <th>Qty (Unit)</th>
+                                <th>Waktu Terdata</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allData.map((item, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.area}</td>
+                                    <td>${item.barcode}</td>
+                                    <td>${item.qty}</td>
+                                    <td>${new Date(item.created_at).toLocaleString('id-ID')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        <p>Penanggung Jawab,</p><br><br><br>
+                        <p>____________________</p>
+                        <p>( Manager Warehouse )</p>
+                    </div>
+                </body></html>`;
+
+            const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Laporan_Warehouse_${new Date().toISOString().split('T')[0]}.doc`;
+            link.click();
+            showToast('Laporan Word siap');
+        }
+    </script>
+</body>
+</html>

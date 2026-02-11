@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <link href="assets/img/scanner.png" rel="icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Opname - Sparepart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library Barcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- Library Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Library Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        .barcode-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 65px;
+        }
+
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Excel-like Table Styling */
+        .excel-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        .excel-table th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-50 hidden flex flex-col items-center justify-center">
+        <div class="loader w-12 h-12 border-4 border-slate-200 rounded-full mb-4"></div>
+        <p class="text-indigo-600 font-semibold animate-pulse">Menyimpan & Sinkronisasi Cloud...</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <div class="flex items-center justify-center gap-3 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m-3 3h2m3-3h2M9 17h2m3 3h2M5 8v8a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h1" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12h1" />
+                </svg>
+                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+                    <span class="text-indigo-600">Stock Opname Sparepart</span>
+                </h1>
+            </div>
+            <div class="flex items-center justify-center gap-3">
+                <div id="statusDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
+                <p id="statusText" class="text-sm font-medium text-slate-500 uppercase tracking-wider">Menghubungkan ke Sparepart Database...</p>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 mb-10 border border-slate-100">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lokasi Sparepart</label>
+                    <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
+                        <script>
+                            // Generate Sparepart Area A1-F35
+                            const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                            spLetters.forEach(letter => {
+                                document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
+                                for(let i=1; i<=35; i++) {
+                                    document.write(`<option value="Sparepart Area ${letter}${i}">Area ${letter}${i}</option>`);
+                                }
+                                document.write(`</optgroup>`);
+                            });
+                        </script>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Kode Barcode</label>
+                    <input type="text" id="barcodeInput" placeholder="Scan barcode..." 
+                        class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                        onkeypress="if(event.key === 'Enter') saveToCloud()">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Jumlah Item</label>
+                    <input type="number" id="qtyInput" value="1" min="1" 
+                        class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                </div>
+
+                <button onclick="saveToCloud()" 
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-indigo-200 active:scale-95">
+                    Simpan Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar & Options -->
+        <div class="flex flex-col lg:flex-row justify-between items-end mb-6 gap-6">
+            <div class="flex flex-col md:flex-row items-start md:items-end gap-4 w-full lg:w-auto">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
+                    <p class="text-slate-500 text-sm">Monitoring stok real-time di Cloud</p>
+                </div>
+
+                <!-- Dropdown Filter Area -->
+                <div class="space-y-1 w-full md:w-64">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
+                    <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
+                        <option value="all">Semua Lokasi Sparepart</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown Mode Selector -->
+                <div class="space-y-1 w-full md:w-48">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Mode Tampilan</label>
+                    <select id="modeSelector" onchange="switchView(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
+                        <option value="grid">Mode Kartu</option>
+                        <option value="table">Mode Tabel</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 w-full lg:w-auto justify-end">
+                <button onclick="exportExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-emerald-100">Ekspor Excel</button>
+                <button onclick="exportWord()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-blue-100">Ekspor Word</button>
+            </div>
+        </div>
+
+        <!-- Data Display Area -->
+        <div id="stockContainer" class="space-y-10 pb-20">
+            <div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                <p class="text-slate-400">Memuat data dari database Sparepart...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI SUPABASE ---
+        const SB_URL = 'https://wqgqyrqjtazqkdellkbo.supabase.co'; 
+        const SB_KEY = 'sb_publishable_y2KBNtIQG1e7TWrJbiQFJg_jjykI3bC'; 
+        
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let inventoryData = {};
+        let currentView = 'grid';
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!SB_URL || !SB_KEY) {
+                updateStatus('bg-red-500', 'API Belum Diatur');
+                return;
+            }
+            await initConnection();
+            document.getElementById('barcodeInput').focus();
+        });
+
+        async function initConnection() {
+            try {
+                updateStatus('bg-amber-500', 'Koneksi...');
+                const { error } = await supabaseClient.from('sparepart').select('id').limit(1);
+                if (error) throw error;
+                
+                updateStatus('bg-green-500', 'Sparepart Online');
+                await loadData();
+            } catch (err) {
+                updateStatus('bg-red-500', 'Cloud Offline');
+            }
+        }
+
+        function updateStatus(colorClass, text) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if(dot && txt) {
+                dot.className = `h-2.5 w-2.5 rounded-full ${colorClass}`;
+                txt.innerText = text;
+            }
+        }
+
+        function toggleLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        }
+
+        function switchView(view) {
+            currentView = view;
+            renderUI();
+        }
+
+        async function loadData() {
+            // Gunakan tabel sparepart
+            const { data, error } = await supabaseClient
+                .from('sparepart')
+                .select('*')
+                .order('area', { ascending: true });
+
+            if (!error && data) {
+                inventoryData = {};
+                data.forEach(item => {
+                    if (!inventoryData[item.area]) inventoryData[item.area] = [];
+                    inventoryData[item.area].push(item);
+                });
+                
+                updateFilterDropdown();
+                renderUI();
+            }
+        }
+
+        function updateFilterDropdown() {
+            const filterSelect = document.getElementById('viewFilter');
+            const currentValue = filterSelect.value;
+            const areas = Object.keys(inventoryData).sort();
+            
+            let html = '<option value="all">Semua Lokasi Sparepart</option>';
+            areas.forEach(area => {
+                html += `<option value="${area}">${area.toUpperCase()}</option>`;
+            });
+            
+            filterSelect.innerHTML = html;
+            if (Array.from(filterSelect.options).some(o => o.value === currentValue)) {
+                filterSelect.value = currentValue;
+            }
+        }
+
+        async function saveToCloud() {
+            let area = document.getElementById('areaInput').value;
+            const barcode = document.getElementById('barcodeInput').value.trim();
+            const qtyStr = document.getElementById('qtyInput').value;
+            const qty = parseInt(qtyStr) || 1;
+
+            if (!barcode) return;
+
+            // Target tabel sparepart
+            const tableName = 'sparepart';
+            toggleLoading(true);
+
+            try {
+                const { data: existingData } = await supabaseClient
+                    .from(tableName)
+                    .select('id, qty')
+                    .eq('area', area)
+                    .eq('barcode', barcode)
+                    .single();
+
+                if (existingData) {
+                    await supabaseClient
+                        .from(tableName)
+                        .update({ qty: existingData.qty + qty })
+                        .eq('id', existingData.id);
+                } else {
+                    await supabaseClient
+                        .from(tableName)
+                        .insert([{ area, barcode, qty }]);
+                }
+
+                document.getElementById('barcodeInput').value = '';
+                document.getElementById('barcodeInput').focus();
+                await loadData();
+            } catch (err) {
+                console.error(err);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function getFilteredAreas() {
+            const filterValue = document.getElementById('viewFilter').value;
+            let areas = Object.keys(inventoryData).sort();
+
+            if (filterValue !== 'all') {
+                return areas.filter(a => a === filterValue);
+            }
+            return areas;
+        }
+
+        function renderUI() {
+            const container = document.getElementById('stockContainer');
+            const areas = getFilteredAreas();
+
+            if (areas.length === 0) {
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Belum ada data Sparepart tersimpan.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = "";
+
+            if (currentView === 'grid') {
+                renderGridView(container, areas);
+            } else {
+                renderTableView(container, areas);
+            }
+        }
+
+        function renderGridView(container, areas) {
+            areas.forEach(area => {
+                const section = document.createElement('div');
+                section.className = "bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8";
+                
+                let html = `
+                    <div class="bg-slate-50 border-b border-slate-100 px-8 py-5 flex justify-between items-center">
+                        <h3 class="text-xl font-extrabold text-slate-900 tracking-tight underline decoration-indigo-500 decoration-4 underline-offset-8">${area.toUpperCase()}</h3>
+                        <div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                            ${inventoryData[area].length} Item
+                        </div>
+                    </div>
+                    <div class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                `;
+
+                inventoryData[area].forEach(item => {
+                    html += `
+                        <div class="barcode-card group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 transition-all">
+                            <div class="barcode-container mb-4">
+                                <svg id="bc-${item.id}"></svg>
+                            </div>
+                            <div class="text-center pt-3 border-t border-slate-50">
+                                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${item.barcode}</span>
+                                <div class="text-2xl font-black text-slate-800">QTY: ${item.qty}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                section.innerHTML = html;
+                container.appendChild(section);
+
+                inventoryData[area].forEach(item => {
+                    JsBarcode(`#bc-${item.id}`, item.barcode, {
+                        format: "CODE128", width: 1.8, height: 45, displayValue: false, margin: 0
+                    });
+                });
+            });
+        }
+
+        function renderTableView(container, areas) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden";
+            
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="excel-table min-w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100">
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-indigo-600">LOKASI SPAREPART</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Barcode (Visual)</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Kode Barcode</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Jumlah (QTY)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+            `;
+
+            areas.forEach(area => {
+                inventoryData[area].forEach(item => {
+                    html += `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-700">${area.toUpperCase()}</td>
+                            <td class="px-6 py-4">
+                                <div class="w-32">
+                                    <svg id="bt-${item.id}"></svg>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td>
+                            <td class="px-6 py-4">
+                                <span class="text-lg font-bold text-slate-900">${item.qty}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            html += `</tbody></table></div>`;
+            wrapper.innerHTML = html;
+            container.appendChild(wrapper);
+
+            // Generate Barcodes for Table View
+            areas.forEach(area => {
+                inventoryData[area].forEach(item => {
+                    JsBarcode(`#bt-${item.id}`, item.barcode, {
+                        format: "CODE128", width: 1.2, height: 30, displayValue: false, margin: 0
+                    });
+                });
+            });
+        }
+
+        function exportExcel() {
+            const areas = getFilteredAreas();
+            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
+            
+            const flatData = [];
+            areas.forEach(area => {
+                inventoryData[area].forEach(item => {
+                    flatData.push({ 
+                        "Lokasi Sparepart": area.toUpperCase(), 
+                        "Barcode": item.barcode, 
+                        "Jumlah (Qty)": item.qty, 
+                        "Waktu Update": new Date(item.created_at).toLocaleString() 
+                    });
+                });
+            });
+            const ws = XLSX.utils.json_to_sheet(flatData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Sparepart");
+            XLSX.writeFile(wb, `Sparepart_Stock_${new Date().getTime()}.xlsx`);
+        }
+
+        function exportWord() {
+            const areas = getFilteredAreas();
+            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
+            
+            let docHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Laporan Sparepart</title><style>
+            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid black; padding: 10px; text-align: left; }
+            h2 { border-bottom: 2px solid #4f46e5; padding-bottom: 5px; color: #4f46e5; margin-top: 20px; }
+            </style></head><body><h1>LAPORAN STOCK OPNAME SPAREPART</h1><p>Filter: ${document.getElementById('viewFilter').options[document.getElementById('viewFilter').selectedIndex].text}</p>`;
+            
+            let body = "";
+            areas.forEach(area => {
+                body += `<h2>${area.toUpperCase()}</h2><table><thead><tr><th>Barcode</th><th>Jumlah</th></tr></thead><tbody>`;
+                inventoryData[area].forEach(item => {
+                    body += `<tr><td>${item.barcode}</td><td>${item.qty}</td></tr>`;
+                });
+                body += `</tbody></table>`;
+            });
+
+            const fullContent = docHeader + body + "</body></html>";
+            const blob = new Blob(['\ufeff', fullContent], { type: 'application/msword' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "Laporan_Sparepart.doc";
+            link.click();
+        }
+    </script>
+</body>
+</html>
