@@ -44,6 +44,20 @@
             top: 0;
             background: #f8fafc;
             z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .excel-table th:hover {
+            background-color: #f1f5f9;
+        }
+
+        @keyframes highlight-new {
+            0% { background-color: #eef2ff; }
+            100% { background-color: transparent; }
+        }
+        .new-entry {
+            animation: highlight-new 2s ease-out;
         }
     </style>
 </head>
@@ -52,7 +66,7 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-50 hidden flex flex-col items-center justify-center">
         <div class="loader w-12 h-12 border-4 border-slate-200 rounded-full mb-4"></div>
-        <p class="text-indigo-600 font-semibold animate-pulse">Menyimpan & Sinkronisasi Cloud...</p>
+        <p class="text-indigo-600 font-semibold animate-pulse">Memproses Data...</p>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8">
@@ -71,7 +85,7 @@
             </div>
             <div class="flex items-center justify-center gap-3">
                 <div id="statusDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
-                <p id="statusText" class="text-sm font-medium text-slate-500 uppercase tracking-wider">Menghubungkan ke Sparepart Database...</p>
+                <p id="statusText" class="text-sm font-medium text-slate-500 uppercase tracking-wider">Menghubungkan ke database...</p>
             </div>
         </header>
 
@@ -82,12 +96,13 @@
                     <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lokasi Sparepart</label>
                     <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
                         <script>
-                            // Generate Sparepart Area A1-F35
                             const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
                             spLetters.forEach(letter => {
                                 document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
                                 for(let i=1; i<=35; i++) {
-                                    document.write(`<option value="Sparepart Area ${letter}${i}">Area ${letter}${i}</option>`);
+                                    // Merubah 1-9 menjadi 01-09
+                                    const areaNum = i < 10 ? '0' + i : i;
+                                    document.write(`<option value="Sparepart Area ${letter}${areaNum}">Area ${letter}${areaNum}</option>`);
                                 }
                                 document.write(`</optgroup>`);
                             });
@@ -110,47 +125,75 @@
 
                 <button onclick="saveToCloud()" 
                     class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-indigo-200 active:scale-95">
-                    Simpan Data
+                    Simpan Manual
                 </button>
             </div>
         </div>
 
         <!-- Toolbar & Options -->
-        <div class="flex flex-col lg:flex-row justify-between items-end mb-6 gap-6">
-            <div class="flex flex-col md:flex-row items-start md:items-end gap-4 w-full lg:w-auto">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
-                    <p class="text-slate-500 text-sm">Monitoring stok real-time di Cloud</p>
-                </div>
+        <div class="flex flex-col space-y-6 mb-10">
+            <div class="flex flex-col lg:flex-row justify-between items-end gap-6">
+                <div class="flex flex-wrap items-end gap-4 w-full">
+                    <div class="w-full md:w-auto">
+                        <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
+                        <p class="text-slate-500 text-sm">Monitoring stok real-time (Berdasarkan Waktu Input)</p>
+                    </div>
 
-                <!-- Dropdown Filter Area -->
-                <div class="space-y-1 w-full md:w-64">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
-                    <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
-                        <option value="all">Semua Lokasi Sparepart</option>
-                    </select>
-                </div>
+                    <!-- Filter Area -->
+                    <div class="space-y-1 w-full md:w-60">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
+                        <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
+                            <option value="all">Semua Lokasi Sparepart</option>
+                        </select>
+                    </div>
 
-                <!-- Dropdown Mode Selector -->
-                <div class="space-y-1 w-full md:w-48">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Mode Tampilan</label>
-                    <select id="modeSelector" onchange="switchView(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
-                        <option value="grid">Mode Kartu</option>
-                        <option value="table">Mode Tabel</option>
-                    </select>
+                    <!-- Filter Tanggal Mulai -->
+                    <div class="space-y-1 w-full md:w-44">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
+                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
+                    </div>
+
+                    <!-- Filter Tanggal Selesai -->
+                    <div class="space-y-1 w-full md:w-44">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
+                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
+                    </div>
+
+                    <!-- Tombol Reset Filter -->
+                    <button onclick="resetFilters()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2.5 rounded-xl transition-colors mb-0.5" title="Reset Filter Tanggal">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-            
-            <div class="flex flex-wrap gap-2 w-full lg:w-auto justify-end">
-                <button onclick="exportExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-emerald-100">Ekspor Excel</button>
-                <button onclick="exportWord()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-blue-100">Ekspor Word</button>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-100/50 p-4 rounded-2xl border border-slate-200/50">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <label class="text-xs font-bold text-slate-400 uppercase">Tampilan:</label>
+                    <select id="modeSelector" onchange="switchView(this.value)" class="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer">
+                        <option value="grid">Mode Kartu</option>
+                        <option value="table" selected>Mode Tabel</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                    <button onclick="loadData()" class="bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors border border-slate-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors">Excel</button>
+                    <button onclick="exportWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors">Word</button>
+                </div>
             </div>
         </div>
 
         <!-- Data Display Area -->
         <div id="stockContainer" class="space-y-10 pb-20">
             <div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                <p class="text-slate-400">Memuat data dari database Sparepart...</p>
+                <p class="text-slate-400">Memuat data...</p>
             </div>
         </div>
     </div>
@@ -162,9 +205,10 @@
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let inventoryData = {};
-        let currentView = 'grid';
+        let currentView = 'table';
+        let sortConfig = { key: 'created_at', direction: 'desc' }; 
+        let lastScannedId = null;
 
-        // Inisialisasi
         document.addEventListener('DOMContentLoaded', async () => {
             if (!SB_URL || !SB_KEY) {
                 updateStatus('bg-red-500', 'API Belum Diatur');
@@ -180,10 +224,10 @@
                 const { error } = await supabaseClient.from('sparepart').select('id').limit(1);
                 if (error) throw error;
                 
-                updateStatus('bg-green-500', 'Sparepart Online');
+                updateStatus('bg-green-500', 'Cloud Online');
                 await loadData();
             } catch (err) {
-                updateStatus('bg-red-500', 'Cloud Offline');
+                updateStatus('bg-red-500', 'Offline');
             }
         }
 
@@ -205,22 +249,44 @@
             renderUI();
         }
 
-        async function loadData() {
-            // Gunakan tabel sparepart
-            const { data, error } = await supabaseClient
-                .from('sparepart')
-                .select('*')
-                .order('area', { ascending: true });
+        function toggleSort(key) {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            renderUI();
+        }
 
-            if (!error && data) {
-                inventoryData = {};
-                data.forEach(item => {
-                    if (!inventoryData[item.area]) inventoryData[item.area] = [];
-                    inventoryData[item.area].push(item);
-                });
-                
-                updateFilterDropdown();
-                renderUI();
+        function resetFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('viewFilter').value = 'all';
+            renderUI();
+        }
+
+        async function loadData() {
+            toggleLoading(true);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('sparepart')
+                    .select('*');
+
+                if (!error && data) {
+                    inventoryData = {};
+                    data.forEach(item => {
+                        if (!inventoryData[item.area]) inventoryData[item.area] = [];
+                        inventoryData[item.area].push(item);
+                    });
+                    
+                    updateFilterDropdown();
+                    renderUI();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                toggleLoading(false);
             }
         }
 
@@ -248,29 +314,38 @@
 
             if (!barcode) return;
 
-            // Target tabel sparepart
-            const tableName = 'sparepart';
             toggleLoading(true);
 
             try {
+                // Query database sekarang menggunakan format area baru (misal: Sparepart Area A01)
                 const { data: existingData } = await supabaseClient
-                    .from(tableName)
-                    .select('id, qty')
+                    .from('sparepart')
+                    .select('id, qty, created_at')
                     .eq('area', area)
                     .eq('barcode', barcode)
                     .single();
 
+                let updatedItem;
                 if (existingData) {
-                    await supabaseClient
-                        .from(tableName)
+                    const { data } = await supabaseClient
+                        .from('sparepart')
                         .update({ qty: existingData.qty + qty })
-                        .eq('id', existingData.id);
+                        .eq('id', existingData.id)
+                        .select()
+                        .single();
+                    updatedItem = data;
                 } else {
-                    await supabaseClient
-                        .from(tableName)
-                        .insert([{ area, barcode, qty }]);
+                    const { data } = await supabaseClient
+                        .from('sparepart')
+                        .insert([{ area, barcode, qty }])
+                        .select()
+                        .single();
+                    updatedItem = data;
                 }
 
+                lastScannedId = updatedItem.id;
+                sortConfig = { key: 'created_at', direction: 'desc' };
+                
                 document.getElementById('barcodeInput').value = '';
                 document.getElementById('barcodeInput').focus();
                 await loadData();
@@ -281,36 +356,73 @@
             }
         }
 
-        function getFilteredAreas() {
-            const filterValue = document.getElementById('viewFilter').value;
-            let areas = Object.keys(inventoryData).sort();
+        function getFilteredAndSortedData() {
+            const filterArea = document.getElementById('viewFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let flatData = [];
 
-            if (filterValue !== 'all') {
-                return areas.filter(a => a === filterValue);
-            }
-            return areas;
+            Object.keys(inventoryData).forEach(area => {
+                if (filterArea === 'all' || area === filterArea) {
+                    inventoryData[area].forEach(item => {
+                        let itemDate = new Date(item.created_at).toISOString().split('T')[0];
+                        let passDate = true;
+                        
+                        if (startDate && itemDate < startDate) passDate = false;
+                        if (endDate && itemDate > endDate) passDate = false;
+
+                        if (passDate) {
+                            flatData.push(item);
+                        }
+                    });
+                }
+            });
+
+            flatData.sort((a, b) => {
+                let valA = a[sortConfig.key];
+                let valB = b[sortConfig.key];
+
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (!valA) return 1;
+                if (!valB) return -1;
+
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            return flatData;
         }
 
         function renderUI() {
             const container = document.getElementById('stockContainer');
-            const areas = getFilteredAreas();
+            const dataToRender = getFilteredAndSortedData();
 
-            if (areas.length === 0) {
-                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Belum ada data Sparepart tersimpan.</p></div>`;
+            if (dataToRender.length === 0) {
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Data tidak ditemukan untuk filter ini.</p></div>`;
                 return;
             }
 
             container.innerHTML = "";
 
             if (currentView === 'grid') {
-                renderGridView(container, areas);
+                renderGridView(container, dataToRender);
             } else {
-                renderTableView(container, areas);
+                renderTableView(container, dataToRender);
             }
         }
 
-        function renderGridView(container, areas) {
-            areas.forEach(area => {
+        function renderGridView(container, flatData) {
+            const grouped = {};
+            flatData.forEach(item => {
+                if(!grouped[item.area]) grouped[item.area] = [];
+                grouped[item.area].push(item);
+            });
+
+            Object.keys(grouped).forEach(area => {
                 const section = document.createElement('div');
                 section.className = "bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8";
                 
@@ -318,21 +430,23 @@
                     <div class="bg-slate-50 border-b border-slate-100 px-8 py-5 flex justify-between items-center">
                         <h3 class="text-xl font-extrabold text-slate-900 tracking-tight underline decoration-indigo-500 decoration-4 underline-offset-8">${area.toUpperCase()}</h3>
                         <div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            ${inventoryData[area].length} Item
+                            ${grouped[area].length} Item
                         </div>
                     </div>
                     <div class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 `;
 
-                inventoryData[area].forEach(item => {
+                grouped[area].forEach(item => {
+                    const isNew = item.id === lastScannedId ? 'ring-2 ring-indigo-500 bg-indigo-50/30' : '';
                     html += `
-                        <div class="barcode-card group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 transition-all">
+                        <div class="barcode-card group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 transition-all ${isNew}">
                             <div class="barcode-container mb-4">
                                 <svg id="bc-${item.id}"></svg>
                             </div>
                             <div class="text-center pt-3 border-t border-slate-50">
                                 <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${item.barcode}</span>
                                 <div class="text-2xl font-black text-slate-800">QTY: ${item.qty}</div>
+                                <div class="text-[9px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
@@ -342,7 +456,7 @@
                 section.innerHTML = html;
                 container.appendChild(section);
 
-                inventoryData[area].forEach(item => {
+                grouped[area].forEach(item => {
                     JsBarcode(`#bc-${item.id}`, item.barcode, {
                         format: "CODE128", width: 1.8, height: 45, displayValue: false, margin: 0
                     });
@@ -350,7 +464,14 @@
             });
         }
 
-        function renderTableView(container, areas) {
+        function getSortIcon(key) {
+            if (sortConfig.key !== key) return `<svg class="w-3 h-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+            return sortConfig.direction === 'asc' 
+                ? `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.82a.75.75 0 011.06 0l5 5a.75.75 0 01-1.06 1.06L12.75 6.16V20a.75.75 0 01-1.5 0V6.16L7.53 9.88a.75.75 0 01-1.06-1.06l5-5z"/></svg>`
+                : `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+        }
+
+        function renderTableView(container, flatData) {
             const wrapper = document.createElement('div');
             wrapper.className = "bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden";
             
@@ -359,93 +480,97 @@
                     <table class="excel-table min-w-full text-left">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100">
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-indigo-600">LOKASI SPAREPART</th>
+                                <th onclick="toggleSort('area')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                    <div class="flex items-center gap-2">LOKASI SPAREPART ${getSortIcon('area')}</div>
+                                </th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Barcode (Visual)</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Kode Barcode</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Jumlah (QTY)</th>
+                                <th onclick="toggleSort('barcode')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                    <div class="flex items-center gap-2">Kode Barcode ${getSortIcon('barcode')}</div>
+                                </th>
+                                <th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                    <div class="flex items-center gap-2">Jumlah (QTY) ${getSortIcon('qty')}</div>
+                                </th>
+                                <th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                    <div class="flex items-center gap-2">Waktu Input ${getSortIcon('created_at')}</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
             `;
 
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    html += `
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-semibold text-slate-700">${area.toUpperCase()}</td>
-                            <td class="px-6 py-4">
-                                <div class="w-32">
-                                    <svg id="bt-${item.id}"></svg>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td>
-                            <td class="px-6 py-4">
-                                <span class="text-lg font-bold text-slate-900">${item.qty}</span>
-                            </td>
-                        </tr>
-                    `;
-                });
+            flatData.forEach(item => {
+                const isNew = item.id === lastScannedId ? 'new-entry' : '';
+                const dateObj = new Date(item.created_at);
+                const displayDate = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                html += `
+                    <tr class="hover:bg-slate-50/50 transition-colors ${isNew}">
+                        <td class="px-6 py-4 text-sm font-semibold text-slate-700">${item.area.toUpperCase()}</td>
+                        <td class="px-6 py-4">
+                            <div class="w-32">
+                                <svg id="bt-${item.id}"></svg>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td>
+                        <td class="px-6 py-4">
+                            <span class="text-lg font-bold text-slate-900">${item.qty}</span>
+                        </td>
+                        <td class="px-6 py-4 text-[11px] text-slate-400 font-medium">${displayDate}</td>
+                    </tr>
+                `;
             });
 
             html += `</tbody></table></div>`;
             wrapper.innerHTML = html;
             container.appendChild(wrapper);
 
-            // Generate Barcodes for Table View
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    JsBarcode(`#bt-${item.id}`, item.barcode, {
-                        format: "CODE128", width: 1.2, height: 30, displayValue: false, margin: 0
-                    });
+            flatData.forEach(item => {
+                JsBarcode(`#bt-${item.id}`, item.barcode, {
+                    format: "CODE128", width: 1.2, height: 30, displayValue: false, margin: 0
                 });
             });
         }
 
         function exportExcel() {
-            const areas = getFilteredAreas();
-            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
+            const dataToExport = getFilteredAndSortedData();
+            if (dataToExport.length === 0) return;
             
-            const flatData = [];
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    flatData.push({ 
-                        "Lokasi Sparepart": area.toUpperCase(), 
-                        "Barcode": item.barcode, 
-                        "Jumlah (Qty)": item.qty, 
-                        "Waktu Update": new Date(item.created_at).toLocaleString() 
-                    });
-                });
-            });
+            const flatData = dataToExport.map(item => ({
+                "Lokasi Sparepart": item.area.toUpperCase(), 
+                "Barcode": item.barcode, 
+                "Jumlah (Qty)": item.qty, 
+                "Waktu Input": new Date(item.created_at).toLocaleString() 
+            }));
+
             const ws = XLSX.utils.json_to_sheet(flatData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Sparepart");
-            XLSX.writeFile(wb, `Sparepart_Stock_${new Date().getTime()}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, `Stock_Sparepart_Filter.xlsx`);
         }
 
         function exportWord() {
-            const areas = getFilteredAreas();
-            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
+            const dataToExport = getFilteredAndSortedData();
+            if (dataToExport.length === 0) return;
             
             let docHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head><meta charset='utf-8'><title>Laporan Sparepart</title><style>
-            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid black; padding: 10px; text-align: left; }
-            h2 { border-bottom: 2px solid #4f46e5; padding-bottom: 5px; color: #4f46e5; margin-top: 20px; }
-            </style></head><body><h1>LAPORAN STOCK OPNAME SPAREPART</h1><p>Filter: ${document.getElementById('viewFilter').options[document.getElementById('viewFilter').selectedIndex].text}</p>`;
+            <head><meta charset='utf-8'><title>Laporan</title><style>
+            table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid black; padding: 8px; text-align: left; font-family: sans-serif; font-size: 12px; }
+            h1 { color: #4f46e5; text-align: center; font-size: 18px; }
+            .info { margin-bottom: 10px; font-size: 10px; color: #666; }
+            </style></head><body><h1>LAPORAN STOCK OPNAME SPAREPART</h1>
+            <div class="info">Dicetak pada: ${new Date().toLocaleString()}</div>`;
             
-            let body = "";
-            areas.forEach(area => {
-                body += `<h2>${area.toUpperCase()}</h2><table><thead><tr><th>Barcode</th><th>Jumlah</th></tr></thead><tbody>`;
-                inventoryData[area].forEach(item => {
-                    body += `<tr><td>${item.barcode}</td><td>${item.qty}</td></tr>`;
-                });
-                body += `</tbody></table>`;
+            let body = "<table><thead><tr><th>Lokasi</th><th>Barcode</th><th>Jumlah</th><th>Waktu Input</th></tr></thead><tbody>";
+            dataToExport.forEach(item => {
+                body += `<tr><td>${item.area.toUpperCase()}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString()}</td></tr>`;
             });
+            body += `</tbody></table></body></html>`;
 
-            const fullContent = docHeader + body + "</body></html>";
+            const fullContent = docHeader + body;
             const blob = new Blob(['\ufeff', fullContent], { type: 'application/msword' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = "Laporan_Sparepart.doc";
+            link.download = "Laporan_Sparepart_Filtered.doc";
             link.click();
         }
     </script>
