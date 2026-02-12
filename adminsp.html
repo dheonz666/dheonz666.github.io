@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link href="assets/img/scanner.png" rel="icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spartpart Dashboard - Stock Opname</title>
+    <title>Sparepart Dashboard - Stock Opname</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -128,7 +128,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900">Dashboard Manajemen</h1>
-                    <p class="text-slate-500">Rekapitulasi data stok Sparepart.</p>
+                    <p class="text-slate-500">Pantau hasil stock opname secara real-time.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <button onclick="exportWord()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
@@ -142,12 +142,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Excel
-                    </button>
-                    <button onclick="confirmReset()" class="inline-flex items-center px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-bold rounded-xl transition-all border border-rose-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Reset Data
                     </button>
                 </div>
             </div>
@@ -220,7 +214,7 @@
                             <tr>
                                 <th class="px-6 py-4 sort-header" onclick="toggleSort('area')">
                                     <div class="flex items-center gap-1">
-                                        Area / RAK
+                                        Area / Lokasi
                                         <span id="sort-icon-area" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
                                     </div>
                                 </th>
@@ -293,6 +287,7 @@
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allData = [];
+        let displayedData = []; // Untuk menyimpan data yang sedang difilter/disort
         
         // State Pengurutan
         let currentSortColumn = 'created_at';
@@ -404,7 +399,7 @@
                 allData = data || [];
                 calculateStats(allData);
                 populateAreaFilter(allData);
-                filterData(); // Ini akan memproses urutan dan render table
+                filterData(); 
             } catch (err) {
                 console.error(err);
                 showToast('Gagal memuat data', 'error');
@@ -524,7 +519,6 @@
                 let valA = a[currentSortColumn];
                 let valB = b[currentSortColumn];
 
-                // Penyesuaian tipe data untuk sorting
                 if (currentSortColumn === 'qty') {
                     valA = parseInt(valA) || 0;
                     valB = parseInt(valB) || 0;
@@ -541,6 +535,7 @@
                 return 0;
             });
 
+            displayedData = filtered; // Simpan untuk keperluan eksport
             renderTable(filtered);
         }
 
@@ -598,27 +593,6 @@
             }
         }
 
-        window.confirmReset = async function() {
-            const pass = prompt('Konfirmasi: Ketik "HAPUS SEMUA" untuk membersihkan database.');
-            if (pass !== "HAPUS SEMUA") return;
-
-            toggleLoading(true);
-            try {
-                const { error } = await supabaseClient
-                    .from('sparepart')
-                    .delete()
-                    .neq('barcode', 'NONE_EXISTENT_FILTER'); 
-
-                if (error) throw error;
-                showToast('Database dibersihkan');
-                await loadData();
-            } catch (err) {
-                showToast('Gagal reset data', 'error');
-            } finally {
-                toggleLoading(false);
-            }
-        }
-
         // --- UI HELPERS ---
 
         function showToast(message, type = 'success') {
@@ -645,9 +619,11 @@
         // --- EXPORT LOGIC ---
 
         window.exportExcel = function() {
-            if (allData.length === 0) return showToast('Tidak ada data', 'error');
+            const dataToExport = displayedData.length > 0 ? displayedData : allData;
             
-            const exportData = allData.map(item => ({
+            if (dataToExport.length === 0) return showToast('Tidak ada data untuk dieksport', 'error');
+            
+            const exportData = dataToExport.map(item => ({
                 "Area": item.area,
                 "Barcode": item.barcode,
                 "QTY": item.qty,
@@ -661,11 +637,13 @@
             
             const fileName = `Stock_Opname_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast('Excel berhasil diunduh');
+            showToast('Excel berhasil diunduh (sesuai filter/sort)');
         }
 
         window.exportWord = function() {
-            if (allData.length === 0) return showToast('Tidak ada data', 'error');
+            const dataToExport = displayedData.length > 0 ? displayedData : allData;
+
+            if (dataToExport.length === 0) return showToast('Tidak ada data untuk dieksport', 'error');
             
             const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -695,7 +673,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${allData.map((item, index) => `
+                            ${dataToExport.map((item, index) => `
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${item.area}</td>
@@ -719,11 +697,8 @@
             link.href = url;
             link.download = `Laporan_Stock_${new Date().toISOString().split('T')[0]}.doc`;
             link.click();
-            showToast('Word berhasil diunduh');
+            showToast('Word berhasil diunduh (sesuai filter/sort)');
         }
     </script>
 </body>
-
 </html>
-
-
