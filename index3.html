@@ -224,7 +224,7 @@
                 const { error } = await supabaseClient.from('sparepart').select('id').limit(1);
                 if (error) throw error;
                 
-                updateStatus('bg-green-500', 'Cloud Online');
+                updateStatus('bg-green-500', 'Database Online');
                 await loadData();
             } catch (err) {
                 updateStatus('bg-red-500', 'Offline');
@@ -576,3 +576,4 @@
     </script>
 </body>
 </html>
+
