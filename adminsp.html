@@ -44,6 +44,11 @@
         .sort-header:hover {
             background-color: #f1f5f9;
         }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen">
@@ -188,20 +193,41 @@
 
             <!-- Data Table Section -->
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
-                    <div class="relative flex-1 max-w-md">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </span>
-                        <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau lokasi..." 
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                <div class="p-6 border-b border-slate-100 flex flex-col xl:flex-row justify-between gap-4">
+                    <div class="flex flex-col md:flex-row gap-4 flex-1">
+                        <!-- Search Bar -->
+                        <div class="relative flex-1 max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </span>
+                            <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau lokasi..." 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                        </div>
+                        <!-- Date Range Filters -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
+                                <input type="date" id="startDate" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
+                                <input type="date" id="endDate" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+						<button onclick="clearDateFilters()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs font-bold text-slate-600 h-[38px]" title="Reset Tanggal">
+                            Reset
+                        </button>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px]">
-                            <option value="">Semua Area</option>
-                        </select>
-                        <button onclick="loadData()" class="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors" title="Refresh Data">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    
+                    <div class="flex gap-2 items-end">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
+                            <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px] h-[38px]">
+                                <option value="">Semua Area</option>
+                            </select>
+                        </div>
+                        <button onclick="loadData()" class="p-2.5 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors h-[38px]" title="Refresh Data">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
@@ -232,7 +258,7 @@
                                 </th>
                                 <th class="px-6 py-4 sort-header" onclick="toggleSort('created_at')">
                                     <div class="flex items-center gap-1">
-                                        Tanggal Input
+                                        Waktu Input
                                         <span id="sort-icon-created_at" class="text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg></span>
                                     </div>
                                 </th>
@@ -287,7 +313,7 @@
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allData = [];
-        let displayedData = []; // Untuk menyimpan data yang sedang difilter/disort
+        let displayedData = []; 
         
         // State Pengurutan
         let currentSortColumn = 'created_at';
@@ -462,7 +488,7 @@
                         <div class="opacity-60 text-[10px] mt-0.5">${new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex justify-end gap-1">
                             <button onclick="openEditModal('${item.id}', '${item.barcode}', ${item.qty})" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="Edit">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                             </button>
@@ -475,7 +501,7 @@
             `).join('');
         }
 
-        // --- SORTING LOGIC ---
+        // --- SORTING & FILTERING LOGIC ---
 
         function toggleSort(column) {
             if (currentSortColumn === column) {
@@ -507,11 +533,28 @@
         function filterData() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const area = document.getElementById('areaFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
 
             let filtered = allData.filter(item => {
                 const matchSearch = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
                 const matchArea = area === "" || item.area === area;
-                return matchSearch && matchArea;
+                
+                // Rentang Tanggal
+                let matchDate = true;
+                if (startDate || endDate) {
+                    const itemDate = new Date(item.created_at).setHours(0,0,0,0);
+                    if (startDate) {
+                        const start = new Date(startDate).setHours(0,0,0,0);
+                        if (itemDate < start) matchDate = false;
+                    }
+                    if (endDate) {
+                        const end = new Date(endDate).setHours(0,0,0,0);
+                        if (itemDate > end) matchDate = false;
+                    }
+                }
+
+                return matchSearch && matchArea && matchDate;
             });
 
             // Apply Sorting
@@ -535,8 +578,17 @@
                 return 0;
             });
 
-            displayedData = filtered; // Simpan untuk keperluan eksport
+            displayedData = filtered;
             renderTable(filtered);
+            
+            // Update stats based on filtered data (optional but recommended)
+            calculateStats(filtered);
+        }
+
+        function clearDateFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            filterData();
         }
 
         // --- CRUD ACTIONS ---
@@ -619,7 +671,7 @@
         // --- EXPORT LOGIC ---
 
         window.exportExcel = function() {
-            const dataToExport = displayedData.length > 0 ? displayedData : allData;
+            const dataToExport = displayedData;
             
             if (dataToExport.length === 0) return showToast('Tidak ada data untuk dieksport', 'error');
             
@@ -628,7 +680,7 @@
                 "Barcode": item.barcode,
                 "QTY": item.qty,
                 "Satuan": "PCS",
-                "Tanggal Input": new Date(item.created_at).toLocaleString('id-ID')
+                "Waktu Input": new Date(item.created_at).toLocaleString('id-ID')
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
@@ -637,11 +689,11 @@
             
             const fileName = `Stock_Opname_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast('Excel berhasil diunduh (sesuai filter/sort)');
+            showToast('Excel berhasil diunduh');
         }
 
         window.exportWord = function() {
-            const dataToExport = displayedData.length > 0 ? displayedData : allData;
+            const dataToExport = displayedData;
 
             if (dataToExport.length === 0) return showToast('Tidak ada data untuk dieksport', 'error');
             
@@ -669,7 +721,7 @@
                                 <th>Area</th>
                                 <th>Barcode</th>
                                 <th>QTY</th>
-                                <th>Waktu</th>
+                                <th>Waktu Input</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -697,7 +749,7 @@
             link.href = url;
             link.download = `Laporan_Stock_${new Date().toISOString().split('T')[0]}.doc`;
             link.click();
-            showToast('Word berhasil diunduh (sesuai filter/sort)');
+            showToast('Word berhasil diunduh');
         }
     </script>
 </body>
