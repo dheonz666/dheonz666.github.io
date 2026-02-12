@@ -93,21 +93,25 @@
         <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 mb-10 border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lokasi Sparepart</label>
-                    <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
-                        <script>
-                            const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-                            spLetters.forEach(letter => {
-                                document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
-                                for(let i=1; i<=35; i++) {
-                                    // Merubah 1-9 menjadi 01-09
-                                    const areaNum = i < 10 ? '0' + i : i;
-                                    document.write(`<option value="Sparepart Area ${letter}${areaNum}">Area ${letter}${areaNum}</option>`);
-                                }
-                                document.write(`</optgroup>`);
-                            });
-                        </script>
-                    </select>
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Area Sparepart</label>
+                    <div class="relative">
+                        <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
+                            <script>
+                                const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                                spLetters.forEach(letter => {
+                                    document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
+                                    for(let i=1; i<=40; i++) {
+                                        const areaNum = i < 10 ? '0' + i : i;
+                                        document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
+                                    }
+                                    document.write(`</optgroup>`);
+                                });
+                            </script>
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -132,60 +136,89 @@
 
         <!-- Toolbar & Options -->
         <div class="flex flex-col space-y-6 mb-10">
-            <div class="flex flex-col lg:flex-row justify-between items-end gap-6">
-                <div class="flex flex-wrap items-end gap-4 w-full">
-                    <div class="w-full md:w-auto">
-                        <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
-                        <p class="text-slate-500 text-sm">Monitoring stok real-time (Berdasarkan Waktu Input)</p>
+            <!-- Title Section -->
+            <div class="w-full">
+                <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
+                <p class="text-slate-500 text-sm">Monitoring stok real-time (Berdasarkan Waktu Input)</p>
+            </div>
+
+            <!-- Consolidated Toolbar (View, Search, Filters, Buttons) -->
+            <div class="flex flex-col xl:flex-row justify-between items-center gap-6 bg-slate-100/50 p-4 rounded-2xl border border-slate-200/50">
+                
+                <!-- Left & Center: Tampilan + Filters -->
+                <div class="flex flex-wrap items-end gap-4 w-full xl:w-auto">
+                    
+                    <!-- View Selector -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Tampilan</label>
+                        <div class="relative min-w-[125px]">
+                            <select id="modeSelector" onchange="switchView(this.value)" class="w-full bg-white border border-slate-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer h-[38px] shadow-sm">
+                                <option value="grid">Mode Kartu</option>
+                                <option value="table" selected>Mode Tabel</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+                                <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="space-y-1 w-full md:w-44 lg:w-56">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Cari Barcode / Area</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" oninput="renderUI()" placeholder="Cari..." 
+                                class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                     </div>
 
                     <!-- Filter Area -->
-                    <div class="space-y-1 w-full md:w-60">
+                    <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
-                        <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
-                            <option value="all">Semua Lokasi Sparepart</option>
-                        </select>
+                        <div class="relative">
+                            <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-8 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer h-[38px]">
+                                <option value="all">Semua Area</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+                                <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Filter Tanggal Mulai -->
-                    <div class="space-y-1 w-full md:w-44">
+                    <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
-                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
+                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
                     <!-- Filter Tanggal Selesai -->
-                    <div class="space-y-1 w-full md:w-44">
+                    <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
-                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
+                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
                     <!-- Tombol Reset Filter -->
-                    <button onclick="resetFilters()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2.5 rounded-xl transition-colors mb-0.5" title="Reset Filter Tanggal">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-100/50 p-4 rounded-2xl border border-slate-200/50">
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <label class="text-xs font-bold text-slate-400 uppercase">Tampilan:</label>
-                    <select id="modeSelector" onchange="switchView(this.value)" class="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer">
-                        <option value="grid">Mode Kartu</option>
-                        <option value="table" selected>Mode Tabel</option>
-                    </select>
+                    <div class="pb-0.5">
+                        <button onclick="resetFilters()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 p-2 rounded-xl transition-colors shadow-sm" title="Reset Filter">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
-                    <button onclick="loadData()" class="bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors border border-slate-200 flex items-center gap-2">
+                <!-- Right: Action Buttons -->
+                <div class="flex flex-wrap gap-2 w-full xl:w-auto justify-end items-end">
+                    <button onclick="loadData()" class="bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors border border-slate-200 flex items-center gap-2 h-[38px] shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Refresh
                     </button>
-                    <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors">Excel</button>
-                    <button onclick="exportWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors">Word</button>
+                    <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors h-[38px]">Excel</button>
+                    <button onclick="exportWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors h-[38px]">Word</button>
                 </div>
             </div>
         </div>
@@ -224,7 +257,7 @@
                 const { error } = await supabaseClient.from('sparepart').select('id').limit(1);
                 if (error) throw error;
                 
-                updateStatus('bg-green-500', 'Database Online');
+                updateStatus('bg-green-500', 'database Online');
                 await loadData();
             } catch (err) {
                 updateStatus('bg-red-500', 'Offline');
@@ -263,6 +296,7 @@
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('viewFilter').value = 'all';
+            document.getElementById('searchInput').value = '';
             renderUI();
         }
 
@@ -295,7 +329,7 @@
             const currentValue = filterSelect.value;
             const areas = Object.keys(inventoryData).sort();
             
-            let html = '<option value="all">Semua Lokasi Sparepart</option>';
+            let html = '<option value="all">Semua Area</option>';
             areas.forEach(area => {
                 html += `<option value="${area}">${area.toUpperCase()}</option>`;
             });
@@ -317,7 +351,6 @@
             toggleLoading(true);
 
             try {
-                // Query database sekarang menggunakan format area baru (misal: Sparepart Area A01)
                 const { data: existingData } = await supabaseClient
                     .from('sparepart')
                     .select('id, qty, created_at')
@@ -360,6 +393,7 @@
             const filterArea = document.getElementById('viewFilter').value;
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
             
             let flatData = [];
 
@@ -368,11 +402,18 @@
                     inventoryData[area].forEach(item => {
                         let itemDate = new Date(item.created_at).toISOString().split('T')[0];
                         let passDate = true;
+                        let passSearch = true;
                         
                         if (startDate && itemDate < startDate) passDate = false;
                         if (endDate && itemDate > endDate) passDate = false;
 
-                        if (passDate) {
+                        if (searchKeyword) {
+                            const barcodeMatch = item.barcode.toLowerCase().includes(searchKeyword);
+                            const areaMatch = item.area.toLowerCase().includes(searchKeyword);
+                            if (!barcodeMatch && !areaMatch) passSearch = false;
+                        }
+
+                        if (passDate && passSearch) {
                             flatData.push(item);
                         }
                     });
@@ -382,13 +423,10 @@
             flatData.sort((a, b) => {
                 let valA = a[sortConfig.key];
                 let valB = b[sortConfig.key];
-
                 if (typeof valA === 'string') valA = valA.toLowerCase();
                 if (typeof valB === 'string') valB = valB.toLowerCase();
-
-                if (!valA) return 1;
-                if (!valB) return -1;
-
+                if (valA === undefined || valA === null) return 1;
+                if (valB === undefined || valB === null) return -1;
                 if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
@@ -402,7 +440,7 @@
             const dataToRender = getFilteredAndSortedData();
 
             if (dataToRender.length === 0) {
-                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Data tidak ditemukan untuk filter ini.</p></div>`;
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Data tidak ditemukan.</p></div>`;
                 return;
             }
 
@@ -477,20 +515,20 @@
             
             let html = `
                 <div class="overflow-x-auto">
-                    <table class="excel-table min-w-full text-left">
+                    <table class="excel-table min-w-full text-left table-auto">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100">
-                                <th onclick="toggleSort('area')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
-                                    <div class="flex items-center gap-2">LOKASI SPAREPART ${getSortIcon('area')}</div>
+                                <th onclick="toggleSort('area')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-24">
+                                    <div class="flex items-center gap-2">Area ${getSortIcon('area')}</div>
                                 </th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Barcode (Visual)</th>
-                                <th onclick="toggleSort('barcode')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-40 text-center">Barcode (Visual)</th>
+                                <th onclick="toggleSort('barcode')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap">
                                     <div class="flex items-center gap-2">Kode Barcode ${getSortIcon('barcode')}</div>
                                 </th>
-                                <th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                <th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-32">
                                     <div class="flex items-center gap-2">Jumlah (QTY) ${getSortIcon('qty')}</div>
                                 </th>
-                                <th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                                <th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-44">
                                     <div class="flex items-center gap-2">Waktu Input ${getSortIcon('created_at')}</div>
                                 </th>
                             </tr>
@@ -506,9 +544,9 @@
                 html += `
                     <tr class="hover:bg-slate-50/50 transition-colors ${isNew}">
                         <td class="px-6 py-4 text-sm font-semibold text-slate-700">${item.area.toUpperCase()}</td>
-                        <td class="px-6 py-4">
-                            <div class="w-32">
-                                <svg id="bt-${item.id}"></svg>
+                        <td class="px-6 py-4 text-center">
+                            <div class="w-full flex justify-center">
+                                <svg id="bt-${item.id}" class="max-w-[140px] h-auto"></svg>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td>
@@ -526,7 +564,7 @@
 
             flatData.forEach(item => {
                 JsBarcode(`#bt-${item.id}`, item.barcode, {
-                    format: "CODE128", width: 1.2, height: 30, displayValue: false, margin: 0
+                    format: "CODE128", width: 1.5, height: 35, displayValue: false, margin: 0
                 });
             });
         }
@@ -536,7 +574,7 @@
             if (dataToExport.length === 0) return;
             
             const flatData = dataToExport.map(item => ({
-                "Lokasi Sparepart": item.area.toUpperCase(), 
+                "Area": item.area.toUpperCase(), 
                 "Barcode": item.barcode, 
                 "Jumlah (Qty)": item.qty, 
                 "Waktu Input": new Date(item.created_at).toLocaleString() 
@@ -545,7 +583,7 @@
             const ws = XLSX.utils.json_to_sheet(flatData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-            XLSX.writeFile(wb, `Stock_Sparepart_Filter.xlsx`);
+            XLSX.writeFile(wb, `Stock_Sparepart_Export.xlsx`);
         }
 
         function exportWord() {
@@ -558,9 +596,9 @@
             h1 { color: #4f46e5; text-align: center; font-size: 18px; }
             .info { margin-bottom: 10px; font-size: 10px; color: #666; }
             </style></head><body><h1>LAPORAN STOCK OPNAME SPAREPART</h1>
-            <div class="info">Dicetak pada: ${new Date().toLocaleString()}</div>`;
+            <div class=\"info\">Dicetak pada: ${new Date().toLocaleString()}</div>`;
             
-            let body = "<table><thead><tr><th>Lokasi</th><th>Barcode</th><th>Jumlah</th><th>Waktu Input</th></tr></thead><tbody>";
+            let body = "<table><thead><tr><th>Area</th><th>Barcode</th><th>Jumlah</th><th>Waktu Input</th></tr></thead><tbody>";
             dataToExport.forEach(item => {
                 body += `<tr><td>${item.area.toUpperCase()}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString()}</td></tr>`;
             });
@@ -570,10 +608,9 @@
             const blob = new Blob(['\ufeff', fullContent], { type: 'application/msword' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = "Laporan_Sparepart_Filtered.doc";
+            link.download = "Laporan_Sparepart_Export.doc";
             link.click();
         }
     </script>
 </body>
 </html>
-
