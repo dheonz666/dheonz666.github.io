@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Keuangan Cloud - Multi Tag & Theme</title>
+    <!-- Dependencies: Tailwind, Supabase, SheetJS, FileSaver, Lucide Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Konfigurasi Tailwind untuk Dark Mode menggunakan class
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body { transition: background-color 0.3s, color 0.3s; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+        
+        /* Gaya Grid ala Excel */
+        .excel-table { border-collapse: collapse; width: 100%; }
+        .excel-table th, .excel-table td { border: 1px solid #e2e8f0; }
+        .dark .excel-table th, .dark .excel-table td { border: 1px solid #1e293b; }
+
+        /* Gaya Tag Input */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px;
+            border-radius: 12px;
+            min-height: 50px;
+            transition: all 0.3s;
+        }
+        .tag-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tag-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            flex-grow: 1;
+            padding: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen">
+
+    <script>
+        // --- KONFIGURASI SUPABASE ---
+        const SB_URL = 'https://hezegmtoqiecdpisqucp.supabase.co'; 
+        const SB_KEY = 'sb_publishable_FP9-br7RV3tYaVIFJhAP_A_tr8SUNGh'; 
+        
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        
+        let transactions = [];
+        let editingId = null;
+        let currentCategories = [];
+        let currentDescriptions = [];
+
+        // --- TEMA LOGIC ---
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcons();
+        }
+        
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (document.getElementById('theme-icon-sun')) document.getElementById('theme-icon-sun').classList.toggle('hidden', isDark);
+            if (document.getElementById('theme-icon-moon')) document.getElementById('theme-icon-moon').classList.toggle('hidden', !isDark);
+        }
+
+        initTheme();
+    </script>
+
+    <div class="max-w-7xl mx-auto px-4 py-8 md:px-8">
+        <!-- Kepala Halaman -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-3">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Terkoneksi ke Cloud
+                </div>
+                <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Financial Tracker</h1>
+                <p class="text-slate-500 dark:text-slate-400 mt-1">Sistem manajemen keuangan Simple</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="toggleTheme()" class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm">
+                    <i id="theme-icon-sun" data-lucide="sun" class="w-5 h-5"></i>
+                    <i id="theme-icon-moon" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                </button>
+                <button onclick="exportToExcel()" class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-5 py-2.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm font-semibold text-sm text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
+                </button>
+                <button onclick="exportToWord()" class="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition shadow-lg shadow-slate-200 dark:shadow-none font-semibold text-sm">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Export Word
+                </button>
+            </div>
+        </header>
+
+        <!-- Ringkasan Saldo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
+                <span class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Saldo Bersih</span>
+                <h3 id="display-balance" class="text-3xl font-black text-slate-900 dark:text-white">Rp 0</h3>
+            </div>
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-emerald-600">Total Masuk</span>
+                <h3 id="display-income" class="text-3xl font-black text-emerald-600">Rp 0</h3>
+            </div>
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-rose-600">Total Keluar</span>
+                <h3 id="display-expense" class="text-3xl font-black text-rose-600">Rp 0</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Borang Input -->
+            <div class="lg:col-span-4">
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 sticky top-8">
+                    <h2 id="form-title" class="text-xl font-bold mb-8 flex items-center gap-3 dark:text-white">
+                        <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                        Transaksi Baru
+                    </h2>
+                    <form id="transaction-form" class="space-y-6">
+                        
+                        <!-- Multi-select Kategori -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">Kategori</label>
+                            <div class="tag-container bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-blue-500/20" id="category-tags-container">
+                                <div id="category-list" class="flex flex-wrap gap-1"></div>
+                                <input type="text" id="category-input" list="cat-suggestions" class="tag-input dark:text-white" placeholder="Ketik & Enter...">
+                            </div>
+                        </div>
+
+                        <!-- Multi-select Keterangan -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">Keterangan / Label</label>
+                            <div class="tag-container bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-blue-500/20" id="desc-tags-container">
+                                <div id="desc-list" class="flex flex-wrap gap-1"></div>
+                                <input type="text" id="desc-input" list="desc-suggestions" class="tag-input dark:text-white" placeholder="Ketik & Enter...">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">Jumlah (Nominal)</label>
+                            <input type="number" id="amount" required class="w-full bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-2xl px-5 py-4 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 outline-none transition dark:text-white" placeholder="0">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">Jenis Transaksi</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="tx-type" value="income" class="hidden peer" checked>
+                                    <div class="text-center py-3 rounded-xl border-2 border-slate-50 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-400 font-bold peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 peer-checked:text-emerald-700 dark:peer-checked:text-emerald-400 transition">Masuk</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="tx-type" value="expense" class="hidden peer">
+                                    <div class="text-center py-3 rounded-xl border-2 border-slate-50 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-400 font-bold peer-checked:border-rose-500 peer-checked:bg-rose-50 dark:peer-checked:bg-rose-900/20 peer-checked:text-rose-700 dark:peer-checked:text-rose-400 transition">Keluar</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">Tanggal</label>
+                            <input type="date" id="date" required class="w-full bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-2xl px-5 py-4 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 outline-none transition dark:text-white">
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <button type="submit" id="btn-submit" class="w-full bg-blue-600 text-white py-5 rounded-[1.25rem] font-bold text-lg hover:bg-blue-700 transition shadow-xl shadow-blue-100 dark:shadow-none flex items-center justify-center gap-2">
+                                <span id="submit-text">Simpan Transaksi</span>
+                                <i data-lucide="save" class="w-5 h-5"></i>
+                            </button>
+                            <button type="button" id="btn-cancel" onclick="cancelEdit()" class="hidden w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 py-3 rounded-[1.25rem] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Batal Edit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Jadual Transaksi -->
+            <div class="lg:col-span-8">
+                <div class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+                    <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center">
+                        <h2 class="text-xl font-bold dark:text-white">Log Aktivitas Keuangan</h2>
+                        <div id="loader" class="hidden"><div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div></div>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="excel-table">
+                            <thead>
+                                <tr class="text-left text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">
+                                    <th class="px-4 py-4 w-32">Tanggal</th>
+                                    <th class="px-4 py-4">Kategori</th>
+                                    <th class="px-4 py-4">Keterangan</th>
+                                    <th class="px-4 py-4 text-right">Nominal</th>
+                                    <th class="px-4 py-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-list" class="dark:text-slate-300"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="no-data" class="hidden p-20 text-center text-slate-300 dark:text-slate-700">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
+                        <p>Belum ada rekod tersimpan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <datalist id="cat-suggestions">
+        <option value="Gaji"><option value="Makanan"><option value="Transportasi"><option value="Hiburan"><option value="Investasi">
+    </datalist>
+    <datalist id="desc-suggestions">
+        <option value="Bulanan"><option value="Bonus"><option value="Mendesak"><option value="Harian">
+    </datalist>
+
+    <div id="toast-notif" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none z-[100]">
+        <span id="toast-text"></span>
+    </div>
+
+    <script>
+        // Inisialisasi awal UI
+        window.onload = () => {
+            lucide.createIcons();
+            updateThemeIcons();
+        };
+
+        // --- Logika Multi-select Tag ---
+        function handleTagInput(inputId, listId, stateArray, renderFn) {
+            const input = document.getElementById(inputId);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addTagFromInput(inputId, listId, stateArray, renderFn);
+                }
+            });
+        }
+
+        function addTagFromInput(inputId, listId, stateArray, renderFn) {
+            const input = document.getElementById(inputId);
+            const val = input.value.trim().replace(',', '');
+            if (val && !stateArray.includes(val)) {
+                stateArray.push(val);
+                renderFn();
+                input.value = '';
+            }
+        }
+
+        function renderTags(listId, stateArray) {
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            stateArray.forEach((tag, index) => {
+                const div = document.createElement('div');
+                div.className = 'tag-item bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
+                div.innerHTML = `${tag} <span class="ml-1 cursor-pointer hover:text-rose-500 font-bold" onclick="removeTag('${listId}', ${index})">&times;</span>`;
+                list.appendChild(div);
+            });
+        }
+
+        window.removeTag = (listId, index) => {
+            if (listId === 'category-list') {
+                currentCategories.splice(index, 1);
+                renderTags('category-list', currentCategories);
+            } else {
+                currentDescriptions.splice(index, 1);
+                renderTags('desc-list', currentDescriptions);
+            }
+        };
+
+        handleTagInput('category-input', 'category-list', currentCategories, () => renderTags('category-list', currentCategories));
+        handleTagInput('desc-input', 'desc-list', currentDescriptions, () => renderTags('desc-list', currentDescriptions));
+
+        // --- CRUD Dasar ---
+        async function fetchTransactions() {
+            setLoading(true);
+            const { data, error } = await supabaseClient.from('transactions').select('*').order('transaction_date', { ascending: false });
+            if (!error) { transactions = data; updateUI(); }
+            setLoading(false);
+        }
+
+        function updateUI() {
+            const listEl = document.getElementById('tx-list');
+            const noDataEl = document.getElementById('no-data');
+            listEl.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                noDataEl.classList.remove('hidden');
+            } else {
+                noDataEl.classList.add('hidden');
+                transactions.forEach(tx => {
+                    const isIncome = tx.type === 'income';
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors';
+                    
+                    const cats = tx.category ? tx.category.split(',').filter(c => c && c !== '-').map(c => `<span class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1 inline-block my-0.5">${c}</span>`).join('') : '-';
+                    const descs = tx.description ? tx.description.split(',').filter(d => d && d !== '-').map(d => `<span class="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1 inline-block my-0.5">${d}</span>`).join('') : '-';
+
+                    row.innerHTML = `
+                        <td class="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 font-bold">${tx.transaction_date}</td>
+                        <td class="px-4 py-4 text-sm">${cats || '-'}</td>
+                        <td class="px-4 py-4 text-sm font-medium text-slate-700 dark:text-slate-300">${descs || '-'}</td>
+                        <td class="px-4 py-4 text-right text-sm font-black ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${isIncome ? '+' : '-'} ${formatCurrency(tx.amount)}
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex justify-center gap-1">
+                                <button onclick="editRecord(${tx.id})" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="deleteRecord(${tx.id})" class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-500 hover:text-white transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    listEl.appendChild(row);
+                });
+                lucide.createIcons();
+            }
+
+            const inc = transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+            const exp = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+            document.getElementById('display-balance').innerText = formatCurrency(inc - exp);
+            document.getElementById('display-income').innerText = formatCurrency(inc);
+            document.getElementById('display-expense').innerText = formatCurrency(exp);
+        }
+
+        document.getElementById('transaction-form').onsubmit = async (e) => {
+            e.preventDefault();
+
+            // Peningkatan: Cek apakah ada teks sisa di input yang belum di-Enter
+            addTagFromInput('category-input', 'category-list', currentCategories, () => renderTags('category-list', currentCategories));
+            addTagFromInput('desc-input', 'desc-list', currentDescriptions, () => renderTags('desc-list', currentDescriptions));
+
+            // Validasi per kolom agar lebih spesifik
+            if (currentCategories.length === 0) {
+                return notify("Pilih minimal satu Kategori", "bg-amber-500 text-black");
+            }
+            if (currentDescriptions.length === 0) {
+                return notify("Isi minimal satu Keterangan", "bg-amber-500 text-black");
+            }
+
+            const payload = {
+                category: currentCategories.join(','),
+                description: currentDescriptions.join(','),
+                amount: document.getElementById('amount').value,
+                type: document.querySelector('input[name="tx-type"]:checked').value,
+                transaction_date: document.getElementById('date').value
+            };
+
+            setLoading(true);
+            const res = editingId ? await supabaseClient.from('transactions').update(payload).eq('id', editingId) : await supabaseClient.from('transactions').insert([payload]);
+
+            if (!res.error) {
+                notify("Berhasil disimpan!", "bg-emerald-600");
+                cancelEdit();
+                fetchTransactions();
+            } else {
+                notify("Gagal: " + res.error.message, "bg-rose-600 text-white");
+            }
+            setLoading(false);
+        };
+
+        window.editRecord = (id) => {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+            editingId = id;
+            
+            // Perbaikan: bersihkan tanda '-' atau string kosong saat edit
+            currentCategories = tx.category ? tx.category.split(',').filter(c => c && c !== '-') : [];
+            currentDescriptions = tx.description ? tx.description.split(',').filter(d => d && d !== '-') : [];
+            
+            renderTags('category-list', currentCategories);
+            renderTags('desc-list', currentDescriptions);
+            
+            document.getElementById('amount').value = tx.amount;
+            document.getElementById('date').value = tx.transaction_date;
+            document.querySelectorAll('input[name="tx-type"]').forEach(r => r.checked = r.value === tx.type);
+            
+            document.getElementById('form-title').innerHTML = `<span class="w-2 h-6 bg-amber-500 rounded-full"></span> Edit Rekod`;
+            document.getElementById('submit-text').innerText = "Update Rekod";
+            document.getElementById('btn-cancel').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function cancelEdit() {
+            editingId = null;
+            currentCategories = [];
+            currentDescriptions = [];
+            renderTags('category-list', []);
+            renderTags('desc-list', []);
+            document.getElementById('transaction-form').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('form-title').innerHTML = `<span class="w-2 h-6 bg-blue-600 rounded-full"></span> Transaksi Baru`;
+            document.getElementById('submit-text').innerText = "Simpan Transaksi";
+            document.getElementById('btn-cancel').classList.add('hidden');
+        }
+
+        async function deleteRecord(id) {
+            if (confirm("Hapus rekod ini secara kekal?")) {
+                await supabaseClient.from('transactions').delete().eq('id', id);
+                fetchTransactions();
+            }
+        }
+
+        function formatCurrency(v) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v); }
+        function notify(m, c) {
+            const t = document.getElementById('toast-notif');
+            document.getElementById('toast-text').innerText = m;
+            t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl shadow-2xl transition-all duration-500 z-[100] ${c} opacity-100 translate-y-0`;
+            setTimeout(() => { t.classList.add('opacity-0'); t.classList.add('translate-y-10'); }, 3000);
+        }
+        function setLoading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(transactions);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+            XLSX.writeFile(wb, "Laporan_Keuangan.xlsx");
+        }
+
+        function exportToWord() {
+            let h = `<h2>Laporan Keuangan</h2><table border="1"><tr><th>Tgl</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th></tr>`;
+            transactions.forEach(t => h += `<tr><td>${t.transaction_date}</td><td>${t.category}</td><td>${t.description}</td><td>${t.amount}</td></tr>`);
+            h += `</table>`;
+            saveAs(new Blob(['\ufeff', h], { type: 'application/msword' }), "Laporan.doc");
+        }
+
+        document.getElementById('date').valueAsDate = new Date();
+        fetchTransactions();
+    </script>
+</body>
+</html>
