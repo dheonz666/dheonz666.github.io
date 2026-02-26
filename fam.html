@@ -144,18 +144,18 @@
             </div>
         </header>
 
-        <!-- Summary Cards (Akan Terupdate Berdasarkan Filter) -->
+        <!-- Summary Cards (Akumulasi Total Tanpa Filter) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
-                <span class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Saldo Bersih</span>
+                <span class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Saldo Bersih (Total Akumulasi)</span>
                 <h3 id="display-balance" class="text-3xl font-black text-slate-900 dark:text-white transition-all">Rp 0</h3>
             </div>
             <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
-                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-emerald-600">Total Masuk</span>
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-emerald-600">Total Masuk (Semua Waktu)</span>
                 <h3 id="display-income" class="text-3xl font-black text-emerald-600 transition-all">Rp 0</h3>
             </div>
             <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 min-h-[140px] flex flex-col justify-center">
-                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-rose-600">Total Keluar</span>
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2 text-rose-600">Total Keluar (Semua Waktu)</span>
                 <h3 id="display-expense" class="text-3xl font-black text-rose-600 transition-all">Rp 0</h3>
             </div>
         </div>
@@ -296,7 +296,7 @@
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer);
                     toast.addEventListener('mouseleave', Swal.resumeTimer);
-                    toast.addEventListener('click', Swal.close); // Close on click anywhere
+                    toast.addEventListener('click', Swal.close); 
                 }
             });
         }
@@ -372,6 +372,7 @@
             const noDataEl = document.getElementById('no-data');
             listEl.innerHTML = '';
             
+            // 1. Data untuk Tabel (Terpengaruh Filter)
             const filteredData = getFilteredData();
 
             if (filteredData.length === 0) {
@@ -404,13 +405,14 @@
                 lucide.createIcons();
             }
 
-            // HITUNG RINGKASAN BERDASARKAN FILTER
-            const inc = filteredData.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-            const exp = filteredData.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+            // 2. Data untuk Kartu Ringkasan (AKUMULASI TOTAL - TIDAK TERPENGARUH FILTER)
+            // Menggunakan array 'transactions' (seluruh data), bukan 'filteredData'
+            const allIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+            const allExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
             
-            document.getElementById('display-balance').innerText = formatCurrency(inc - exp);
-            document.getElementById('display-income').innerText = formatCurrency(inc);
-            document.getElementById('display-expense').innerText = formatCurrency(exp);
+            document.getElementById('display-balance').innerText = formatCurrency(allIncome - allExpense);
+            document.getElementById('display-income').innerText = formatCurrency(allIncome);
+            document.getElementById('display-expense').innerText = formatCurrency(allExpense);
         }
 
         function resetFilter() {
