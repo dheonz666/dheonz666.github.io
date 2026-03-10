@@ -1,106 +1,310 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seserahan Online - Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Inisialisasi tema sebelum halaman dimuat untuk mencegah flickering
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
 
-  <title>Seserahan Nikah</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
-
-  <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 600px;
-      margin: 20px auto;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0f172a',
+                        darkCard: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .line-through-fade {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+        [box-shadow] {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 dark:bg-slate-950 min-h-screen pb-10 font-sans transition-colors duration-300 flex flex-col">
 
-  <h2 style="text-align:center;">Tabel Persiapan Nikah</h2>
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-10 p-4 transition-colors duration-300">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 hover:scale-110 transition-all">
+                    <i id="theme-icon" data-lucide="sun"></i>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 dark:text-white leading-none">Seserahan <span class="text-emerald-600">Nikah</span></h1>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-tighter uppercase">Cloud Synced</p>
+                </div>
+            </div>
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg text-xs font-bold">
+                <button id="tab-checklist" onclick="switchTab('checklist')" class="px-4 py-1.5 rounded-md bg-white dark:bg-slate-700 shadow-sm text-emerald-600 dark:text-emerald-400 transition-all">DAFTAR</button>
+                <button id="tab-admin" onclick="switchTab('admin')" class="px-4 py-1.5 rounded-md text-slate-500 dark:text-slate-400 transition-all">ADMIN</button>
+            </div>
+        </div>
+    </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Ceklis</th>
-        <th>Item</th>
-      </tr>
-    </thead>
-    <tbody id="checklist-table">
-      <!-- Akan diisi oleh JavaScript -->
-    </tbody>
-  </table>
+    <main class="max-w-md mx-auto p-4 flex-grow w-full">
+        
+        <!-- View: Checklist -->
+        <div id="view-checklist" class="space-y-4">
+            <!-- Progress Card -->
+            <div class="bg-emerald-600 text-white p-6 rounded-2xl shadow-xl shadow-emerald-100 dark:shadow-none">
+                <p class="opacity-80 text-sm font-medium">Progres Persiapan</p>
+                <div class="flex justify-between items-baseline">
+                    <h2 id="stats-text" class="text-3xl font-black">0 / 0</h2>
+                    <span id="stats-percent" class="text-xl font-bold opacity-90">0%</span>
+                </div>
+                <div class="mt-4 h-2 bg-emerald-900/20 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-white rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+            </div>
 
-  <script>
-    const items = [
-      "Mas Kawin",
-      "Seperangkat Alat Shalat + Alquran",
-      "Baju Couple",
-      "Kerudung",
-      "Daleman",
-      "Tas",
-      "Sendal",
-      "Sepatu",
-      "Make Up",
-      "Set Mandi + Handuk",
-      "Jajanan Coklat",
-      "Bad Cover Sprei",
-      "Samping Kebat dan Samping Sarung",
-      "Parcel Buah",
-      "Bucket Bunga",
-      "Mejicom",
-      "Kasur Springbed",
-      "Lemari"
-    ];
+            <!-- List Container -->
+            <div id="list-container" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors duration-300">
+                <!-- Data akan diisi oleh JS -->
+                <div class="p-10 text-center text-slate-400">
+                    <div class="animate-spin mb-2 inline-block"><i data-lucide="refresh-cw"></i></div>
+                    <p>Memuat data...</p>
+                </div>
+            </div>
 
-    const tableBody = document.getElementById("checklist-table");
+            <!-- Add Item -->
+            <div class="flex gap-2">
+                <input 
+                    id="input-new-item"
+                    type="text" 
+                    placeholder="Tambah kebutuhan baru..."
+                    class="flex-grow p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all shadow-sm"
+                >
+                <button onclick="addItem()" class="bg-emerald-600 text-white p-4 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-100 dark:shadow-none">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
+        </div>
 
-    items.forEach((item, index) => {
-      const row = document.createElement("tr");
+        <!-- View: Admin -->
+        <div id="view-admin" class="hidden space-y-4">
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors duration-300">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-b dark:border-slate-700">
+                        <tr>
+                            <th class="p-3 text-left font-bold uppercase tracking-wider">Item</th>
+                            <th class="p-3 text-center font-bold uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <!-- Data admin -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Mode Admin: Kelola Data</p>
+        </div>
 
-      const checkboxCell = document.createElement("td");
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.id = "item_" + index;
+    </main>
 
-      // Cek status dari localStorage
-      const saved = localStorage.getItem(checkbox.id);
-      if (saved === "true") {
-        checkbox.checked = true;
-      }
+    <!-- Footer Section -->
+    <footer class="p-8 text-center mt-auto">
+        <p class="text-slate-400 dark:text-slate-600 text-xs font-bold tracking-widest uppercase">
+            @2026- Ade&Ami
+        </p>
+    </footer>
 
-      // Simpan ke localStorage saat berubah
-      checkbox.addEventListener("change", () => {
-        localStorage.setItem(checkbox.id, checkbox.checked);
-      });
+    <script>
+        // --- KONFIGURASI SUPABASE ---
+        const SUPABASE_URL = 'https://cvglfffviztrsrspvjcr.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_dRDqlI3qlguzetyFTbkZ8A_Z0E8Htg8';
 
-      checkboxCell.appendChild(checkbox);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let items = [];
 
-      const itemCell = document.createElement("td");
-      itemCell.textContent = item;
+        // Inisialisasi Lucide Icons
+        function initIcons() {
+            lucide.createIcons();
+        }
 
-      row.appendChild(checkboxCell);
-      row.appendChild(itemCell);
-      tableBody.appendChild(row);
-    });
-  </script>
+        // Toggle Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        }
 
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const iconElement = document.getElementById('theme-icon');
+            iconElement.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+            initIcons();
+        }
+
+        // Ambil data dari Supabase
+        async function fetchItems() {
+            const { data, error } = await supabaseClient
+                .from('items')
+                .select('*')
+                .order('sort_order', { ascending: true });
+            
+            if (error) {
+                console.error('Error:', error);
+                document.getElementById('list-container').innerHTML = `<div class="p-10 text-center text-red-500 text-xs font-bold uppercase tracking-wider">Gagal terhubung<br><span class="opacity-50">${error.message}</span></div>`;
+                return;
+            }
+            items = data;
+            render();
+        }
+
+        // Render UI
+        function render() {
+            const listContainer = document.getElementById('list-container');
+            const adminTableBody = document.getElementById('admin-table-body');
+            
+            // Render Checklist
+            if (items.length === 0) {
+                listContainer.innerHTML = `<div class="p-10 text-center text-slate-400 dark:text-slate-600 font-medium">Belum ada item dalam daftar.</div>`;
+            } else {
+                listContainer.innerHTML = items.map(item => `
+                    <div onclick="toggleItem(${item.id}, ${item.checked})" class="flex items-center gap-4 p-4 border-b dark:border-slate-800 last:border-0 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <div class="${item.checked ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700'}">
+                            <i data-lucide="${item.checked ? 'check-circle-2' : 'circle'}"></i>
+                        </div>
+                        <span class="flex-grow font-medium ${item.checked ? 'line-through-fade text-slate-400' : 'text-slate-700 dark:text-slate-300'}">${item.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Render Tabel Admin
+            adminTableBody.innerHTML = items.map(item => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                    <td class="p-3 font-medium text-slate-700 dark:text-slate-300">${item.name}</td>
+                    <td class="p-3 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="editItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')" class="text-blue-400 hover:text-blue-600 dark:text-blue-500 p-2 transition-colors" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteItem(${item.id})" class="text-red-400 hover:text-red-600 dark:text-red-500 p-2 transition-colors" title="Hapus">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Perbarui Statistik
+            const completed = items.filter(i => i.checked).length;
+            const total = items.length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('stats-text').innerText = `${completed} / ${total}`;
+            document.getElementById('stats-percent').innerText = `${percent}%`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            initIcons();
+        }
+
+        // Logika Aksi
+        async function toggleItem(id, currentStatus) {
+            await supabaseClient.from('items').update({ checked: !currentStatus }).eq('id', id);
+        }
+
+        async function addItem() {
+            const input = document.getElementById('input-new-item');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const { error } = await supabaseClient.from('items').insert([{ 
+                name: name, 
+                sort_order: items.length + 1, 
+                checked: false 
+            }]);
+            
+            if (error) {
+                console.error("Gagal menambah item:", error);
+            } else {
+                input.value = '';
+            }
+        }
+
+        async function editItem(id, currentName) {
+            const newName = prompt("Edit nama item:", currentName);
+            if (newName !== null && newName.trim() !== "" && newName !== currentName) {
+                const { error } = await supabaseClient
+                    .from('items')
+                    .update({ name: newName.trim() })
+                    .eq('id', id);
+                
+                if (error) {
+                    console.error("Gagal mengedit item:", error);
+                    alert("Gagal menyimpan perubahan.");
+                }
+            }
+        }
+
+        async function deleteItem(id) {
+            if (confirm('Hapus item ini secara permanen?')) {
+                const { error } = await supabaseClient.from('items').delete().eq('id', id);
+                if (error) {
+                    console.error("Gagal menghapus item:", error);
+                    alert("Gagal menghapus item.");
+                }
+            }
+        }
+
+        // Pengalih Tab
+        function switchTab(tab) {
+            const checklistView = document.getElementById('view-checklist');
+            const adminView = document.getElementById('view-admin');
+            const tabCheck = document.getElementById('tab-checklist');
+            const tabAdmin = document.getElementById('tab-admin');
+
+            if (tab === 'checklist') {
+                checklistView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                tabCheck.className = 'px-4 py-1.5 rounded-md bg-white dark:bg-slate-700 shadow-sm text-emerald-600 dark:text-emerald-400 transition-all';
+                tabAdmin.className = 'px-4 py-1.5 rounded-md text-slate-500 dark:text-slate-400 transition-all';
+            } else {
+                checklistView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                tabAdmin.className = 'px-4 py-1.5 rounded-md bg-white dark:bg-slate-700 shadow-sm text-emerald-600 dark:text-emerald-400 transition-all';
+                tabCheck.className = 'px-4 py-1.5 rounded-md text-slate-500 dark:text-slate-400 transition-all';
+            }
+        }
+
+        // Pendengar Realtime
+        function setupRealtime() {
+            supabaseClient
+                .channel('public:items')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
+                    fetchItems();
+                })
+                .subscribe();
+        }
+
+        // Jalankan Aplikasi
+        window.onload = () => {
+            fetchItems();
+            setupRealtime();
+            updateThemeIcon();
+        };
+
+        // Memungkinkan Tombol Enter untuk Menambah
+        document.getElementById('input-new-item').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+    </script>
 </body>
 </html>
-
