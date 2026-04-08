@@ -136,6 +136,14 @@
                     <p class="text-slate-500">Pantau hasil stock opname secara real-time.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <!-- Import Section -->
+                    <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="handleImport(this)">
+                    <button onclick="document.getElementById('importFile').click()" class="inline-flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Import XLSX
+                    </button>
                     <button onclick="exportWord()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -213,9 +221,9 @@
                                 <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
                                 <input type="date" id="endDate" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                             </div>
-						<button onclick="clearDateFilters()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs font-bold text-slate-600 h-[38px]" title="Reset Tanggal">
-                            Reset
-                        </button>
+                            <button onclick="clearDateFilters()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs font-bold text-slate-600 h-[38px] self-end" title="Reset Tanggal">
+                                Reset
+                            </button>
                         </div>
                     </div>
                     
@@ -295,7 +303,7 @@
                     <input type="text" id="editBarcode" disabled class="w-full bg-slate-100 border-0 rounded-xl p-3 text-slate-500 font-mono font-bold">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">QTY (Qty)</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">QTY (Unit)</label>
                     <input type="number" id="editQty" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-lg">
                 </div>
                 <input type="hidden" id="editId">
@@ -321,8 +329,31 @@
 
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', async () => {
+            setDefaultDates();
             checkSession();
         });
+
+        // Set default filter ke bulan ini (Tanggal 1 s/d Hari ini)
+        function setDefaultDates() {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            // Format YYYY-MM-DD
+            const formatDate = (date) => {
+                let d = new Date(date),
+                    month = '' + (d.getMonth() + 1),
+                    day = '' + d.getDate(),
+                    year = d.getFullYear();
+
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+
+                return [year, month, day].join('-');
+            }
+
+            document.getElementById('startDate').value = formatDate(firstDay);
+            document.getElementById('endDate').value = formatDate(now);
+        }
 
         // --- AUTH LOGIC ---
 
@@ -423,7 +454,6 @@
                 if (error) throw error;
 
                 allData = data || [];
-                calculateStats(allData);
                 populateAreaFilter(allData);
                 filterData(); 
             } catch (err) {
@@ -448,7 +478,8 @@
         function populateAreaFilter(data) {
             const select = document.getElementById('areaFilter');
             const currentVal = select.value;
-            const areas = [...new Set(data.map(item => item.area))].sort();
+            // Get areas from all data to keep the filter consistent
+            const areas = [...new Set(allData.map(item => item.area))].sort();
             
             select.innerHTML = '<option value="">Semua Area</option>';
             areas.forEach(area => {
@@ -549,7 +580,7 @@
                         if (itemDate < start) matchDate = false;
                     }
                     if (endDate) {
-                        const end = new Date(endDate).setHours(0,0,0,0);
+                        const end = new Date(endDate).setHours(23,59,59,999);
                         if (itemDate > end) matchDate = false;
                     }
                 }
@@ -580,8 +611,6 @@
 
             displayedData = filtered;
             renderTable(filtered);
-            
-            // Update stats based on filtered data (optional but recommended)
             calculateStats(filtered);
         }
 
@@ -589,6 +618,63 @@
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             filterData();
+        }
+
+        // --- IMPORT EXCEL LOGIC ---
+
+        async function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            toggleLoading(true);
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+                    if (rows.length === 0) {
+                        showToast('File kosong', 'error');
+                        return;
+                    }
+
+                    // Mapping & Validation
+                    // Memastikan kolom Area, Barcode, QTY ada
+                    const mappedData = rows.map(row => {
+                        return {
+                            area: (row.Area || row.area || '').toString().toUpperCase(),
+                            barcode: (row.Barcode || row.barcode || row['Kode Barcode'] || '').toString(),
+                            qty: parseInt(row.QTY || row.qty || row.Jumlah || 0)
+                        };
+                    }).filter(item => item.area && item.barcode && !isNaN(item.qty));
+
+                    if (mappedData.length === 0) {
+                        showToast('Format kolom tidak sesuai. Gunakan kolom: Area, Barcode, QTY', 'error');
+                        return;
+                    }
+
+                    // Bulk Insert ke Supabase
+                    const { error } = await supabaseClient
+                        .from('sparepart')
+                        .insert(mappedData);
+
+                    if (error) throw error;
+
+                    showToast(`Berhasil mengimport ${mappedData.length} data`);
+                    await loadData();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Gagal memproses file Excel', 'error');
+                } finally {
+                    toggleLoading(false);
+                    input.value = ''; // Reset input
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
         }
 
         // --- CRUD ACTIONS ---
@@ -653,7 +739,7 @@
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-rose-600';
             
-            toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 toast translate-x-10 opacity-0`;
+            toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 toast translate-x-10 opacity-0 pointer-events-auto`;
             toast.innerHTML = `<span class="text-sm font-bold">${message}</span>`;
             
             container.appendChild(toast);
@@ -754,4 +840,3 @@
     </script>
 </body>
 </html>
-
