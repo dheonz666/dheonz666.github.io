@@ -59,14 +59,64 @@
         .new-entry {
             animation: highlight-new 2s ease-out;
         }
+
+        /* SweetAlert-like Animations */
+        @keyframes modalShow {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate { animation: modalShow 0.2s ease-out; }
+
+        .modal-active { display: flex !important; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-50 hidden flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-[70] hidden flex flex-col items-center justify-center">
         <div class="loader w-12 h-12 border-4 border-slate-200 rounded-full mb-4"></div>
         <p class="text-indigo-600 font-semibold animate-pulse">Memproses Data...</p>
+    </div>
+
+    <!-- SweetAlert-like Delete Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl border border-slate-100 modal-animate text-center">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Apakah anda yakin?</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Data yang dihapus tidak dapat dikembalikan lagi!</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeConfirmModal()" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all">Batal</button>
+                <button id="btnConfirmDelete" class="px-6 py-3.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl shadow-lg shadow-red-200 transition-all">Ya, Hapus!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert-like Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl border border-slate-100 modal-animate">
+            <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 text-center mb-1">Edit Stok</h3>
+            <p id="editItemCode" class="text-xs font-mono text-slate-400 text-center mb-8"></p>
+            <input type="hidden" id="editItemId">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Jumlah Baru</label>
+                    <input type="number" id="editQtyInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none mt-1 text-center text-xl font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-4">
+                    <button onclick="closeEditModal()" class="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all">Batal</button>
+                    <button onclick="confirmEdit()" class="px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 transition-all">Simpan</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8">
@@ -97,14 +147,20 @@
                     <div class="relative">
                         <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
                             <script>
-                                const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                                const spLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'GS'];
                                 spLetters.forEach(letter => {
-                                    document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
-                                    for(let i=1; i<=40; i++) {
-                                        const areaNum = i < 10 ? '0' + i : i;
-                                        document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
+                                    if (letter === 'GS') {
+                                        document.write(`<optgroup label="SPAREPART AREA GS">`);
+                                        document.write(`<option value="GS">GS</option>`);
+                                        document.write(`</optgroup>`);
+                                    } else {
+                                        document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
+                                        for(let i=1; i<=40; i++) {
+                                            const areaNum = i < 10 ? '0' + i : i;
+                                            document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
+                                        }
+                                        document.write(`</optgroup>`);
                                     }
-                                    document.write(`</optgroup>`);
                                 });
                             </script>
                         </select>
@@ -136,19 +192,18 @@
 
         <!-- Toolbar & Options -->
         <div class="flex flex-col space-y-6 mb-10">
-            <!-- Title Section -->
-            <div class="w-full">
-                <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
-                <p class="text-slate-500 text-sm">Monitoring stok real-time (Berdasarkan Waktu Input)</p>
+            <div class="w-full flex flex-col md:flex-row md:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
+                    <p id="viewStatusInfo" class="text-indigo-500 text-sm font-semibold italic">Menampilkan data bulan ini</p>
+                </div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold bg-white px-3 py-1 rounded-full border border-slate-100 self-start md:self-center">
+                    Auto-refresh: Aktif
+                </div>
             </div>
 
-            <!-- Consolidated Toolbar (View, Search, Filters, Buttons) -->
             <div class="flex flex-col xl:flex-row justify-between items-center gap-6 bg-slate-100/50 p-4 rounded-2xl border border-slate-200/50">
-                
-                <!-- Left & Center: Tampilan + Filters -->
                 <div class="flex flex-wrap items-end gap-4 w-full xl:w-auto">
-                    
-                    <!-- View Selector -->
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Tampilan</label>
                         <div class="relative min-w-[125px]">
@@ -162,7 +217,6 @@
                         </div>
                     </div>
 
-                    <!-- Search Input -->
                     <div class="space-y-1 w-full md:w-44 lg:w-56">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Cari Barcode / Area</label>
                         <div class="relative">
@@ -174,7 +228,6 @@
                         </div>
                     </div>
 
-                    <!-- Filter Area -->
                     <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
                         <div class="relative">
@@ -187,27 +240,26 @@
                         </div>
                     </div>
 
-                    <!-- Filter Tanggal Mulai -->
                     <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
-                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                        <input type="date" id="startDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
-                    <!-- Filter Tanggal Selesai -->
                     <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
-                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                        <input type="date" id="endDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
-                    <!-- Tombol Reset Filter -->
-                    <div class="pb-0.5">
+                    <div class="pb-0.5 flex gap-2">
+                        <button onclick="renderUI()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm h-[38px]" title="Terapkan Filter Sekarang">
+                            Tampilkan
+                        </button>
                         <button onclick="resetFilters()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm h-[38px]" title="Reset Semua Filter">
                             Reset
                         </button>
                     </div>
                 </div>
 
-                <!-- Right: Action Buttons -->
                 <div class="flex flex-wrap gap-2 w-full xl:w-auto justify-end items-end">
                     <button onclick="loadData()" class="bg-white hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl transition-colors border border-slate-200 flex items-center justify-center h-[38px] shadow-sm" title="Refresh Data">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -257,7 +309,8 @@
                 updateStatus('bg-green-500', 'database Online');
                 await loadData();
             } catch (err) {
-                updateStatus('bg-red-500', 'Offline');
+                console.error("Connection error:", err);
+                updateStatus('bg-red-500', 'Gagal Koneksi');
             }
         }
 
@@ -271,7 +324,8 @@
         }
 
         function toggleLoading(show) {
-            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.toggle('hidden', !show);
         }
 
         function switchView(view) {
@@ -304,7 +358,9 @@
                     .from('sparepart')
                     .select('*');
 
-                if (!error && data) {
+                if (error) throw error;
+
+                if (data) {
                     inventoryData = {};
                     data.forEach(item => {
                         if (!inventoryData[item.area]) inventoryData[item.area] = [];
@@ -313,9 +369,11 @@
                     
                     updateFilterDropdown();
                     renderUI();
+                    updateStatus('bg-green-500', 'Data Tersinkron');
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Load error:", e);
+                updateStatus('bg-red-500', 'Gagal Memuat Data');
             } finally {
                 toggleLoading(false);
             }
@@ -339,70 +397,191 @@
 
         async function saveToCloud() {
             let area = document.getElementById('areaInput').value;
-            const barcode = document.getElementById('barcodeInput').value.trim();
-            const qtyStr = document.getElementById('qtyInput').value;
-            const qty = parseInt(qtyStr) || 1;
+            const barcodeInput = document.getElementById('barcodeInput');
+            const barcode = barcodeInput.value.trim();
+            const qtyInput = document.getElementById('qtyInput');
+            const qty = parseInt(qtyInput.value) || 1;
 
             if (!barcode) return;
 
             toggleLoading(true);
+            updateStatus('bg-amber-500', 'Menyimpan...');
 
             try {
-                const { data: existingData } = await supabaseClient
+                const { data: existingData, error: checkError } = await supabaseClient
                     .from('sparepart')
-                    .select('id, qty, created_at')
+                    .select('id, qty')
                     .eq('area', area)
                     .eq('barcode', barcode)
-                    .single();
+                    .maybeSingle();
 
-                let updatedItem;
+                if (checkError) throw checkError;
+
+                let result;
                 if (existingData) {
-                    const { data } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('sparepart')
                         .update({ qty: existingData.qty + qty })
                         .eq('id', existingData.id)
                         .select()
                         .single();
-                    updatedItem = data;
+                    if (error) throw error;
+                    result = data;
                 } else {
-                    const { data } = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('sparepart')
                         .insert([{ area, barcode, qty }])
                         .select()
                         .single();
-                    updatedItem = data;
+                    if (error) throw error;
+                    result = data;
                 }
 
-                lastScannedId = updatedItem.id;
+                lastScannedId = result.id;
                 sortConfig = { key: 'created_at', direction: 'desc' };
                 
-                document.getElementById('barcodeInput').value = '';
-                document.getElementById('barcodeInput').focus();
+                barcodeInput.value = '';
+                barcodeInput.focus();
+                qtyInput.value = 1;
+                
                 await loadData();
+                updateStatus('bg-green-500', 'Berhasil Disimpan');
             } catch (err) {
-                console.error(err);
+                console.error("Save error:", err);
+                updateStatus('bg-red-500', 'Error: Cek Akses DB');
             } finally {
                 toggleLoading(false);
             }
         }
 
+        // --- CUSTOM MODAL ACTIONS ---
+        function openEditModal(id, currentQty, barcode) {
+            document.getElementById('editItemId').value = id;
+            document.getElementById('editQtyInput').value = currentQty;
+            document.getElementById('editItemCode').innerText = "Barcode: " + barcode;
+            document.getElementById('editModal').classList.add('modal-active');
+            setTimeout(() => document.getElementById('editQtyInput').select(), 100);
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('modal-active');
+        }
+
+        async function confirmEdit() {
+            const id = document.getElementById('editItemId').value;
+            const newQty = parseInt(document.getElementById('editQtyInput').value);
+            
+            if (isNaN(newQty) || newQty < 1) return;
+
+            toggleLoading(true);
+            closeEditModal();
+
+            try {
+                const { error } = await supabaseClient
+                    .from('sparepart')
+                    .update({ qty: newQty })
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadData();
+                updateStatus('bg-green-500', 'Stok Diperbarui');
+            } catch (err) {
+                console.error("Edit error:", err);
+                updateStatus('bg-red-500', 'Gagal Memperbarui');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('modal-active');
+        }
+
+        function deleteItem(id) {
+            const modal = document.getElementById('confirmModal');
+            const btnDelete = document.getElementById('btnConfirmDelete');
+            
+            modal.classList.add('modal-active');
+            
+            btnDelete.onclick = async function() {
+                modal.classList.remove('modal-active');
+                toggleLoading(true);
+                try {
+                    const { error } = await supabaseClient
+                        .from('sparepart')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    await loadData();
+                    updateStatus('bg-red-500', 'Item Dihapus');
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    updateStatus('bg-red-500', 'Gagal Menghapus');
+                } finally {
+                    toggleLoading(false);
+                }
+            };
+        }
+
+        function parseLocalDate(dateStr, isEnd = false) {
+            if (!dateStr) return null;
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
+            if (isEnd) {
+                date.setHours(23, 59, 59, 999);
+            } else {
+                date.setHours(0, 0, 0, 0);
+            }
+            return date.getTime();
+        }
+
         function getFilteredAndSortedData() {
             const filterArea = document.getElementById('viewFilter').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+            const startVal = document.getElementById('startDate').value;
+            const endVal = document.getElementById('endDate').value;
             const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusInfo = document.getElementById('viewStatusInfo');
             
+            const startTime = parseLocalDate(startVal, false);
+            const endTime = parseLocalDate(endVal, true);
+
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // Cek apakah user sedang melakukan filter manual
+            const isFilteringDates = startVal || endVal;
+
+            if (isFilteringDates) {
+                statusInfo.innerText = "Menampilkan data berdasarkan filter tanggal";
+                statusInfo.classList.replace('text-indigo-500', 'text-emerald-500');
+            } else {
+                statusInfo.innerText = "Menampilkan data bulan ini";
+                statusInfo.classList.replace('text-emerald-500', 'text-indigo-500');
+            }
+
             let flatData = [];
 
             Object.keys(inventoryData).forEach(area => {
                 if (filterArea === 'all' || area === filterArea) {
                     inventoryData[area].forEach(item => {
-                        let itemDate = new Date(item.created_at).toISOString().split('T')[0];
+                        const dateObj = new Date(item.created_at);
+                        const itemTime = dateObj.getTime();
                         let passDate = true;
                         let passSearch = true;
                         
-                        if (startDate && itemDate < startDate) passDate = false;
-                        if (endDate && itemDate > endDate) passDate = false;
+                        // Logika filter: Jika user tidak mengisi filter tanggal, 
+                        // maka default hanya menampilkan data bulan ini.
+                        if (!isFilteringDates) {
+                            if (dateObj.getMonth() !== currentMonth || dateObj.getFullYear() !== currentYear) {
+                                passDate = false;
+                            }
+                        } else {
+                            // Jika user memfilter tanggal, gunakan range waktu
+                            if (startTime && itemTime < startTime) passDate = false;
+                            if (endTime && itemTime > endTime) passDate = false;
+                        }
 
                         if (searchKeyword) {
                             const barcodeMatch = item.barcode.toLowerCase().includes(searchKeyword);
@@ -420,8 +599,13 @@
             flatData.sort((a, b) => {
                 let valA = a[sortConfig.key];
                 let valB = b[sortConfig.key];
-                if (typeof valA === 'string') valA = valA.toLowerCase();
-                if (typeof valB === 'string') valB = valB.toLowerCase();
+                if (sortConfig.key === 'created_at') {
+                    valA = new Date(valA).getTime();
+                    valB = new Date(valB).getTime();
+                } else if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
                 if (valA === undefined || valA === null) return 1;
                 if (valB === undefined || valB === null) return -1;
                 if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -437,12 +621,14 @@
             const dataToRender = getFilteredAndSortedData();
 
             if (dataToRender.length === 0) {
-                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Data tidak ditemukan.</p></div>`;
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                    <p class="text-slate-500 font-medium">Data tidak ditemukan.</p>
+                    <p class="text-slate-400 text-xs mt-1">Gunakan filter tanggal untuk melihat data bulan lainnya.</p>
+                </div>`;
                 return;
             }
 
             container.innerHTML = "";
-
             if (currentView === 'grid') {
                 renderGridView(container, dataToRender);
             } else {
@@ -457,7 +643,7 @@
                 grouped[item.area].push(item);
             });
 
-            Object.keys(grouped).forEach(area => {
+            Object.keys(grouped).sort().forEach(area => {
                 const section = document.createElement('div');
                 section.className = "bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8";
                 
@@ -481,7 +667,7 @@
                             <div class="text-center pt-3 border-t border-slate-50">
                                 <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${item.barcode}</span>
                                 <div class="text-2xl font-black text-slate-800">QTY: ${item.qty}</div>
-                                <div class="text-[9px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleDateString()}</div>
+                                <div class="text-[9px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleString('id-ID')}</div>
                             </div>
                         </div>
                     `;
@@ -497,13 +683,6 @@
                     });
                 });
             });
-        }
-
-        function getSortIcon(key) {
-            if (sortConfig.key !== key) return `<svg class="w-3 h-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
-            return sortConfig.direction === 'asc' 
-                ? `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.82a.75.75 0 011.06 0l5 5a.75.75 0 01-1.06 1.06L12.75 6.16V20a.75.75 0 01-1.5 0V6.16L7.53 9.88a.75.75 0 01-1.06-1.06l5-5z"/></svg>`
-                : `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
         }
 
         function renderTableView(container, flatData) {
@@ -522,12 +701,13 @@
                                 <th onclick="toggleSort('barcode')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap">
                                     <div class="flex items-center gap-2">Kode Barcode ${getSortIcon('barcode')}</div>
                                 </th>
-                                <th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-32">
-                                    <div class="flex items-center gap-2">Jumlah (QTY) ${getSortIcon('qty')}</div>
+                                <th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-24">
+                                    <div class="flex items-center gap-2">Qty ${getSortIcon('qty')}</div>
                                 </th>
-                                <th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-44">
+                                <th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-40">
                                     <div class="flex items-center gap-2">Waktu Input ${getSortIcon('created_at')}</div>
                                 </th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-32 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -535,9 +715,11 @@
 
             flatData.forEach(item => {
                 const isNew = item.id === lastScannedId ? 'new-entry' : '';
-                const dateObj = new Date(item.created_at);
-                const displayDate = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
+                const timeString = new Date(item.created_at).toLocaleString('id-ID', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
                 html += `
                     <tr class="hover:bg-slate-50/50 transition-colors ${isNew}">
                         <td class="px-6 py-4 text-sm font-semibold text-slate-700">${item.area.toUpperCase()}</td>
@@ -550,7 +732,19 @@
                         <td class="px-6 py-4">
                             <span class="text-lg font-bold text-slate-900">${item.qty}</span>
                         </td>
-                        <td class="px-6 py-4 text-[11px] text-slate-400 font-medium">${displayDate}</td>
+                        <td class="px-6 py-4 text-[11px] text-slate-400 font-medium">
+                            ${timeString}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="openEditModal('${item.id}', ${item.qty}, '${item.barcode}')" class="p-2.5 hover:bg-indigo-50 text-indigo-600 rounded-xl transition-all border border-indigo-100 shadow-sm active:scale-95" title="Edit Qty">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
+                                <button onclick="deleteItem('${item.id}')" class="p-2.5 hover:bg-red-50 text-red-600 rounded-xl transition-all border border-red-100 shadow-sm active:scale-95" title="Hapus Item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -566,41 +760,42 @@
             });
         }
 
+        function getSortIcon(key) {
+            if (sortConfig.key !== key) return `<svg class="w-3 h-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+            return sortConfig.direction === 'asc' 
+                ? `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.82a.75.75 0 011.06 0l5 5a.75.75 0 01-1.06 1.06L12.75 6.16V20a.75.75 0 01-1.5 0V6.16L7.53 9.88a.75.75 0 01-1.06-1.06l5-5z"/></svg>`
+                : `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+        }
+
         function exportExcel() {
             const dataToExport = getFilteredAndSortedData();
             if (dataToExport.length === 0) return;
-            
             const flatData = dataToExport.map(item => ({
                 "Area": item.area.toUpperCase(), 
                 "Barcode": item.barcode, 
                 "Jumlah (Qty)": item.qty, 
-                "Waktu Input": new Date(item.created_at).toLocaleString() 
+                "Waktu Input": new Date(item.created_at).toLocaleString('id-ID') 
             }));
-
             const ws = XLSX.utils.json_to_sheet(flatData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-            XLSX.writeFile(wb, `Stock_Sparepart_Export.xlsx`);
+            XLSX.writeFile(wb, `Stock_Sparepart_Export_${new Date().getTime()}.xlsx`);
         }
 
         function exportWord() {
             const dataToExport = getFilteredAndSortedData();
             if (dataToExport.length === 0) return;
-            
             let docHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head><meta charset='utf-8'><title>Laporan</title><style>
             table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid black; padding: 8px; text-align: left; font-family: sans-serif; font-size: 12px; }
-            h1 { color: #4f46e5; text-align: center; font-size: 18px; }
-            .info { margin-bottom: 10px; font-size: 10px; color: #666; }
+            th { background-color: #f3f4f6; } h1 { color: #4f46e5; text-align: center; font-size: 18px; }
             </style></head><body><h1>LAPORAN STOCK OPNAME SPAREPART</h1>
-            <div class=\"info\">Dicetak pada: ${new Date().toLocaleString()}</div>`;
-            
+            <div style="font-size: 10px; color: #666;">Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>`;
             let body = "<table><thead><tr><th>Area</th><th>Barcode</th><th>Jumlah</th><th>Waktu Input</th></tr></thead><tbody>";
             dataToExport.forEach(item => {
-                body += `<tr><td>${item.area.toUpperCase()}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString()}</td></tr>`;
+                body += `<tr><td>${item.area.toUpperCase()}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString('id-ID')}</td></tr>`;
             });
             body += `</tbody></table></body></html>`;
-
             const fullContent = docHeader + body;
             const blob = new Blob(['\ufeff', fullContent], { type: 'application/msword' });
             const link = document.createElement('a');
