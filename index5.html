@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link href="assets/img/scanner.png" rel="icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Opname - Warehouse (Local Storage)</title>
+    <title>Stock Opname - Warehouse (Area Grouping)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -21,6 +21,12 @@
         .excel-table th:hover { background-color: #f1f5f9; }
         @keyframes highlight-new { 0% { background-color: #eef2ff; } 100% { background-color: transparent; } }
         .new-entry { animation: highlight-new 2s ease-out; }
+        
+        /* Custom Scrollbar for Dropdown */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -46,28 +52,29 @@
             </div>
         </header>
 
-        <!-- Bagian Input -->
+        <!-- Bahian Input -->
         <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 mb-10 border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                <div class="space-y-2">
+                
+                <!-- Searchable Area Input -->
+                <div class="space-y-2 relative">
                     <label class="text-xs font-bold text-slate-500 uppercase ml-1">Area Warehouse</label>
-                    <div class="relative">
-                        <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
-                            <script>
-                                // Menghasilkan pilihan A01-A06, B01-B06, dst.
-                                const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-                                letters.forEach(letter => {
-                                    document.write(`<optgroup label="WAREHOUSE AREA ${letter}">`);
-                                    for(let i=1; i<=6; i++) {
-                                        const areaNum = i < 10 ? '0' + i : i;
-                                        document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
-                                    }
-                                    document.write(`</optgroup>`);
-                                });
-                            </script>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                    <div id="areaDropdownWrapper" class="relative">
+                        <button type="button" id="areaDisplay" onclick="toggleAreaDropdown()" 
+                            class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-left flex justify-between items-center">
+                            <span id="selectedAreaText" class="text-slate-700 font-semibold italic">Pilih Area...</span>
                             <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <!-- Menu Dropdown -->
+                        <div id="areaMenu" class="hidden absolute z-30 mt-2 w-full bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden ring-1 ring-black/5">
+                            <div class="p-2 border-b border-slate-50 bg-slate-50/50">
+                                <input type="text" id="areaSearch" oninput="filterAreaOptions()" placeholder="Cari kod area..." 
+                                    class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <ul id="areaList" class="max-h-60 overflow-y-auto custom-scrollbar">
+                                <!-- Opsi Area akan di-render di sini oleh JavaScript -->
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -141,6 +148,17 @@
     </div>
 
     <script>
+        // --- DATA & CONFIG ---
+        const ALL_AREAS = [];
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+        letters.forEach(letter => {
+            for(let i=1; i<=6; i++) {
+                ALL_AREAS.push(`${letter}${i < 10 ? '0' + i : i}`);
+            }
+        });
+
+        let selectedAreaValue = ""; 
+
         // --- UTILITY COOKIE ---
         const CookieHelper = {
             set: (name, value, days = 7) => {
@@ -156,7 +174,6 @@
             }
         };
 
-        // Konfigurasi SweetAlert2
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -173,9 +190,82 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modeSelector').value = currentView;
             loadFromLocalStorage();
+            initAreaSelect();
             document.getElementById('barcodeInput').focus();
+
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('areaDropdownWrapper').contains(e.target)) {
+                    document.getElementById('areaMenu').classList.add('hidden');
+                }
+            });
         });
 
+        // --- SEARCHABLE AREA FUNCTIONS ---
+        function initAreaSelect() {
+            renderAreaOptions(ALL_AREAS);
+            selectArea(ALL_AREAS[0]);
+        }
+
+        function toggleAreaDropdown() {
+            const menu = document.getElementById('areaMenu');
+            menu.classList.toggle('hidden');
+            if (!menu.classList.contains('hidden')) {
+                const searchInput = document.getElementById('areaSearch');
+                searchInput.value = '';
+                renderAreaOptions(ALL_AREAS);
+                searchInput.focus();
+            }
+        }
+
+        function filterAreaOptions() {
+            const keyword = document.getElementById('areaSearch').value.toUpperCase();
+            const filtered = ALL_AREAS.filter(area => area.includes(keyword));
+            renderAreaOptions(filtered);
+        }
+
+        function renderAreaOptions(list) {
+            const listContainer = document.getElementById('areaList');
+            if (list.length === 0) {
+                listContainer.innerHTML = `<li class="px-4 py-3 text-xs text-slate-400 text-center">Tiada kawasan dijumpai</li>`;
+                return;
+            }
+
+            // Grouping logic by Letter
+            const grouped = {};
+            list.forEach(area => {
+                const letter = area.charAt(0);
+                if (!grouped[letter]) grouped[letter] = [];
+                grouped[letter].push(area);
+            });
+
+            let html = '';
+            Object.keys(grouped).sort().forEach(letter => {
+                // Render Group Header (e.g., Area A)
+                html += `<li class="px-4 py-2 bg-slate-50 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-100">Area ${letter}</li>`;
+                
+                // Render Area Items (e.g., A01, A02)
+                grouped[letter].forEach(area => {
+                    const isSelected = area === selectedAreaValue;
+                    html += `
+                        <li onclick="selectArea('${area}')" 
+                            class="px-6 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between">
+                            <span class="${isSelected ? 'font-bold text-indigo-600' : ''}">${area}</span>
+                            ${isSelected ? '<svg class="h-4 w-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}
+                        </li>
+                    `;
+                });
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function selectArea(area) {
+            selectedAreaValue = area;
+            document.getElementById('selectedAreaText').innerHTML = `<span class="text-slate-400 font-normal">Area:</span> <b class="text-indigo-600">${area}</b>`;
+            document.getElementById('areaMenu').classList.add('hidden');
+        }
+
+        // --- INVENTORY FUNCTIONS ---
         function loadFromLocalStorage() {
             const saved = localStorage.getItem('warehouse_inventory');
             inventoryData = saved ? JSON.parse(saved) : [];
@@ -235,11 +325,18 @@
         }
 
         function saveToLocal() {
-            const area = document.getElementById('areaInput').value;
+            const area = selectedAreaValue;
             const barcode = document.getElementById('barcodeInput').value.trim();
             const qty = parseInt(document.getElementById('qtyInput').value) || 1;
 
-            if (!barcode) return;
+            if (!barcode) {
+                Toast.fire({ icon: 'warning', title: 'Barcode tidak boleh kosong' });
+                return;
+            }
+            if (!area) {
+                Toast.fire({ icon: 'warning', title: 'Pilih area terlebih dahulu' });
+                return;
+            }
 
             toggleLoading(true);
 
