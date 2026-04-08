@@ -53,22 +53,27 @@
                     <label class="text-xs font-bold text-slate-500 uppercase ml-1">Area Sparepart</label>
                     <div class="relative">
                         <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
-                            <script>
-                                // Area A sampai F (01-40)
-                                const spLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                           <script>
+                                const spLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'GS'];
                                 spLetters.forEach(letter => {
-                                    document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
-                                    for(let i=1; i<=40; i++) {
-                                        const areaNum = i < 10 ? '0' + i : i;
-                                        document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
+                                    if (letter === 'GS') {
+                                        document.write(`<optgroup label="SPAREPART AREA GS">`);
+                                        document.write(`<option value="GS">GS</option>`);
+                                        // Menambahkan GS01 sampai GS91
+                                        for(let i=1; i<=91; i++) {
+                                            const areaNum = i < 10 ? '0' + i : i;
+                                            document.write(`<option value="GS${areaNum}">GS${areaNum}</option>`);
+                                        }
+                                        document.write(`</optgroup>`);
+                                    } else {
+                                        document.write(`<optgroup label="SPAREPART AREA ${letter}">`);
+                                        for(let i=1; i<=40; i++) {
+                                            const areaNum = i < 10 ? '0' + i : i;
+                                            document.write(`<option value="${letter}${areaNum}">${letter}${areaNum}</option>`);
+                                        }
+                                        document.write(`</optgroup>`);
                                     }
-                                    document.write(`</optgroup>`);
                                 });
-
-                                // Penambahan Area GS (Hanya GS saja)
-                                document.write(`<optgroup label="SPAREPART AREA">`);
-                                document.write(`<option value="GS">GS</option>`);
-                                document.write(`</optgroup>`);
                             </script>
                         </select>
                     </div>
