@@ -33,7 +33,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Excel-like Table Styling */
         .excel-table {
             border-collapse: separate;
             border-spacing: 0;
@@ -44,15 +43,80 @@
             top: 0;
             background: #f8fafc;
             z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .excel-table th:hover {
+            background-color: #f1f5f9;
+        }
+
+        @keyframes modalShow {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate { animation: modalShow 0.2s ease-out; }
+        .modal-active { display: flex !important; }
+        
+        .new-entry {
+            animation: highlight-new 2s ease-out;
+        }
+        @keyframes highlight-new {
+            0% { background-color: #eef2ff; }
+            100% { background-color: transparent; }
         }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-50 hidden flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-[70] hidden flex flex-col items-center justify-center text-center px-4">
         <div class="loader w-12 h-12 border-4 border-slate-200 rounded-full mb-4"></div>
-        <p class="text-indigo-600 font-semibold animate-pulse">Menyimpan & Sinkronisasi Cloud...</p>
+        <p id="loadingText" class="text-indigo-600 font-semibold animate-pulse">Memproses Data...</p>
+    </div>
+
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="importFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFileImport(event)">
+
+    <!-- Modern Confirmation Modal (Hapus) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl border border-slate-100 modal-animate text-center">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Hapus Item?</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Data yang dihapus tidak dapat dikembalikan!</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeConfirmModal()" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all">Batal</button>
+                <button id="btnConfirmDelete" class="px-6 py-3.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl shadow-lg shadow-red-200 transition-all">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl border border-slate-100 modal-animate">
+            <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 text-center mb-1">Edit Stok</h3>
+            <p id="editItemCode" class="text-xs font-mono text-slate-400 text-center mb-8"></p>
+            <input type="hidden" id="editItemId">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Jumlah Baru</label>
+                    <input type="number" id="editQtyInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none mt-1 text-center text-xl font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-4">
+                    <button onclick="closeEditModal()" class="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all">Batal</button>
+                    <button onclick="confirmEdit()" class="px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 transition-all">Simpan</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8">
@@ -60,10 +124,7 @@
         <header class="mb-10 text-center">
             <div class="flex items-center justify-center gap-3 mb-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m-3 3h2m3-3h2M9 17h2m3 3h2M5 8v8a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 12h10" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h1" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12h1" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
                     <span class="text-indigo-600">Stock Opname Warehouse</span>
@@ -71,7 +132,7 @@
             </div>
             <div class="flex items-center justify-center gap-3">
                 <div id="statusDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
-                <p id="statusText" class="text-sm font-medium text-slate-500 uppercase tracking-wider">Menghubungkan ke Warehouse Database...</p>
+                <p id="statusText" class="text-sm font-medium text-slate-500 uppercase tracking-wider">Menghubungkan ke Cloud...</p>
             </div>
         </header>
 
@@ -79,20 +140,25 @@
         <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 mb-10 border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Lokasi Warehouse</label>
-                    <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none">
-                        <script>
-                            // Generate Warehouse A1-F6
-                            const whLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-                            whLetters.forEach(letter => {
-                                document.write(`<optgroup label="WAREHOUSE AREA ${letter}">`);
-                                for(let i=1; i<=6; i++) {
-                                    document.write(`<option value="Warehouse Area ${letter}${i}">Area ${letter}${i}</option>`);
-                                }
-                                document.write(`</optgroup>`);
-                            });
-                        </script>
-                    </select>
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Area Warehouse</label>
+                    <div class="relative">
+                        <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none cursor-pointer">
+                            <script>
+                                // Generate Warehouse A1-F6 sesuai index2.html
+                                const whLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+                                whLetters.forEach(letter => {
+                                    document.write(`<optgroup label="WAREHOUSE AREA ${letter}">`);
+                                    for(let i=1; i<=6; i++) {
+                                        document.write(`<option value="Warehouse Area ${letter}${i}">Area ${letter}${i}</option>`);
+                                    }
+                                    document.write(`</optgroup>`);
+                                });
+                            </script>
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -116,34 +182,72 @@
         </div>
 
         <!-- Toolbar & Options -->
-        <div class="flex flex-col lg:flex-row justify-between items-end mb-6 gap-6">
-            <div class="flex flex-col md:flex-row items-start md:items-end gap-4 w-full lg:w-auto">
+        <div class="flex flex-col space-y-6 mb-10">
+            <div class="w-full flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Warehouse</h2>
-                    <p class="text-slate-500 text-sm">Monitoring stok real-time di Cloud</p>
+                    <p id="viewStatusInfo" class="text-indigo-500 text-sm font-semibold italic">Memuat data...</p>
                 </div>
-
-                <!-- Dropdown Filter Area -->
-                <div class="space-y-1 w-full md:w-64">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
-                    <select id="viewFilter" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
-                        <option value="all">Semua Lokasi Warehouse</option>
-                    </select>
-                </div>
-
-                <!-- Dropdown Mode Selector -->
-                <div class="space-y-1 w-full md:w-48">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Mode Tampilan</label>
-                    <select id="modeSelector" onchange="switchView(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all appearance-none cursor-pointer">
-                        <option value="grid">Mode Kartu</option>
-                        <option value="table">Mode Tabel</option>
-                    </select>
+                <div class="flex gap-2 self-start md:self-center">
+                    <button onclick="document.getElementById('importFileInput').click()" class="bg-white hover:bg-slate-50 text-slate-700 px-4 py-1.5 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-colors shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        Import Excel
+                    </button>
                 </div>
             </div>
-            
-            <div class="flex flex-wrap gap-2 w-full lg:w-auto justify-end">
-                <button onclick="exportExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-emerald-100">Ekspor Excel</button>
-                <button onclick="exportWord()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-blue-100">Ekspor Word</button>
+
+            <div class="flex flex-col xl:flex-row justify-between items-center gap-6 bg-slate-100/50 p-4 rounded-2xl border border-slate-200/50">
+                <div class="flex flex-wrap items-end gap-4 w-full xl:w-auto">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Tampilan</label>
+                        <div class="relative min-w-[125px]">
+                            <select id="modeSelector" onchange="switchView(this.value)" class="w-full bg-white border border-slate-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer h-[38px] shadow-sm">
+                                <option value="grid">Mode Kartu</option>
+                                <option value="table" selected>Mode Tabel</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+                                <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 w-full md:w-44 lg:w-56">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Cari Barcode / Lokasi</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" oninput="renderUI()" placeholder="Cari..." 
+                                class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 w-full md:w-36">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
+                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                    </div>
+
+                    <div class="space-y-1 w-full md:w-36">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
+                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                    </div>
+
+                    <div class="pb-0.5">
+                        <button onclick="resetFilters()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm h-[38px]">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full xl:w-auto justify-end items-end">
+                    <button onclick="loadData()" class="bg-white hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl transition-colors border border-slate-200 flex items-center justify-center h-[38px] shadow-sm" title="Refresh Data">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                    <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors h-[38px]">Excel</button>
+                    <button onclick="exportWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition-colors h-[38px]">Word</button>
+                </div>
             </div>
         </div>
 
@@ -159,13 +263,19 @@
         // --- KONFIGURASI SUPABASE ---
         const SB_URL = 'https://wqgqyrqjtazqkdellkbo.supabase.co'; 
         const SB_KEY = 'sb_publishable_y2KBNtIQG1e7TWrJbiQFJg_jjykI3bC'; 
+        const TABLE_NAME = 'stock_opname'; 
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let inventoryData = {};
-        let currentView = 'grid';
+        let currentView = 'table';
+        let sortConfig = { key: 'created_at', direction: 'desc' }; 
+        let lastScannedId = null;
 
-        // Inisialisasi
         document.addEventListener('DOMContentLoaded', async () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+
             if (!SB_URL || !SB_KEY) {
                 updateStatus('bg-red-500', 'API Belum Diatur');
                 return;
@@ -177,7 +287,7 @@
         async function initConnection() {
             try {
                 updateStatus('bg-amber-500', 'Koneksi...');
-                const { error } = await supabaseClient.from('stock_opname').select('id').limit(1);
+                const { error } = await supabaseClient.from(TABLE_NAME).select('id').limit(1);
                 if (error) throw error;
                 
                 updateStatus('bg-green-500', 'Warehouse Online');
@@ -196,8 +306,11 @@
             }
         }
 
-        function toggleLoading(show) {
-            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        function toggleLoading(show, text = "Memproses Data...") {
+            const overlay = document.getElementById('loadingOverlay');
+            const label = document.getElementById('loadingText');
+            if (label) label.innerText = text;
+            if (overlay) overlay.classList.toggle('hidden', !show);
         }
 
         function switchView(view) {
@@ -205,248 +318,306 @@
             renderUI();
         }
 
-        async function loadData() {
-            const { data, error } = await supabaseClient
-                .from('stock_opname')
-                .select('*')
-                .order('area', { ascending: true });
-
-            if (!error && data) {
-                inventoryData = {};
-                data.forEach(item => {
-                    if (!inventoryData[item.area]) inventoryData[item.area] = [];
-                    inventoryData[item.area].push(item);
-                });
-                
-                updateFilterDropdown();
-                renderUI();
+        function toggleSort(key) {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
             }
+            renderUI();
         }
 
-        function updateFilterDropdown() {
-            const filterSelect = document.getElementById('viewFilter');
-            const currentValue = filterSelect.value;
-            const areas = Object.keys(inventoryData).sort();
-            
-            let html = '<option value="all">Semua Lokasi Warehouse</option>';
-            areas.forEach(area => {
-                // Tampilan dropdown mengikuti apa yang ada di DB
-                html += `<option value="${area}">${area.toUpperCase()}</option>`;
-            });
-            
-            filterSelect.innerHTML = html;
-            if (Array.from(filterSelect.options).some(o => o.value === currentValue)) {
-                filterSelect.value = currentValue;
+        function resetFilters() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            document.getElementById('searchInput').value = '';
+            renderUI();
+        }
+
+        async function loadData() {
+            toggleLoading(true);
+            try {
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*');
+
+                if (error) throw error;
+
+                inventoryData = {};
+                if (data) {
+                    data.forEach(item => {
+                        const loc = (item.area || "LOKASI TIDAK DISET").toUpperCase();
+                        if (!inventoryData[loc]) inventoryData[loc] = [];
+                        inventoryData[loc].push(item);
+                    });
+                }
+                renderUI();
+                updateStatus('bg-green-500', 'Tersinkron');
+            } catch (e) {
+                updateStatus('bg-red-500', 'Gagal Memuat');
+            } finally {
+                toggleLoading(false);
             }
         }
 
         async function saveToCloud() {
             let area = document.getElementById('areaInput').value;
             const barcode = document.getElementById('barcodeInput').value.trim();
-            const qtyStr = document.getElementById('qtyInput').value;
-            const qty = parseInt(qtyStr) || 1;
+            const qtyInput = document.getElementById('qtyInput');
+            const qty = parseInt(qtyInput.value) || 1;
 
             if (!barcode) return;
 
-            // Transformasi input ke format Database: "Warehouse Area X"
-            if (area.startsWith('Warehouse') && !area.includes('Area')) {
-                area = area.replace('Warehouse', 'Warehouse Area');
-            }
-
-            const tableName = 'stock_opname';
-            toggleLoading(true);
-
+            toggleLoading(true, "Menyimpan...");
             try {
                 const { data: existingData } = await supabaseClient
-                    .from(tableName)
+                    .from(TABLE_NAME)
                     .select('id, qty')
                     .eq('area', area)
                     .eq('barcode', barcode)
-                    .single();
+                    .maybeSingle();
 
+                let result;
                 if (existingData) {
-                    await supabaseClient
-                        .from(tableName)
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME)
                         .update({ qty: existingData.qty + qty })
-                        .eq('id', existingData.id);
+                        .eq('id', existingData.id)
+                        .select().single();
+                    if (error) throw error;
+                    result = data;
                 } else {
-                    await supabaseClient
-                        .from(tableName)
-                        .insert([{ area, barcode, qty }]);
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .insert([{ area, barcode, qty }])
+                        .select().single();
+                    if (error) throw error;
+                    result = data;
                 }
 
+                lastScannedId = result.id;
                 document.getElementById('barcodeInput').value = '';
                 document.getElementById('barcodeInput').focus();
+                qtyInput.value = 1;
                 await loadData();
             } catch (err) {
-                console.error(err);
+                updateStatus('bg-red-500', 'Gagal Simpan');
             } finally {
                 toggleLoading(false);
             }
         }
 
-        function getFilteredAreas() {
-            const filterValue = document.getElementById('viewFilter').value;
-            let areas = Object.keys(inventoryData).sort();
+        async function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            if (filterValue !== 'all') {
-                return areas.filter(a => a === filterValue);
+            toggleLoading(true, "Membaca Excel...");
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+                    if (jsonData.length === 0) throw new Error("File Kosong");
+
+                    toggleLoading(true, `Import ${jsonData.length} data...`);
+                    for (let row of jsonData) {
+                        const area = (row.Lokasi || row.Area || "LOKASI TIDAK DISET").toString();
+                        const barcode = (row.Barcode || "").toString();
+                        const qty = parseInt(row.Qty || row.Jumlah || 0);
+
+                        if (barcode && qty > 0) {
+                            const { data: existing } = await supabaseClient
+                                .from(TABLE_NAME).select('id, qty').eq('area', area).eq('barcode', barcode).maybeSingle();
+
+                            if (existing) {
+                                await supabaseClient.from(TABLE_NAME).update({ qty: existing.qty + qty }).eq('id', existing.id);
+                            } else {
+                                await supabaseClient.from(TABLE_NAME).insert([{ area, barcode, qty }]);
+                            }
+                        }
+                    }
+                    await loadData();
+                } catch (err) {
+                    alert("Error: Pastikan kolom adalah 'Lokasi', 'Barcode', dan 'Qty'");
+                } finally {
+                    toggleLoading(false);
+                    event.target.value = "";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function openEditModal(id, qty, barcode) {
+            document.getElementById('editItemId').value = id;
+            document.getElementById('editQtyInput').value = qty;
+            document.getElementById('editItemCode').innerText = "Barcode: " + barcode;
+            document.getElementById('editModal').classList.add('modal-active');
+        }
+
+        function closeEditModal() { document.getElementById('editModal').classList.remove('modal-active'); }
+
+        async function confirmEdit() {
+            const id = document.getElementById('editItemId').value;
+            const newQty = parseInt(document.getElementById('editQtyInput').value);
+            if (isNaN(newQty) || newQty < 1) return;
+
+            toggleLoading(true, "Update...");
+            closeEditModal();
+            try {
+                await supabaseClient.from(TABLE_NAME).update({ qty: newQty }).eq('id', id);
+                await loadData();
+            } catch (err) { alert("Gagal update"); }
+            finally { toggleLoading(false); }
+        }
+
+        function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('modal-active'); }
+
+        function deleteItem(id) {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('modal-active');
+            document.getElementById('btnConfirmDelete').onclick = async () => {
+                modal.classList.remove('modal-active');
+                toggleLoading(true, "Hapus...");
+                try {
+                    await supabaseClient.from(TABLE_NAME).delete().eq('id', id);
+                    await loadData();
+                } catch (err) { alert("Gagal hapus"); }
+                finally { toggleLoading(false); }
+            };
+        }
+
+        function parseLocalDate(dateStr, isEnd = false) {
+            if (!dateStr) return null;
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
+            isEnd ? date.setHours(23, 59, 59, 999) : date.setHours(0, 0, 0, 0);
+            return date.getTime();
+        }
+
+        function getFilteredAndSortedData() {
+            const startVal = document.getElementById('startDate').value;
+            const endVal = document.getElementById('endDate').value;
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusInfo = document.getElementById('viewStatusInfo');
+            
+            const startTime = parseLocalDate(startVal, false);
+            const endTime = parseLocalDate(endVal, true);
+
+            if (startVal || endVal) {
+                statusInfo.innerText = `Range: ${startVal || '?'} s/d ${endVal || '?'}`;
+                statusInfo.className = "text-emerald-500 text-sm font-semibold italic";
+            } else {
+                statusInfo.innerText = "Menampilkan data bulan ini";
+                statusInfo.className = "text-indigo-500 text-sm font-semibold italic";
             }
-            return areas;
+
+            let flatData = [];
+            Object.keys(inventoryData).forEach(loc => {
+                inventoryData[loc].forEach(item => {
+                    const dateObj = new Date(item.created_at);
+                    let pass = true;
+
+                    if (startVal || endVal) {
+                        if (startTime && dateObj.getTime() < startTime) pass = false;
+                        if (endTime && dateObj.getTime() > endTime) pass = false;
+                    } else {
+                        const now = new Date();
+                        if (dateObj.getMonth() !== now.getMonth() || dateObj.getFullYear() !== now.getFullYear()) pass = false;
+                    }
+
+                    if (search) {
+                        const match = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
+                        if (!match) pass = false;
+                    }
+
+                    if (pass) flatData.push(item);
+                });
+            });
+
+            flatData.sort((a, b) => {
+                let vA = a[sortConfig.key], vB = b[sortConfig.key];
+                if (sortConfig.key === 'created_at') { vA = new Date(vA).getTime(); vB = new Date(vB).getTime(); }
+                else if (typeof vA === 'string') { vA = vA.toLowerCase(); vB = vB.toLowerCase(); }
+                return vA < vB ? (sortConfig.direction === 'asc' ? -1 : 1) : (sortConfig.direction === 'asc' ? 1 : -1);
+            });
+
+            return flatData;
         }
 
         function renderUI() {
             const container = document.getElementById('stockContainer');
-            const areas = getFilteredAreas();
+            const data = getFilteredAndSortedData();
 
-            if (areas.length === 0) {
-                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Belum ada data Warehouse tersimpan.</p></div>`;
+            if (data.length === 0) {
+                container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-500 font-medium">Data Kosong.</p></div>`;
                 return;
             }
 
             container.innerHTML = "";
-
-            if (currentView === 'grid') {
-                renderGridView(container, areas);
-            } else {
-                renderTableView(container, areas);
-            }
+            currentView === 'grid' ? renderGridView(container, data) : renderTableView(container, data);
         }
 
-        function renderGridView(container, areas) {
-            areas.forEach(area => {
+        function renderGridView(container, flatData) {
+            const grouped = {};
+            flatData.forEach(item => {
+                const loc = item.area.toUpperCase();
+                if(!grouped[loc]) grouped[loc] = [];
+                grouped[loc].push(item);
+            });
+
+            Object.keys(grouped).sort().forEach(loc => {
                 const section = document.createElement('div');
                 section.className = "bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8";
-                
-                let html = `
-                    <div class="bg-slate-50 border-b border-slate-100 px-8 py-5 flex justify-between items-center">
-                        <h3 class="text-xl font-extrabold text-slate-900 tracking-tight underline decoration-indigo-500 decoration-4 underline-offset-8">${area.toUpperCase()}</h3>
-                        <div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            ${inventoryData[area].length} Item
-                        </div>
-                    </div>
-                    <div class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                `;
+                let html = `<div class="bg-slate-50 border-b border-slate-100 px-8 py-5 flex justify-between items-center"><h3 class="text-xl font-extrabold text-slate-900 underline decoration-indigo-500 decoration-4 underline-offset-8">${loc}</h3><div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500">${grouped[loc].length} Item</div></div><div class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">`;
 
-                inventoryData[area].forEach(item => {
-                    html += `
-                        <div class="barcode-card group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 transition-all">
-                            <div class="barcode-container mb-4">
-                                <svg id="bc-${item.id}"></svg>
-                            </div>
-                            <div class="text-center pt-3 border-t border-slate-50">
-                                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${item.barcode}</span>
-                                <div class="text-2xl font-black text-slate-800">QTY: ${item.qty}</div>
-                            </div>
-                        </div>
-                    `;
+                grouped[loc].forEach(item => {
+                    const isNew = item.id === lastScannedId ? 'ring-2 ring-indigo-500 bg-indigo-50/30' : '';
+                    html += `<div class="group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 transition-all ${isNew}"><div class="barcode-container mb-4"><svg id="bc-${item.id}"></svg></div><div class="text-center pt-3 border-t border-slate-50"><span class="block text-[10px] font-black text-slate-400 mb-1">${item.barcode}</span><div class="text-2xl font-black text-slate-800">QTY: ${item.qty}</div><div class="text-[9px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleString('id-ID')}</div></div></div>`;
                 });
-
-                html += `</div>`;
-                section.innerHTML = html;
+                section.innerHTML = html + "</div>";
                 container.appendChild(section);
-
-                inventoryData[area].forEach(item => {
-                    JsBarcode(`#bc-${item.id}`, item.barcode, {
-                        format: "CODE128", width: 1.8, height: 45, displayValue: false, margin: 0
-                    });
-                });
+                grouped[loc].forEach(item => JsBarcode(`#bc-${item.id}`, item.barcode, { format: "CODE128", width: 1.8, height: 45, displayValue: false, margin: 0 }));
             });
         }
 
-        function renderTableView(container, areas) {
+        function getSortIcon(key) {
+            if (sortConfig.key !== key) return `<svg class="w-3 h-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+            return sortConfig.direction === 'asc' ? `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M11.47 3.82a.75.75 0 011.06 0l5 5a.75.75 0 01-1.06 1.06L12.75 6.16V20a.75.75 0 01-1.5 0V6.16L7.53 9.88a.75.75 0 01-1.06-1.06l5-5z"/></svg>` : `<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3.25a.75.75 0 01.75.75v14.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V4a.75.75 0 01.75-.75z"/></svg>`;
+        }
+
+        function renderTableView(container, flatData) {
             const wrapper = document.createElement('div');
             wrapper.className = "bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden";
-            
-            let html = `
-                <div class="overflow-x-auto">
-                    <table class="excel-table min-w-full text-left">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-100">
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-indigo-600">LOKASI</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Barcode (Visual)</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Kode Barcode</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Jumlah (QTY)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-            `;
+            let html = `<div class="overflow-x-auto"><table class="excel-table min-w-full text-left table-auto"><thead><tr class="bg-slate-50 border-b border-slate-100"><th onclick="toggleSort('area')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-24"><div class="flex items-center gap-2">Lokasi ${getSortIcon('area')}</div></th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-40 text-center">Barcode</th><th onclick="toggleSort('barcode')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap"><div class="flex items-center gap-2">Kode ${getSortIcon('barcode')}</div></th><th onclick="toggleSort('qty')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-24"><div class="flex items-center gap-2">Qty ${getSortIcon('qty')}</div></th><th onclick="toggleSort('created_at')" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase whitespace-nowrap w-40"><div class="flex items-center gap-2">Waktu ${getSortIcon('created_at')}</div></th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">`;
 
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    html += `
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-semibold text-slate-700">${area.toUpperCase()}</td>
-                            <td class="px-6 py-4">
-                                <div class="w-32">
-                                    <svg id="bt-${item.id}"></svg>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td>
-                            <td class="px-6 py-4">
-                                <span class="text-lg font-bold text-slate-900">${item.qty}</span>
-                            </td>
-                        </tr>
-                    `;
-                });
+            flatData.forEach(item => {
+                const isNew = item.id === lastScannedId ? 'new-entry' : '';
+                const time = new Date(item.created_at).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                html += `<tr class="hover:bg-slate-50/50 transition-colors ${isNew}"><td class="px-6 py-4 text-sm font-semibold text-slate-700">${item.area.toUpperCase()}</td><td class="px-6 py-4 text-center"><div class="w-full flex justify-center"><svg id="bt-${item.id}" class="max-w-[140px] h-auto"></svg></div></td><td class="px-6 py-4 text-sm font-mono text-slate-600">${item.barcode}</td><td class="px-6 py-4"><span class="text-lg font-bold text-slate-900">${item.qty}</span></td><td class="px-6 py-4 text-[11px] text-slate-400 font-medium">${time}</td><td class="px-6 py-4 text-center"><div class="flex justify-center gap-2"><button onclick="openEditModal('${item.id}', ${item.qty}, '${item.barcode}')" class="p-2 hover:bg-indigo-50 text-indigo-600 rounded-xl transition-all border border-indigo-100 shadow-sm active:scale-95"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button><button onclick="deleteItem('${item.id}')" class="p-2 hover:bg-red-50 text-red-600 rounded-xl transition-all border border-red-100 shadow-sm active:scale-95"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></div></td></tr>`;
             });
-
-            html += `</tbody></table></div>`;
-            wrapper.innerHTML = html;
-            container.appendChild(wrapper);
-
-            // Generate Barcodes for Table View
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    JsBarcode(`#bt-${item.id}`, item.barcode, {
-                        format: "CODE128", width: 1.2, height: 30, displayValue: false, margin: 0
-                    });
-                });
-            });
+            container.appendChild(wrapper).innerHTML = html + "</tbody></table></div>";
+            flatData.forEach(item => JsBarcode(`#bt-${item.id}`, item.barcode, { format: "CODE128", width: 1.5, height: 35, displayValue: false, margin: 0 }));
         }
 
         function exportExcel() {
-            const areas = getFilteredAreas();
-            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
-            
-            const flatData = [];
-            areas.forEach(area => {
-                inventoryData[area].forEach(item => {
-                    flatData.push({ 
-                        "Lokasi": area.toUpperCase(), 
-                        "Barcode": item.barcode, 
-                        "Jumlah (Qty)": item.qty, 
-                        "Waktu Update": new Date(item.created_at).toLocaleString() 
-                    });
-                });
-            });
-            const ws = XLSX.utils.json_to_sheet(flatData);
+            const data = getFilteredAndSortedData();
+            if (data.length === 0) return;
+            const ws = XLSX.utils.json_to_sheet(data.map(item => ({ "Lokasi": item.area, "Barcode": item.barcode, "Qty": item.qty, "Waktu": new Date(item.created_at).toLocaleString() })));
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Warehouse");
-            XLSX.writeFile(wb, `Warehouse_Stock_${new Date().getTime()}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, `Warehouse_Export_${new Date().getTime()}.xlsx`);
         }
 
         function exportWord() {
-            const areas = getFilteredAreas();
-            if (areas.length === 0) return alert('Tidak ada data untuk diekspor');
-            
-            let docHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head><meta charset='utf-8'><title>Laporan Warehouse</title><style>
-            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } th, td { border: 1px solid black; padding: 10px; text-align: left; }
-            h2 { border-bottom: 2px solid #4f46e5; padding-bottom: 5px; color: #4f46e5; margin-top: 20px; }
-            </style></head><body><h1>LAPORAN STOCK OPNAME WAREHOUSE</h1><p>Filter: ${document.getElementById('viewFilter').options[document.getElementById('viewFilter').selectedIndex].text}</p>`;
-            
-            let body = "";
-            areas.forEach(area => {
-                body += `<h2>${area.toUpperCase()}</h2><table><thead><tr><th>Barcode</th><th>Jumlah</th></tr></thead><tbody>`;
-                inventoryData[area].forEach(item => {
-                    body += `<tr><td>${item.barcode}</td><td>${item.qty}</td></tr>`;
-                });
-                body += `</tbody></table>`;
-            });
-
-            const fullContent = docHeader + body + "</body></html>";
-            const blob = new Blob(['\ufeff', fullContent], { type: 'application/msword' });
+            const data = getFilteredAndSortedData();
+            if (data.length === 0) return;
+            let html = `<html><body><h1>LAPORAN WAREHOUSE</h1><table border="1"><tr><th>Lokasi</th><th>Barcode</th><th>Qty</th><th>Waktu</th></tr>`;
+            data.forEach(item => { html += `<tr><td>${item.area}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString()}</td></tr>`; });
+            const blob = new Blob(['\ufeff', html + "</table></body></html>"], { type: 'application/msword' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = "Laporan_Warehouse.doc";
