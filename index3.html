@@ -73,10 +73,13 @@
 <body class="bg-slate-50 min-h-screen">
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-[70] hidden flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-[70] hidden flex flex-col items-center justify-center text-center px-4">
         <div class="loader w-12 h-12 border-4 border-slate-200 rounded-full mb-4"></div>
-        <p class="text-indigo-600 font-semibold animate-pulse">Memproses Data...</p>
+        <p id="loadingText" class="text-indigo-600 font-semibold animate-pulse">Memproses Data...</p>
     </div>
+
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="importFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFileImport(event)">
 
     <!-- SweetAlert-like Delete Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
@@ -197,8 +200,11 @@
                     <h2 class="text-2xl font-bold text-slate-800">Daftar Inventaris Sparepart</h2>
                     <p id="viewStatusInfo" class="text-indigo-500 text-sm font-semibold italic">Menampilkan data bulan ini</p>
                 </div>
-                <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold bg-white px-3 py-1 rounded-full border border-slate-100 self-start md:self-center">
-                    Auto-refresh: Aktif
+                <div class="flex gap-2 self-start md:self-center">
+                    <button onclick="document.getElementById('importFileInput').click()" class="bg-white hover:bg-slate-50 text-slate-700 px-4 py-1.5 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        Import Excel
+                    </button>
                 </div>
             </div>
 
@@ -242,18 +248,15 @@
 
                     <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
-                        <input type="date" id="startDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                        <input type="date" id="startDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
                     <div class="space-y-1 w-full md:w-36">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
-                        <input type="date" id="endDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
+                        <input type="date" id="endDate" onchange="renderUI()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all h-[38px]">
                     </div>
 
                     <div class="pb-0.5 flex gap-2">
-                        <button onclick="renderUI()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm h-[38px]" title="Terapkan Filter Sekarang">
-                            Tampilkan
-                        </button>
                         <button onclick="resetFilters()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm h-[38px]" title="Reset Semua Filter">
                             Reset
                         </button>
@@ -292,6 +295,11 @@
         let lastScannedId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Set tanggal default ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+
             if (!SB_URL || !SB_KEY) {
                 updateStatus('bg-red-500', 'API Belum Diatur');
                 return;
@@ -323,8 +331,10 @@
             }
         }
 
-        function toggleLoading(show) {
+        function toggleLoading(show, text = "Memproses Data...") {
             const overlay = document.getElementById('loadingOverlay');
+            const label = document.getElementById('loadingText');
+            if (label) label.innerText = text;
             if (overlay) overlay.classList.toggle('hidden', !show);
         }
 
@@ -344,8 +354,10 @@
         }
 
         function resetFilters() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
+            // Reset ke tanggal hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
             document.getElementById('viewFilter').value = 'all';
             document.getElementById('searchInput').value = '';
             renderUI();
@@ -404,7 +416,7 @@
 
             if (!barcode) return;
 
-            toggleLoading(true);
+            toggleLoading(true, "Menyimpan...");
             updateStatus('bg-amber-500', 'Menyimpan...');
 
             try {
@@ -454,7 +466,71 @@
             }
         }
 
-        // --- CUSTOM MODAL ACTIONS ---
+        async function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            toggleLoading(true, "Membaca File Excel...");
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length === 0) {
+                        alert("File kosong!");
+                        toggleLoading(false);
+                        return;
+                    }
+
+                    toggleLoading(true, `Mengimport ${jsonData.length} baris...`);
+                    
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        const area = (row.Area || row.area || "").toString().trim().toUpperCase();
+                        const barcode = (row.Barcode || row.barcode || "").toString().trim();
+                        const qty = parseInt(row.Qty || row.qty || row.Jumlah || 0);
+
+                        if (area && barcode && qty > 0) {
+                            const { data: existing } = await supabaseClient
+                                .from('sparepart')
+                                .select('id, qty')
+                                .eq('area', area)
+                                .eq('barcode', barcode)
+                                .maybeSingle();
+
+                            if (existing) {
+                                await supabaseClient
+                                    .from('sparepart')
+                                    .update({ qty: existing.qty + qty })
+                                    .eq('id', existing.id);
+                            } else {
+                                await supabaseClient
+                                    .from('sparepart')
+                                    .insert([{ area, barcode, qty }]);
+                            }
+                        }
+                    }
+
+                    event.target.value = "";
+                    await loadData();
+                    updateStatus('bg-green-500', 'Import Selesai');
+                } catch (err) {
+                    console.error("Import error:", err);
+                    updateStatus('bg-red-500', 'Gagal Import');
+                    alert("Gagal memproses file. Pastikan format kolom benar (Area, Barcode, Qty).");
+                } finally {
+                    toggleLoading(false);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
         function openEditModal(id, currentQty, barcode) {
             document.getElementById('editItemId').value = id;
             document.getElementById('editQtyInput').value = currentQty;
@@ -473,7 +549,7 @@
             
             if (isNaN(newQty) || newQty < 1) return;
 
-            toggleLoading(true);
+            toggleLoading(true, "Memperbarui Stok...");
             closeEditModal();
 
             try {
@@ -505,7 +581,7 @@
             
             btnDelete.onclick = async function() {
                 modal.classList.remove('modal-active');
-                toggleLoading(true);
+                toggleLoading(true, "Menghapus...");
                 try {
                     const { error } = await supabaseClient
                         .from('sparepart')
@@ -546,15 +622,9 @@
             const startTime = parseLocalDate(startVal, false);
             const endTime = parseLocalDate(endVal, true);
 
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
-
-            // Cek apakah user sedang melakukan filter manual
-            const isFilteringDates = startVal || endVal;
-
-            if (isFilteringDates) {
-                statusInfo.innerText = "Menampilkan data berdasarkan filter tanggal";
+            // Jika ada nilai di input tanggal, kita tampilkan info filter aktif
+            if (startVal || endVal) {
+                statusInfo.innerText = `Menampilkan data dari ${startVal || '...'} s/d ${endVal || '...'}`;
                 statusInfo.classList.replace('text-indigo-500', 'text-emerald-500');
             } else {
                 statusInfo.innerText = "Menampilkan data bulan ini";
@@ -571,16 +641,15 @@
                         let passDate = true;
                         let passSearch = true;
                         
-                        // Logika filter: Jika user tidak mengisi filter tanggal, 
-                        // maka default hanya menampilkan data bulan ini.
-                        if (!isFilteringDates) {
-                            if (dateObj.getMonth() !== currentMonth || dateObj.getFullYear() !== currentYear) {
-                                passDate = false;
-                            }
-                        } else {
-                            // Jika user memfilter tanggal, gunakan range waktu
+                        // Gunakan filter tanggal jika diisi, jika tidak hanya tampilkan bulan ini
+                        if (startVal || endVal) {
                             if (startTime && itemTime < startTime) passDate = false;
                             if (endTime && itemTime > endTime) passDate = false;
+                        } else {
+                            const now = new Date();
+                            if (dateObj.getMonth() !== now.getMonth() || dateObj.getFullYear() !== now.getFullYear()) {
+                                passDate = false;
+                            }
                         }
 
                         if (searchKeyword) {
@@ -623,7 +692,7 @@
             if (dataToRender.length === 0) {
                 container.innerHTML = `<div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200">
                     <p class="text-slate-500 font-medium">Data tidak ditemukan.</p>
-                    <p class="text-slate-400 text-xs mt-1">Gunakan filter tanggal untuk melihat data bulan lainnya.</p>
+                    <p class="text-slate-400 text-xs mt-1">Gunakan filter tanggal untuk melihat data di luar rentang ini.</p>
                 </div>`;
                 return;
             }
@@ -735,7 +804,7 @@
                         <td class="px-6 py-4 text-[11px] text-slate-400 font-medium">
                             ${timeString}
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-6 py-4">
                             <div class="flex justify-center gap-2">
                                 <button onclick="openEditModal('${item.id}', ${item.qty}, '${item.barcode}')" class="p-2.5 hover:bg-indigo-50 text-indigo-600 rounded-xl transition-all border border-indigo-100 shadow-sm active:scale-95" title="Edit Qty">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
