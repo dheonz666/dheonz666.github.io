@@ -65,6 +65,18 @@
             0% { background-color: #eef2ff; }
             100% { background-color: transparent; }
         }
+
+        /* Custom Scrollbar for Dropdown */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -139,26 +151,30 @@
         <!-- Input Section -->
         <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 mb-10 border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                <div class="space-y-2">
+                
+                <!-- Searchable Area Warehouse -->
+                <div class="space-y-2 relative">
                     <label class="text-xs font-bold text-slate-500 uppercase ml-1">Area Warehouse</label>
-                    <div class="relative">
-                        <select id="areaInput" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none appearance-none cursor-pointer">
-                            <script>
-                                // Generate Warehouse A1-F6 sesuai index2.html
-                                const whLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-                                whLetters.forEach(letter => {
-                                    document.write(`<optgroup label="WAREHOUSE AREA ${letter}">`);
-                                    for(let i=1; i<=6; i++) {
-                                        document.write(`<option value="Warehouse Area ${letter}${i}">Area ${letter}${i}</option>`);
-                                    }
-                                    document.write(`</optgroup>`);
-                                });
-                            </script>
-                        </select>
-                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <div id="areaDropdown" class="relative group">
+                        <button type="button" onclick="toggleAreaDropdown()" class="w-full bg-slate-50 border-0 rounded-2xl p-4 ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 transition-all outline-none flex justify-between items-center text-left">
+                            <span id="areaDisplayValue" class="truncate font-medium text-slate-700">Pilih Area...</span>
+                            <svg class="h-4 w-4 text-slate-400 transition-transform duration-200 group-[.open]:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Content -->
+                        <div id="areaMenu" class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 hidden flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                            <div class="p-3 border-b border-slate-50">
+                                <input type="text" id="areaSearch" oninput="filterAreaOptions()" placeholder="Cari area (misal: A1)..." class="w-full bg-slate-50 border-0 rounded-xl px-4 py-2 text-sm ring-1 ring-slate-200 focus:ring-2 focus:indigo-500 outline-none">
+                            </div>
+                            <div id="areaOptionsList" class="max-h-60 overflow-y-auto custom-scrollbar py-2">
+                                <!-- Options populated by JS -->
+                            </div>
                         </div>
                     </div>
+                    <!-- Hidden Input to store the actual value -->
+                    <input type="hidden" id="areaInput" value="A1">
                 </div>
 
                 <div class="space-y-2">
@@ -271,10 +287,20 @@
         let sortConfig = { key: 'created_at', direction: 'desc' }; 
         let lastScannedId = null;
 
+        // --- KONFIGURASI SEARCHABLE SELECT ---
+        const whLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const allAreas = [];
+        whLetters.forEach(l => {
+            for(let i=1; i<=6; i++) allAreas.push(`${l}${i}`);
+        });
+
         document.addEventListener('DOMContentLoaded', async () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
+
+            // Inisialisasi Area Dropdown
+            setupAreaDropdown();
 
             if (!SB_URL || !SB_KEY) {
                 updateStatus('bg-red-500', 'API Belum Diatur');
@@ -282,7 +308,114 @@
             }
             await initConnection();
             document.getElementById('barcodeInput').focus();
+
+            // Close dropdown when click outside
+            window.addEventListener('click', (e) => {
+                const dd = document.getElementById('areaDropdown');
+                if (dd && !dd.contains(e.target)) {
+                    closeAreaDropdown();
+                }
+            });
         });
+
+        function setupAreaDropdown() {
+            const display = document.getElementById('areaDisplayValue');
+            const hiddenInput = document.getElementById('areaInput');
+
+            // Set default
+            const defaultValue = "A1";
+            hiddenInput.value = defaultValue;
+            display.innerText = defaultValue;
+
+            renderAreaOptions(allAreas);
+        }
+
+        function renderAreaOptions(options) {
+            const listContainer = document.getElementById('areaOptionsList');
+            const hiddenInput = document.getElementById('areaInput');
+            const searchTerm = document.getElementById('areaSearch').value.toLowerCase();
+            listContainer.innerHTML = '';
+
+            if (options.length === 0) {
+                listContainer.innerHTML = '<div class="px-4 py-2 text-sm text-slate-400 italic">Tidak ditemukan...</div>';
+                return;
+            }
+
+            // Jika tidak sedang mencari, tampilkan dengan pengepala Grup (Area A, Area B, dst)
+            if (!searchTerm) {
+                whLetters.forEach(letter => {
+                    // Cek jika ada item untuk grup ini
+                    const letterOptions = options.filter(opt => opt.startsWith(letter));
+                    if (letterOptions.length > 0) {
+                        // Tambah Pengepala Grup
+                        const header = document.createElement('div');
+                        header.className = "px-4 py-2 mt-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-slate-50/50";
+                        header.innerText = `Area ${letter}`;
+                        listContainer.appendChild(header);
+
+                        // Tambah Item dalam grup
+                        letterOptions.forEach(val => {
+                            const btn = createOptionButton(val, hiddenInput.value === val);
+                            listContainer.appendChild(btn);
+                        });
+                    }
+                });
+            } else {
+                // Jika sedang mencari, tampilkan daftar rata
+                options.forEach(val => {
+                    const btn = createOptionButton(val, hiddenInput.value === val);
+                    listContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function createOptionButton(val, isActive) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `w-full text-left px-6 py-2.5 text-sm transition-colors hover:bg-indigo-50 flex items-center justify-between ${isActive ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600'}`;
+            btn.innerHTML = `<span>${val}</span>${isActive ? '<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}`;
+            btn.onclick = () => selectArea(val);
+            return btn;
+        }
+
+        function toggleAreaDropdown() {
+            const menu = document.getElementById('areaMenu');
+            const wrapper = document.getElementById('areaDropdown');
+            const isHidden = menu.classList.contains('hidden');
+            
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex');
+                wrapper.classList.add('open');
+                document.getElementById('areaSearch').value = '';
+                renderAreaOptions(allAreas);
+                setTimeout(() => document.getElementById('areaSearch').focus(), 50);
+            } else {
+                closeAreaDropdown();
+            }
+        }
+
+        function closeAreaDropdown() {
+            const menu = document.getElementById('areaMenu');
+            const wrapper = document.getElementById('areaDropdown');
+            if (menu) {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }
+            if (wrapper) wrapper.classList.remove('open');
+        }
+
+        function filterAreaOptions() {
+            const term = document.getElementById('areaSearch').value.toLowerCase();
+            const filtered = allAreas.filter(a => a.toLowerCase().includes(term));
+            renderAreaOptions(filtered);
+        }
+
+        function selectArea(val) {
+            document.getElementById('areaInput').value = val;
+            document.getElementById('areaDisplayValue').innerText = val;
+            closeAreaDropdown();
+        }
 
         async function initConnection() {
             try {
@@ -615,7 +748,7 @@
         function exportWord() {
             const data = getFilteredAndSortedData();
             if (data.length === 0) return;
-            let html = `<html><body><h1>LAPORAN WAREHOUSE</h1><table border="1"><tr><th>Lokasi</th><th>Barcode</th><th>Qty</th><th>Waktu</th></tr>`;
+            let html = `<html><body><h1>LAPORAN WAREHOUSE</h1><table border="1"><tr><th>Area</th><th>Barcode</th><th>Qty</th><th>Waktu</th></tr>`;
             data.forEach(item => { html += `<tr><td>${item.area}</td><td>${item.barcode}</td><td>${item.qty}</td><td>${new Date(item.created_at).toLocaleString()}</td></tr>`; });
             const blob = new Blob(['\ufeff', html + "</table></body></html>"], { type: 'application/msword' });
             const link = document.createElement('a');
