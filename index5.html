@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link href="assets/img/scanner.png" rel="icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Opname - Warehouse (Camera Scan)</title>
+    <title>Stock Opname - Warehouse (Flash Support)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -45,9 +45,18 @@
         <div class="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Scan Barcode Kamera</h3>
-                <button onclick="stopScanner()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Flash -->
+                    <button id="torchBtn" onclick="toggleFlash()" class="hidden p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors" title="Toggle Flash">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </button>
+                    <!-- Tombol Close -->
+                    <button onclick="stopScanner()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
             </div>
             <div class="p-4 bg-slate-50">
                 <div id="reader" class="w-full"></div>
@@ -183,6 +192,7 @@
 
         let selectedAreaValue = ""; 
         let html5QrCode = null;
+        let isFlashOn = false;
 
         // --- UTILITY COOKIE ---
         const CookieHelper = {
@@ -236,18 +246,53 @@
                     { facingMode: "environment" }, 
                     config, 
                     (decodedText) => {
-                        // Jika berhasil scan
                         document.getElementById('barcodeInput').value = decodedText;
                         stopScanner();
                         Toast.fire({ icon: 'success', title: `Barcode terdeteksi: ${decodedText}` });
-                        // Simpan otomatis bisa diaktifkan di sini:
-                        // saveToLocal(); 
                     }
                 );
+
+                // Periksa apakah perangkat mendukung flash
+                const track = html5QrCode.getRunningTrack();
+                const capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    document.getElementById('torchBtn').classList.remove('hidden');
+                } else {
+                    document.getElementById('torchBtn').classList.add('hidden');
+                }
+                isFlashOn = false;
+                updateFlashUI();
+
             } catch (err) {
                 console.error(err);
                 Swal.fire('Error', 'Gagal mengakses kamera. Pastikan izin kamera diaktifkan.', 'error');
                 document.getElementById('scannerModal').classList.add('hidden');
+            }
+        }
+
+        async function toggleFlash() {
+            if (!html5QrCode) return;
+            const track = html5QrCode.getRunningTrack();
+            isFlashOn = !isFlashOn;
+            
+            try {
+                await track.applyConstraints({
+                    advanced: [{ torch: isFlashOn }]
+                });
+                updateFlashUI();
+            } catch (err) {
+                console.error("Gagal toggle flash", err);
+            }
+        }
+
+        function updateFlashUI() {
+            const btn = document.getElementById('torchBtn');
+            if (isFlashOn) {
+                btn.classList.add('bg-yellow-100', 'text-yellow-600');
+                btn.classList.remove('text-slate-400');
+            } else {
+                btn.classList.remove('bg-yellow-100', 'text-yellow-600');
+                btn.classList.add('text-slate-400');
             }
         }
 
