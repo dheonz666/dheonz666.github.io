@@ -243,7 +243,6 @@
 
         // --- SCANNER FUNCTIONS ---
         async function startScanner() {
-            // Deteksi Secure Context
             if (!window.isSecureContext && location.hostname !== "localhost") {
                 Swal.fire({
                     title: 'Protokol Tidak Aman',
@@ -261,7 +260,6 @@
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            // Dapatkan daftar kamera untuk fallback jika facingMode gagal
             try {
                 const devices = await Html5Qrcode.getCameras();
                 if (devices && devices.length > 0) {
@@ -286,7 +284,6 @@
             };
 
             try {
-                // Percobaan pertama dengan kamera belakang otomatis
                 await html5QrCode.start(
                     { facingMode: "environment" }, 
                     config, 
@@ -295,7 +292,6 @@
                 onScannerStarted();
             } catch (err) {
                 console.error("Camera FacingMode Error:", err);
-                // Percobaan kedua: Jika gagal, coba gunakan kamera pertama yang tersedia
                 try {
                     const devices = await Html5Qrcode.getCameras();
                     if (devices && devices.length > 0) {
@@ -311,14 +307,16 @@
         }
 
         function onScanSuccess(decodedText) {
+            // Masukkan hasil scan ke input
             document.getElementById('barcodeInput').value = decodedText;
+            // Tutup scanner
             stopScanner();
-            Toast.fire({ icon: 'success', title: `Berhasil: ${decodedText}` });
+            // Jalankan simpan otomatis langsung
+            saveToLocal();
         }
 
         function onScannerStarted() {
             document.getElementById('cameraStatus').innerText = "Kamera Aktif";
-            // Check flash/torch
             try {
                 const track = html5QrCode.getRunningTrack();
                 const capabilities = track.getCapabilities();
@@ -556,7 +554,7 @@
                 updateFilterDropdown();
                 renderUI();
                 
-                Toast.fire({ icon: 'success', title: 'Data berhasil disimpan' });
+                Toast.fire({ icon: 'success', title: `Data ${barcode} berhasil disimpan` });
 
                 document.getElementById('barcodeInput').value = '';
                 document.getElementById('barcodeInput').focus();
