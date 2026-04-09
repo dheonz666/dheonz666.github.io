@@ -287,11 +287,11 @@
         let sortConfig = { key: 'created_at', direction: 'desc' }; 
         let lastScannedId = null;
 
-        // --- KONFIGURASI SEARCHABLE SELECT ---
+        // --- KONFIGURASI SEARCHABLE SELECT (Diperbarui ke area 1-7) ---
         const whLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
         const allAreas = [];
         whLetters.forEach(l => {
-            for(let i=1; i<=6; i++) allAreas.push(`${l}${i}`);
+            for(let i=1; i<=7; i++) allAreas.push(`${l}${i}`); // i diperbarui ke <= 7
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
