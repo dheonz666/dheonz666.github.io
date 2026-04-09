@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Barcode & QR Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .canvas-container canvas {
+            max-width: 100%;
+            height: auto !important;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-2">Code Generator</h1>
+            <p class="text-slate-600">Buat Barcode dan QR Code secara instan, gratis, dan aman.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Sidebar Controls -->
+            <div class="md:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-800">Pengaturan</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Tipe -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Pilih Jenis</label>
+                            <select id="codeType" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="qr">QR Code</option>
+                                <option value="barcode">Barcode (CODE128)</option>
+                                <option value="ean13">Barcode (EAN-13)</option>
+                            </select>
+                        </div>
+
+                        <!-- Warna -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Warna Kode</label>
+                            <input type="color" id="fgColor" value="#000000" class="w-full h-10 p-1 bg-slate-50 border border-slate-300 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Ukuran -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Skala / Ukuran</label>
+                            <input type="range" id="scale" min="1" max="10" value="4" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Workspace -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Input Area -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Konten / Teks</label>
+                    <textarea id="contentInput" rows="3" class="w-full p-4 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Masukkan URL atau teks di sini..."></textarea>
+                    
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <button onclick="generateCode()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                            Generate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Area -->
+                <div id="previewContainer" class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden">
+                    <div id="placeholder" class="text-slate-400 flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-4"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/></svg>
+                        <p>Preview akan muncul di sini</p>
+                    </div>
+                    <div class="canvas-container hidden" id="resultWrapper">
+                        <canvas id="canvas"></canvas>
+                        <!-- For barcode library which might prefer svg or img in some modes -->
+                        <img id="barcodeImg" class="hidden">
+                    </div>
+
+                    <div id="actionButtons" class="hidden mt-8 w-full flex gap-3">
+                        <button onclick="downloadImage()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                            Unduh Gambar
+                        </button>
+                        <button onclick="copyToClipboard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            Salin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 transition-transform duration-300 flex items-center gap-2">
+        <span id="toastMsg">Berhasil!</span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const contentInput = document.getElementById('contentInput');
+        const codeType = document.getElementById('codeType');
+        const fgColor = document.getElementById('fgColor');
+        const scaleInput = document.getElementById('scale');
+        
+        const resultWrapper = document.getElementById('resultWrapper');
+        const placeholder = document.getElementById('placeholder');
+        const actionButtons = document.getElementById('actionButtons');
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20');
+            }, 3000);
+        }
+
+        function generateCode() {
+            const text = contentInput.value.trim();
+            if (!text) {
+                showToast("Silakan masukkan teks terlebih dahulu!");
+                return;
+            }
+
+            const type = codeType.value;
+            const color = fgColor.value;
+            const scale = parseInt(scaleInput.value);
+
+            // Reset view
+            placeholder.classList.add('hidden');
+            resultWrapper.classList.remove('hidden');
+            actionButtons.classList.remove('hidden');
+
+            try {
+                if (type === 'qr') {
+                    generateQR(text, color, scale);
+                } else {
+                    generateBarcode(text, type, color, scale);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal membuat kode. Periksa format input.");
+            }
+        }
+
+        function generateQR(text, color, scale) {
+            QRCode.toCanvas(canvas, text, {
+                width: scale * 50,
+                margin: 2,
+                color: {
+                    dark: color,
+                    light: '#ffffff'
+                }
+            }, function (error) {
+                if (error) throw error;
+            });
+        }
+
+        function generateBarcode(text, format, color, scale) {
+            // JsBarcode handles EAN13 validation (must be 12-13 digits)
+            if (format === 'ean13' && !/^\d{12,13}$/.test(text)) {
+                showToast("EAN-13 memerlukan 12 atau 13 angka saja.");
+                return;
+            }
+
+            JsBarcode(canvas, text, {
+                format: format === 'ean13' ? "EAN13" : "CODE128",
+                lineColor: color,
+                width: scale / 1.5,
+                height: 100,
+                displayValue: true,
+                background: "#ffffff"
+            });
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = `code-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast("Gambar berhasil diunduh.");
+        }
+
+        function copyToClipboard() {
+            canvas.toBlob(blob => {
+                try {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    navigator.clipboard.write([item]);
+                    showToast("Berhasil disalin ke clipboard!");
+                } catch (err) {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    showToast("Coba gunakan tombol unduh di browser Anda.");
+                }
+            });
+        }
+
+        // Auto-generate on input change for smoother UX
+        contentInput.addEventListener('input', () => {
+            if(contentInput.value.length > 0) {
+                 // debounce would be better here but for simplicity:
+                 // generateCode(); 
+            }
+        });
+    </script>
+</body>
+</html>
