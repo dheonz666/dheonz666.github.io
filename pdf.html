@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to PDF Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #dbeafe;
+        }
+        #image-list img {
+            object-fit: cover;
+            height: 120px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Konverter Gambar ke PDF</h1>
+            <p class="text-slate-500">Ubah gambar Anda menjadi dokumen PDF berkualitas tinggi secara instan.</p>
+        </header>
+
+        <!-- Dropzone -->
+        <div id="dropzone" class="relative group border-2 border-dashed border-slate-300 rounded-2xl p-8 transition-all duration-300 bg-white hover:border-blue-400 hover:shadow-lg text-center cursor-pointer mb-6">
+            <input type="file" id="fileInput" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            <div class="space-y-4">
+                <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto transition-transform group-hover:scale-110">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-lg font-semibold text-slate-700">Klik atau tarik gambar ke sini</p>
+                    <p class="text-sm text-slate-400">Mendukung JPG, PNG, WEBP (Bisa pilih banyak sekaligus)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls (Hidden if no images) -->
+        <div id="controls" class="hidden flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <div class="text-sm font-medium text-slate-600">
+                Total: <span id="image-count" class="text-blue-600 font-bold">0</span> gambar
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <button id="clearBtn" class="flex-1 md:flex-none px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Hapus Semua
+                </button>
+                <button id="downloadBtn" class="flex-1 md:flex-none px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Unduh PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Image Grid -->
+        <div id="image-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+            <!-- Items injected via JS -->
+        </div>
+
+        <!-- Notification Message -->
+        <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 translate-y-20 opacity-0 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 pointer-events-none flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-green-400"></i>
+            <span id="toast-msg">Pesan toast</span>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
+            <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p class="font-bold text-slate-700">Sedang memproses PDF...</p>
+        </div>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const imageList = document.getElementById('image-list');
+        const controls = document.getElementById('controls');
+        const imageCountDisplay = document.getElementById('image-count');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        let images = [];
+
+        // Inisialisasi SortableJS
+        new Sortable(imageList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: () => {
+                // Re-order array based on DOM
+                const newOrder = Array.from(imageList.children).map(el => el.dataset.id);
+                images = newOrder.map(id => images.find(img => img.id === id));
+            }
+        });
+
+        // Event Listeners for Dropzone
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('drag-over');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            
+            if (validFiles.length === 0) return;
+
+            validFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const id = Math.random().toString(36).substr(2, 9);
+                    const imgData = {
+                        id: id,
+                        src: e.target.result,
+                        name: file.name
+                    };
+                    images.push(imgData);
+                    renderImage(imgData);
+                    updateUI();
+                };
+                reader.readAsDataURL(file);
+            });
+            showToast(`${validFiles.length} gambar berhasil ditambahkan`);
+        }
+
+        function renderImage(imgData) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative group bg-white p-2 rounded-xl shadow-sm border border-slate-200 cursor-move';
+            wrapper.dataset.id = imgData.id;
+            wrapper.innerHTML = `
+                <img src="${imgData.src}" alt="${imgData.name}" class="shadow-inner">
+                <button onclick="removeImage('${imgData.id}')" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+                <div class="mt-2 text-[10px] text-slate-400 truncate text-center">${imgData.name}</div>
+            `;
+            imageList.appendChild(wrapper);
+        }
+
+        window.removeImage = (id) => {
+            images = images.filter(img => img.id !== id);
+            const el = imageList.querySelector(`[data-id="${id}"]`);
+            if (el) el.remove();
+            updateUI();
+        };
+
+        function updateUI() {
+            if (images.length > 0) {
+                controls.classList.remove('hidden');
+            } else {
+                controls.classList.add('hidden');
+            }
+            imageCountDisplay.innerText = images.length;
+        }
+
+        clearBtn.addEventListener('click', () => {
+            images = [];
+            imageList.innerHTML = '';
+            updateUI();
+            showToast('Semua gambar dihapus');
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            if (images.length === 0) return;
+
+            loadingOverlay.classList.remove('hidden');
+            
+            // Beri sedikit jeda agar loading muncul
+            setTimeout(async () => {
+                try {
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+
+                    for (let i = 0; i < images.length; i++) {
+                        const img = images[i];
+                        
+                        // Buat objek image sementara untuk mendapatkan dimensi asli
+                        const tempImg = new Image();
+                        tempImg.src = img.src;
+                        
+                        await new Promise((resolve) => {
+                            tempImg.onload = () => {
+                                let imgWidth = tempImg.width;
+                                let imgHeight = tempImg.height;
+                                
+                                // Kalkulasi rasio agar pas di A4 (dengan margin 10mm)
+                                const margin = 10;
+                                const maxWidth = pageWidth - (margin * 2);
+                                const maxHeight = pageHeight - (margin * 2);
+                                
+                                let ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+                                
+                                let finalWidth = imgWidth * ratio;
+                                let finalHeight = imgHeight * ratio;
+                                
+                                // Center image
+                                let x = (pageWidth - finalWidth) / 2;
+                                let y = (pageHeight - finalHeight) / 2;
+
+                                if (i > 0) pdf.addPage();
+                                pdf.addImage(img.src, 'JPEG', x, y, finalWidth, finalHeight);
+                                resolve();
+                            };
+                        });
+                    }
+
+                    pdf.save('Hasil_Konversi.pdf');
+                    showToast('PDF berhasil diunduh!');
+                } catch (error) {
+                    console.error(error);
+                    showToast('Terjadi kesalahan saat membuat PDF');
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }, 500);
+        });
+
+        function showToast(msg) {
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
