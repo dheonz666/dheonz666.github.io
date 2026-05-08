@@ -1,4 +1,7 @@
 #EXTM3U
+#EXTINF:-1 tvg-id="ANTV" tvg-name="ANTV" tvg-logo="https://thumbor.prod.vidiocdn.com/V9X9eX0e6_K_1q_Q_H_8Y8O_V8=/filters:quality(75)/vidio-web-main/uploads/tv_station/logo/782/logo-antv-2b5d4c.png" group-title="LOKAL", ANTV
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+https://geo-id-etslive-v3-vidio-com-tokenized.akamaized.net/stream/782/file/stream.mpd?hdntl=exp=1778247721~acl=%2fstream%2f782%2ffile%2fstream.mpd!%2fstream%2f782%2ffile%2f*%2faac%2f*!%2fstream%2f782%2ffile%2f*%2f*-2160p%2f*!%2fstream%2f782%2ffile%2f*%2f*-1440p%2f*!%2fstream%2f782%2ffile%2f*%2f*-1080p%2f*!%2fstream%2f782%2ffile%2f*%2f*-720p%2f*!%2fstream%2f782%2ffile%2f*%2f*-480p%2f*!%2fstream%2f782%2ffile%2f*%2f*-360p%2f*~id=152458838~data=hdntl~hmac=5fa6f427503d8c7595a6d944833464f27fb00ecfb2253fb1e6848a8534471e86|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
 #EXTINF:-1 tvg-logo="https://i.imgur.com/DUY5WXf.png" group-title="General",AKTV SD
 https://e.siar.us/live/aktv.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/Qj1EFf1.png" group-title="Religious",Al-Iman TV SD
