@@ -1,0 +1,209 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/DUY5WXf.png" group-title="General",AKTV SD
+https://e.siar.us/live/aktv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Qj1EFf1.png" group-title="Religious",Al-Iman TV SD
+https://tv.aliman.id/aliman/live.m3u8
+#EXTINF:-1 tvg-logo="https://i.ibb.co/3yfMjmf/logo-3.png" group-title="Religious",Al Wafa Tarim SD
+https://ammedia.siar.us/ammedia/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Bw8fLiD.png" group-title="General",Arek TV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/arektv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/bTktkcr.png" group-title="Religious",Ashiil TV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/ashiiltv2.m3u8
+#EXTINF:-1 tvg-logo="https://astha.garuda.tv/assets/logo-DLGyXEGO.png" group-title="Lainnya",Astha TV HD
+https://hgmtv.com:19360/asthatv/asthatv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/72/Atambua_TV.png" group-title="Lainnya",Atambua TV HD
+http://122.248.43.242:1935/ATAMBUATV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/uHcRd1t.png" group-title="Lainnya",ATV SD
+http://103.180.118.5:9981/stream/channelid/1457201262
+#EXTINF:-1 tvg-logo="https://i.imgur.com/P3whqna.png" group-title="General",Balikpapan TV SD
+https://5bf7b725107e5.streamlock.net/btv/btv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/uH1Szme.png" group-title="Culture",Bali TV SD
+http://103.180.118.5:9981/stream/channelid/916002722
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/D0WYpKD6/bandungtv.png" group-title="General",Bandung TV SD
+http://202.150.153.254:65500/bandungtvWEBSITE.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/TA76a10.png" group-title="Lainnya",Banjar TV SD
+https://banjartv.siar.us/banjartv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/tbtF40p.png" group-title="Lainnya",Banten TV SD
+https://5bf7b725107e5.streamlock.net/bantentv/bantentv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/lo7YXnW.png" group-title="General",Batam TV SD
+http://122.248.43.242:1935/BATAMTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/SRDWxRGs/13092012142252.jpg" group-title="News",BeritaSatu English SD
+https://beritasatu.secureswiftcontent.com/han/beritasatu/bsatu10008/srtoutput/manifest.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/snMxng5.png" group-title="Lainnya",BMS TV SD
+https://5bf7b725107e5.streamlock.net/bmstv/bmstv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/1/1f/Logo_BRTV.png" group-title="Lainnya",BRTV SD
+https://5bf7b725107e5.streamlock.net/brtv/brtv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/BTV_%28Indonesia%29_logo_%282025%29.svg/2560px-BTV_%28Indonesia%29_logo_%282025%29.svg.png" group-title="News",BTV SD
+https://btv.secureswiftcontent.com/han/btv/btv10005/srtoutput/manifest.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/OrCrtDA.png" group-title="General",Bungo TV SD
+https://5bf7b725107e5.streamlock.net/bungotv/bungotv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/3/3a/CarubanTV%28Low-res%29.png" group-title="Lainnya",Caruban TV HD
+https://stream.carubantv.id/hls/0/stream.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/8/81/Logo_Celebes_TV_2020.png" group-title="General",Celebes TV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/celebesmedia.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/77KYgbz.png" group-title="Lainnya",Citra Dangdut SD
+http://103.180.118.5:9981/stream/channelid/64520893
+#EXTINF:-1 tvg-logo="https://i.imgur.com/bUfeG7Y.png" group-title="Business",CNBC Indonesia SD
+https://live.cnbcindonesia.com/livecnbc/smil:cnbctv.smil/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/YC7JCHo.png" group-title="Religious",DAAI TV SD
+https://pull.daaiplus.com/live-DAAIPLUS/live-DAAIPLUS_HD.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/6/60/Logo_Davika_TV.png" group-title="Lainnya",Davika TV SD
+https://5bf7b725107e5.streamlock.net/davika/davika/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://dhammaweb.tv/wp-content/uploads/2018/08/cropped-dhammatv-3.png" group-title="Religious",Dhamma TV SD
+https://b.webcache.maxindo.net.id/dhamma/dhamma.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/4Khyyfh.png" group-title="General",Dhoho TV SD
+https://dhohotv.siar.us/dhohotv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3iC41QX.png" group-title="General",DM TV Malang SD
+https://e.siar.us/live/dmtv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/9/90/Logo_DTVI.png" group-title="General",dTVi SD
+https://e.siar.us/live/dtvi.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/XgIuU7M.png" group-title="Entertainment",Dunia Lain SD
+http://103.180.118.5:9981/stream/channelid/406907994
+#EXTINF:-1 tvg-logo="https://i.imgur.com/B4JW54M.png" group-title="General",Duta TV SD
+https://dutatv.siar.us/dutatv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/iYTimXh.png" group-title="General",Efarina TV SD
+https://live.efarinatv.net/hls/stream123/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/x5uoy2H.png" group-title="General",Elshinta TV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/elshintatv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/mkuXxRK.png" group-title="Religious",Fajar TV SD
+http://122.248.43.242:1935/FAJARTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/sXsAcZ3.png" group-title="General",Garuda TV SD
+https://hgmtv.com:19360/garudatvlivestreaming/garudatvlivestreaming.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/xBTqOEu.png" group-title="News",Huma Betang TV SD
+https://v3.siar.us/humabetangtv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Gg6OcGT.png" group-title="Religious",I Am Channel SD
+http://iamchannel.org:1935/tes/1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/xPvrcsr.png" group-title="Business",IDX Channel SD
+http://vod.linknetott.swiftcontent.com/Content/HLS/Live/Channel(ch389)/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/my7aqLc.png" group-title="Religious",Izzah TV SD
+https://streaming.radiosalamjambi.com/izzahtv.m3u8
+#EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/logopedia/images/1/15/Jambi_TV.png" group-title="General",Jambi TV SD
+https://ams.juraganstreaming.com:5443/JambiTV/streams/livestream.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Jawa_Pos_TV_2024.svg/2560px-Jawa_Pos_TV_2024.svg.png" group-title="General",Jawa Pos TV Jakarta
+http://122.248.43.242:1935/JAWAPOSTVJKT/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wh75d1f.png" group-title="General",Jek TV SD
+http://27.124.81.245:1935/jektv/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/VEqQfTu.png" group-title="General",Jogja Istimewa TV SD
+http://103.255.15.222:1935/tv/jitv_720p/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/logopedia/images/4/40/Jogjatvnew.png" group-title="General",Jogja TV SD
+https://stream.jogjatv.co.id/jtvlive/stream/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/mIDWIQk.png" group-title="General",JTV Kediri
+http://122.248.43.242:1935/JTVKEDIRI/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/5/5f/Logo_kawanua_tv.png" group-title="General",Kawanua TV SD
+http://122.248.43.242:1935/KAWANUATV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/B5YiUIP.png" group-title="Kids",Kids TV SD
+http://origin5.mediacdn.ru/live/kidstv/index.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/e/e4/Kilisuci_TV_NEW_LOGO_2016.png" group-title="General",Kilisuci TV SD
+https://5bf7b725107e5.streamlock.net/kstv/kstv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://lingkartv.com/assets/img/logo-square.png" group-title="Music;News;Religious",Lingkar TV SD
+https://lingkartv.my.id/hls/lingkartv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8aonQ0v.png" group-title="Religious",Madani TV SD
+https://stream.asianastream.com/madani/madanitv.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/cKpgbgW.png" group-title="General",Madu TV SD
+https://re1.siar.us/madutv/hd720/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/tfJo0SO.png" group-title="General",Magna Channel SD
+https://edge.medcom.id/live-edge/smil:magna.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/QxbFGWcM/maxstream.png" group-title="General",MAX Stream SD
+https://cdn08jtedge.indihometv.com/dassdvr/194/maxstream/manifest.mpd
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/MDTV_logo.svg/330px-MDTV_logo.svg.png" group-title="Lainnya",MDTV HD
+https://wahyu1ptv.pages.dev/MDTV-HD.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/aiiinzg.png" group-title="News",Metro Globe Network SD
+https://edge.medcom.id/live-edge/smil:mgnch.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/xrNtabe.png" group-title="Religious",MGI TV SD
+https://tv.rodja.live/tasik/ngrp:mgitv_all/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/MYU7dsZ.png" group-title="General",MGSTV SD
+https://cdn.gunadarma.ac.id/streams/mgstv/ingestmgstv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/d8dQo6E.png" group-title="Religious",MQTV SD
+https://5bf7b725107e5.streamlock.net/mqtv/mqtv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/xdtkx9P0/musik-indo.png" group-title="Music",Musik Indonesia SD
+http://103.180.118.5:9981/stream/channelid/1076749647
+#EXTINF:-1 tvg-logo="https://i.imgur.com/BTmcTQO.png" group-title="Movies",My Cinema SD
+http://210.210.155.37/uq2663/h/h192/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/4XVZLW0.png" group-title="Movies",My Cinema Asia SD
+http://210.210.155.37/uq2663/h/h193/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/viun5hj.png" group-title="General",Nusantara TV SD
+https://nusantaratv.siar.us/nusantaratv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/E9CCIpP.jpg" group-title="Culture;General;Music;News",Online TV Nusantara SD
+https://5bf7b725107e5.streamlock.net/onlinetvnusantara/onlinetvnusantara/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/EL2BfxY.png" group-title="General",Padang TV SD
+http://122.248.43.242:1935/PADANGTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/e2F1zyU.png" group-title="General",Palembang TV SD
+https://v3.siar.us/paltv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/mldv8Sf.png" group-title="Lainnya",PKTV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/pktv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/P5erWzm.png" group-title="Lainnya",PONTV SD
+http://122.248.43.242:1935/PONTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/4/42/Logo_RadarTV_Lampung.png" group-title="Lainnya",Radar Lampung TV SD
+http://122.248.43.138:1935/ch17/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/1/1a/Logo_Radar_Tasikmalaya_TV.png" group-title="Lainnya",Radar Tasikmalaya TV SD
+https://v2.siar.us/radartasikmalaya/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/dlsv1sl.png" group-title="Lainnya",Rajawali TV SD
+https://rtvstream.rtv.co.id:4555/hls/rtv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/3/31/RBTV_Jogjakarta.png" group-title="General",RBTV Jogja SD
+http://live.rbtvjogja.tv/481e185e-72e3-49f6-ad37-e495f911c9e4_output_0.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/DZRB5rpD/rctv.png" group-title="Lainnya",RCTV SD
+https://v10.siar.us/rctv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/1g8FtJi.png" group-title="Lainnya",Riau TV SD
+http://122.248.43.242:1935/RIAUTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/XwCeHlC.png" group-title="Lainnya",Rodja TV SD
+https://rodjatv.com/rodjatv/live.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/RRI_NET_2023.svg/2560px-RRI_NET_2023.svg.png" group-title="Lainnya",RRI Net SD
+https://private-streaming.rri.go.id/memfs/6f77c7b5-feb2-4935-9f89-e7e9fca0a54a_output_0.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/IDNjMfQ.png" group-title="Lainnya",Sakti TV SD
+https://saktitv.siar.us/saktitv/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/00Ifzgo.png" group-title="Lainnya",Salam TV SD
+https://salamtv.siar.us/live/salamtv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/6/6b/Logo_Salira_TV.png" group-title="Culture;Lifestyle",Salira TV SD
+https://live.salira.tv/p/3870/hybrid/play.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8cFJa8G.png" group-title="General",Sampit TV SD
+https://sampit-tv.siar.us/live/sampit-tv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/SindoNewsTV_2023.png/375px-SindoNewsTV_2023.png" group-title="News",Sindo News TV SD
+http://103.180.118.5:9981/stream/channelid/1133438425
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/6/6e/Logo_SMTV_Sumedang.png" group-title="Lainnya",SMTV SD
+http://122.248.43.242:1935/SMTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/7/75/SriwijayaTV_2014.png" group-title="Lainnya",Sriwijaya TV SD
+https://sriwijayatv.siar.us/live/sriwijayatv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/9/91/Stara_TV_Sumedang_fix.png" group-title="Lainnya",Stara TV Bandung
+https://bandung.staratv.id/hls/0/stream.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/EIrXgT8.png" group-title="Lainnya",STV SD
+http://122.248.43.242:1935/SAMARINDATV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/cmpbNJz.png" group-title="Lainnya",Sultra TV SD
+http://122.248.43.242:1935/SULTRATV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/jlss2ll.png" group-title="Lainnya",Surabaya TV SD
+https://e.siar.us/live/surabayatv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/CKoxcWL.png" group-title="Lainnya",Surau TV SD
+https://wahyu1ptv.pages.dev/SurauTV-HD.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/1f0EC7t.png" group-title="Lainnya",TATV SD
+https://v2.siar.us/tatv/live.sdp/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/VvVgb6dN/logo-tawaf.png" group-title="Lainnya",Tawaf TV SD
+https://streamtawaf.asfatv.com/hls/tawaftv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/8/83/Logo_Timor_TV.png" group-title="Lainnya",Timor TV HD
+http://122.248.43.242:1935/TIMORTV/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/fAbGImS.png" group-title="General",Trans7 SD
+https://video.detik.com/trans7/smil:trans7.smil/index.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/6/62/Trans_TV_2013.svg/512px-Trans_TV_2013.svg.png" group-title="General",Trans TV SD
+https://video.detik.com/transtv/smil:transtv.smil/index.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/e/ed/TV9_Nusantara.png" group-title="Lainnya",TV 9 Nusantara SD
+https://5bf7b725107e5.streamlock.net/tv9/tv9/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/BAklJGy.png" group-title="Lainnya",TVKU SD
+https://tvku.tv/hlsstream/hls/live.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/id/d/d0/TvMu.png" group-title="Lainnya",TV Mu SD
+https://e.siar.us/live/tvmu.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/TVRILogo2019.svg/512px-TVRILogo2019.svg.png" group-title="General",TVRI West Papua
+https://ott-balancer.tvri.go.id/live/eds/Pabar/hls/Pabar.m3u8
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/PrqBt2h1/tvrisport.png" group-title="Sports",TVRI Sport SD
+https://ott-balancer.tvri.go.id/live/eds/SportHD/hls/SportHD.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/TVRIWorld.png/512px-TVRIWorld.png" group-title="Lainnya",TVRI World SD
+https://ott-balancer.tvri.go.id/live/eds/TVRIWorld/hls/TVRIWorld.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/2XYpmHL.png" group-title="Legislative",TVR Parlemen SD
+http://103.18.181.69:1935/golive/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/2YhDH98.png" group-title="Lainnya",TV Tabalong SD
+https://5bf7b725107e5.streamlock.net/tvtabalong/tvtabalong/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/qxkb0cy.png" group-title="Lainnya",U Channel SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/uchannel1.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/iEKDH26.png" group-title="Lainnya",UGTV SD
+https://cdn.gunadarma.ac.id/streams/ugtv/ingestugtv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Uv8RWks.png" group-title="Lainnya",Wesal TV SD
+https://ams.juraganstreaming.com:5443/LiveApp/streams/wesaltv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/6/6b/Zee_Bioskop_%282025%29.svg" group-title="Lainnya",Zee Bioskop SD
+http://103.180.118.5:9981/stream/channelid/789671189
