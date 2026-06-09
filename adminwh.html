@@ -48,10 +48,8 @@
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen">
 
-    <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-5 right-5 z-[100] space-y-3 pointer-events-none"></div>
 
-    <!-- Login Section -->
     <div id="loginSection" class="fixed inset-0 z-[60] login-bg flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 p-8 border border-slate-100">
             <div class="text-center mb-8">
@@ -83,7 +81,6 @@
         </div>
     </div>
 
-    <!-- Main Content (Protected) -->
     <div id="adminContent" class="hidden">
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
@@ -124,13 +121,29 @@
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            <!-- Header & Quick Actions -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900">Dashboard Stock Opname</h1>
                     <p class="text-slate-500">Rekapitulasi data stok Warehouse.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <!-- Template & Import Section (NEW) -->
+                    <button onclick="downloadTemplate()" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-all shadow-md" title="Unduh format Excel untuk import">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Template
+                    </button>
+
+                    <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="handleImport(this)">
+                    <button onclick="document.getElementById('importFile').click()" class="inline-flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition-all shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Import XLSX
+                    </button>
+
+                    <!-- Export and Action Buttons -->
                     <button onclick="exportWord()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -152,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- Stats Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Unit Terdata</p>
@@ -192,7 +204,6 @@
                 </div>
             </div>
 
-            <!-- Data Table Section -->
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
                     <div class="relative flex-1 max-w-md">
@@ -260,7 +271,6 @@
         </main>
     </div>
 
-    <!-- Modal Edit -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
@@ -544,6 +554,80 @@
             renderTable(filtered);
         }
 
+        // --- IMPORT EXCEL LOGIC ---
+        
+        window.downloadTemplate = function() {
+            const templateData = [
+                { "Area": "RAK-A", "Barcode": "8991234567890", "QTY": 50 },
+                { "Area": "RAK-B", "Barcode": "8999876543210", "QTY": 12 },
+                { "Area": "GUDANG-1", "Barcode": "8995555555555", "QTY": 100 }
+            ];
+
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            
+            // Set lebar kolom yang wajar
+            ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 10 }];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Template_Import");
+            XLSX.writeFile(wb, "Template_Import_Warehouse.xlsx");
+            showToast('Template Excel berhasil diunduh');
+        };
+
+        async function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            toggleLoading(true);
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+                    if (rows.length === 0) {
+                        showToast('File Excel yang diunggah kosong', 'error');
+                        return;
+                    }
+
+                    // Mapping Data: Menerima berbagai macam nama kolom agar fleksibel
+                    const mappedData = rows.map(row => {
+                        return {
+                            area: (row.Area || row.area || row.AREA || '').toString().toUpperCase(),
+                            barcode: (row.Barcode || row.barcode || row.BARCODE || row['ID Barcode'] || '').toString(),
+                            qty: parseInt(row.QTY || row.qty || row.Jumlah || 0)
+                        };
+                    }).filter(item => item.area && item.barcode && !isNaN(item.qty));
+
+                    if (mappedData.length === 0) {
+                        showToast('Gagal memproses data. Pastikan kolom: Area, Barcode, QTY ada.', 'error');
+                        return;
+                    }
+
+                    // Insert ke Supabase menggunakan variabel TABLE_NAME (stock_opname)
+                    const { error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .insert(mappedData);
+
+                    if (error) throw error;
+
+                    showToast(`Berhasil import ${mappedData.length} baris data warehouse`);
+                    await loadData(); // Refresh UI
+                } catch (err) {
+                    console.error(err);
+                    showToast('Gagal import data dari file Excel', 'error');
+                } finally {
+                    toggleLoading(false);
+                    input.value = ''; // Mengizinkan file yang sama dipilih lagi
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
         // --- CRUD ACTIONS ---
 
         window.openEditModal = function(id, barcode, qty) {
@@ -723,5 +807,4 @@
         }
     </script>
 </body>
-
 </html>
