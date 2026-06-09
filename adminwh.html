@@ -44,12 +44,20 @@
         .sort-header:hover {
             background-color: #f1f5f9;
         }
+
+        /* Penyesuaian kursor kalender pada input date */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen">
 
+    <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-5 right-5 z-[100] space-y-3 pointer-events-none"></div>
 
+    <!-- Login Section -->
     <div id="loginSection" class="fixed inset-0 z-[60] login-bg flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 p-8 border border-slate-100">
             <div class="text-center mb-8">
@@ -81,6 +89,7 @@
         </div>
     </div>
 
+    <!-- Main Content (Protected) -->
     <div id="adminContent" class="hidden">
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
@@ -127,7 +136,7 @@
                     <p class="text-slate-500">Rekapitulasi data stok Warehouse.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <!-- Template & Import Section (NEW) -->
+                    <!-- Template & Import Section -->
                     <button onclick="downloadTemplate()" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-all shadow-md" title="Unduh format Excel untuk import">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -205,20 +214,43 @@
             </div>
 
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
-                    <div class="relative flex-1 max-w-md">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </span>
-                        <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau lokasi..." 
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                <!-- Baris Filter Baru -->
+                <div class="p-6 border-b border-slate-100 flex flex-col xl:flex-row justify-between gap-4">
+                    <div class="flex flex-col md:flex-row gap-4 flex-1">
+                        <!-- Search Bar -->
+                        <div class="relative flex-1 max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </span>
+                            <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Cari barcode atau lokasi..." 
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none text-sm">
+                        </div>
+                        
+                        <!-- Date Range Filters -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari Tanggal</label>
+                                <input type="date" id="startDate" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 h-[42px]">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai Tanggal</label>
+                                <input type="date" id="endDate" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 h-[42px]">
+                            </div>
+                            <button onclick="clearDateFilters()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs font-bold text-slate-600 h-[42px] self-end" title="Reset Tanggal">
+                                Reset
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px]">
-                            <option value="">Semua Area</option>
-                        </select>
-                        <button onclick="loadData()" class="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors" title="Refresh Data">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    
+                    <div class="flex gap-2 items-end">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Filter Area</label>
+                            <select id="areaFilter" onchange="filterData()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px] h-[42px]">
+                                <option value="">Semua Area</option>
+                            </select>
+                        </div>
+                        <button onclick="loadData()" class="p-2.5 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors h-[42px]" title="Refresh Data">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
@@ -271,6 +303,7 @@
         </main>
     </div>
 
+    <!-- Modal Edit -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
@@ -300,10 +333,11 @@
         // --- KONFIGURASI SUPABASE ---
         const SB_URL = 'https://wqgqyrqjtazqkdellkbo.supabase.co'; 
         const SB_KEY = 'sb_publishable_y2KBNtIQG1e7TWrJbiQFJg_jjykI3bC'; 
-        const TABLE_NAME = 'stock_opname'; // Perubahan nama tabel ke stock_opname
+        const TABLE_NAME = 'stock_opname'; 
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let allData = [];
+        let displayedData = []; // Array ini untuk menyimpan data setelah ter-filter
         
         // State Pengurutan
         let currentSortColumn = 'created_at';
@@ -311,8 +345,31 @@
 
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', async () => {
+            setDefaultDates(); // Set filter tanggal secara default (awal bulan sd hari ini)
             checkSession();
         });
+
+        // Set default filter ke bulan ini
+        function setDefaultDates() {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            // Format YYYY-MM-DD
+            const formatDate = (date) => {
+                let d = new Date(date),
+                    month = '' + (d.getMonth() + 1),
+                    day = '' + d.getDate(),
+                    year = d.getFullYear();
+
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+
+                return [year, month, day].join('-');
+            }
+
+            document.getElementById('startDate').value = formatDate(firstDay);
+            document.getElementById('endDate').value = formatDate(now);
+        }
 
         // --- AUTH LOGIC ---
 
@@ -413,9 +470,8 @@
                 if (error) throw error;
 
                 allData = data || [];
-                calculateStats(allData);
                 populateAreaFilter(allData);
-                filterData();
+                filterData(); // Menjalankan filter sekaligus perhitungan stats 
             } catch (err) {
                 console.error(err);
                 showToast('Gagal memproses database', 'error');
@@ -438,7 +494,8 @@
         function populateAreaFilter(data) {
             const select = document.getElementById('areaFilter');
             const currentVal = select.value;
-            const areas = [...new Set(data.map(item => item.area))].sort();
+            // Pilihan dropdown area diambil secara unik dari allData
+            const areas = [...new Set(allData.map(item => item.area))].sort();
             
             select.innerHTML = '<option value="">Semua Area</option>';
             areas.forEach(area => {
@@ -491,7 +548,7 @@
             `).join('');
         }
 
-        // --- SORTING LOGIC ---
+        // --- SORTING & FILTERING LOGIC ---
 
         function toggleSort(column) {
             if (currentSortColumn === column) {
@@ -523,11 +580,28 @@
         function filterData() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const area = document.getElementById('areaFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
 
             let filtered = allData.filter(item => {
                 const matchSearch = item.barcode.toLowerCase().includes(search) || item.area.toLowerCase().includes(search);
                 const matchArea = area === "" || item.area === area;
-                return matchSearch && matchArea;
+                
+                // Logika Pengecekan Rentang Tanggal
+                let matchDate = true;
+                if (startDate || endDate) {
+                    const itemDate = new Date(item.created_at).setHours(0,0,0,0);
+                    if (startDate) {
+                        const start = new Date(startDate).setHours(0,0,0,0);
+                        if (itemDate < start) matchDate = false;
+                    }
+                    if (endDate) {
+                        const end = new Date(endDate).setHours(23,59,59,999);
+                        if (itemDate > end) matchDate = false;
+                    }
+                }
+
+                return matchSearch && matchArea && matchDate;
             });
 
             // Apply Sorting
@@ -551,7 +625,19 @@
                 return 0;
             });
 
+            // Simpan hasil ke displayedData agar Export akurat sesuai tampilan layar
+            displayedData = filtered; 
+            
+            // Render table & perbarui stat counter
             renderTable(filtered);
+            calculateStats(filtered); 
+        }
+
+        // Fungsi Reset Tanggal
+        function clearDateFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            filterData();
         }
 
         // --- IMPORT EXCEL LOGIC ---
@@ -729,9 +815,12 @@
         // --- EXPORT LOGIC ---
 
         window.exportExcel = function() {
-            if (allData.length === 0) return showToast('Data kosong', 'error');
+            // Gunakan displayedData (data yang sudah difilter), bukan allData
+            const dataToExport = displayedData;
+
+            if (dataToExport.length === 0) return showToast('Data kosong atau tidak ada hasil filter', 'error');
             
-            const exportData = allData.map(item => ({
+            const exportData = dataToExport.map(item => ({
                 "Area/Rak": item.area,
                 "Barcode ID": item.barcode,
                 "Jumlah": item.qty,
@@ -745,11 +834,14 @@
             
             const fileName = `Warehouse_Opname_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast('Laporan Excel siap');
+            showToast('Laporan Excel berhasil diunduh');
         }
 
         window.exportWord = function() {
-            if (allData.length === 0) return showToast('Data kosong', 'error');
+            // Gunakan displayedData (data yang sudah difilter), bukan allData
+            const dataToExport = displayedData;
+
+            if (dataToExport.length === 0) return showToast('Data kosong atau tidak ada hasil filter', 'error');
             
             const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -779,7 +871,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${allData.map((item, index) => `
+                            ${dataToExport.map((item, index) => `
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${item.area}</td>
@@ -803,7 +895,7 @@
             link.href = url;
             link.download = `Laporan_Warehouse_${new Date().toISOString().split('T')[0]}.doc`;
             link.click();
-            showToast('Laporan Word siap');
+            showToast('Laporan Word berhasil diunduh');
         }
     </script>
 </body>
