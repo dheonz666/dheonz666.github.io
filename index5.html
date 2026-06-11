@@ -195,6 +195,12 @@
                 ALL_AREAS.push(`${letter}${i < 10 ? '0' + i : i}`);
             }
         });
+        
+        // --- TAMBAHAN AREA BARU (Sesuai Permintaan) ---
+        ALL_AREAS.push('E07', 'E08', 'F', 'G', 'G01');
+        
+        // Mengurutkan area agar rapi saat ditampilkan di dropdown
+        ALL_AREAS.sort();
 
         let selectedAreaValue = ""; 
         let html5QrCode = null;
