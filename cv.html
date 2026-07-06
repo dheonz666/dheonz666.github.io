@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Builder & 10 Tema CV</title>
-      <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
-    
+    <title>CV Builder & 20 Tema CV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -96,8 +92,8 @@
         [data-theme="10"] .cv-layout { flex-direction: column; padding: 2rem; position: relative; }
         [data-theme="10"] .cv-sidebar, [data-theme="10"] .cv-main { width: 100%; background: transparent; color: #fdfbf7; padding: 0; }
         [data-theme="10"] .magazine-header { display: block; text-align: center; margin-bottom: 1rem; position: relative; z-index: 2; }
-        [data-theme="10"] .magazine-header h1 { font-size: 4.5rem; font-weight: 900; letter-spacing: 2px; line-height: 1; color: #ffffff; }
-        [data-theme="10"] .magazine-header h2 { font-size: 1.5rem; letter-spacing: 5px; color: #9ca3af; margin-top: 0.5rem; }
+        [data-theme="10"] .magazine-header-text h1 { font-size: 4.5rem; font-weight: 900; letter-spacing: 2px; line-height: 1; color: #ffffff; }
+        [data-theme="10"] .magazine-header-text h2 { font-size: 1.5rem; letter-spacing: 5px; color: #9ca3af; margin-top: 0.5rem; }
         [data-theme="10"] .sidebar-name-area { display: none; }
         [data-theme="10"] .profile-img-container { width: 100%; height: 450px; border-radius: 0; border: none; margin-bottom: 2rem; position: relative; z-index: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         [data-theme="10"] .profile-img-container img { object-position: top; }
@@ -105,6 +101,143 @@
         [data-theme="10"] .section-title-sidebar, [data-theme="10"] .section-title-main { background: transparent; color: #fca5a5; border-bottom: 1px solid #4b3240; text-align: left; padding-left: 0; font-size: 1.5rem; }
         [data-theme="10"] .timeline-item::before { background-color: #fca5a5; }
         [data-theme="10"] .timeline-item::after { background-color: #fca5a5; }
+
+        /* --- THEMES 11-15 --- */
+        [data-theme="11"] { --bg-sidebar: #22252a; --text-sidebar: #e5e7eb; --bg-main: #ffffff; --text-main: #1f2937; --accent-color: #c69c6d; }
+        [data-theme="11"] .top-banner-bg { display: block; position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: #c69c6d; clip-path: polygon(100% 0, 100% 100%, 0 0); z-index: 0; }
+        [data-theme="11"] .section-title-sidebar { background: #c69c6d; color: #22252a; border-radius: 4px; padding: 0.5rem 1rem; text-align: center; }
+        [data-theme="11"] .section-title-main { background: transparent; color: #22252a; border-bottom: 2px solid #c69c6d; padding-left: 0; }
+        [data-theme="11"] .timeline-item::before { background-color: #c69c6d; border-radius: 0; }
+
+        [data-theme="12"] { --layout-dir: column; --bg-sidebar: #1e3a8a; --text-sidebar: #ffffff; --bg-main: #ffffff; --text-main: #1f2937; --accent-color: #1e3a8a; }
+        [data-theme="12"] .top-banner-bg { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 16px; background: linear-gradient(135deg, #1e3a8a 25%, transparent 25%) -8px 0, linear-gradient(225deg, #1e3a8a 25%, transparent 25%) -8px 0, linear-gradient(315deg, #1e3a8a 25%, transparent 25%), linear-gradient(45deg, #1e3a8a 25%, transparent 25%); background-size: 16px 16px; z-index: 0; }
+        [data-theme="12"] .bottom-banner-bg { display: block; position: absolute; bottom: 0; left: 0; width: 100%; height: 16px; background: linear-gradient(135deg, transparent 75%, #1e3a8a 75%) -8px 0, linear-gradient(225deg, transparent 75%, #1e3a8a 75%) -8px 0, linear-gradient(315deg, transparent 75%, #1e3a8a 75%), linear-gradient(45deg, transparent 75%, #1e3a8a 75%); background-size: 16px 16px; z-index: 0; }
+        [data-theme="12"] .cv-sidebar { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 3rem; background: #1e3a8a; color: white; padding: 2.5rem; margin: 16px 0 0 0; width: 100%; }
+        [data-theme="12"] .profile-img-container { margin: 0; width: 130px; height: 130px; border: 4px solid white; box-shadow: none; }
+        [data-theme="12"] .sidebar-name-area { margin: 0; text-align: left; }
+        [data-theme="12"] .sidebar-name-area h1, [data-theme="12"] .sidebar-name-area h2 { color: white; }
+        [data-theme="12"] .content-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+        [data-theme="12"] .content-columns-wrapper { display: none; }
+        [data-theme="12"] .section-title-sidebar, [data-theme="12"] .section-title-main { background: #1e3a8a; color: white; border-radius: 0; text-align: center; padding: 0.5rem; }
+
+        [data-theme="13"] { --layout-dir: column; --bg-sidebar: #e5e7eb; --text-sidebar: #111827; --bg-main: transparent; --text-main: #374151; --accent-color: #1f2937; }
+        [data-theme="13"] .cv-wrapper { background: #f9fafb url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 Q 50 80 150 20 T 190 190" stroke="%23e5e7eb" fill="none" opacity="0.4"/></svg>') repeat; }
+        [data-theme="13"] .cv-sidebar { display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 2rem; background: #d1d5db; padding: 2rem 4rem; width: 100%; }
+        [data-theme="13"] .profile-img-container { margin: 0; width: 120px; height: 120px; box-shadow: none; }
+        [data-theme="13"] .sidebar-name-area { margin: 0; text-align: left; }
+        [data-theme="13"] .sidebar-name-area h1 { color: #111827; }
+        [data-theme="13"] .content-columns { display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem; }
+        [data-theme="13"] .content-columns-wrapper { display: none; }
+        [data-theme="13"] .section-title-sidebar, [data-theme="13"] .section-title-main { background: #1f2937; color: white; border-radius: 4px; display: inline-block; padding: 0.5rem 1.5rem; }
+
+        [data-theme="14"] { --bg-sidebar: transparent; --text-sidebar: #1f2937; --bg-main: transparent; --text-main: #374151; --accent-color: #4b5563; }
+        [data-theme="14"] .top-banner-bg { display: block; position: absolute; top: 0; left: 0; width: 85%; height: 180px; background: #374151; border-radius: 0 0 120px 0; z-index: 0; }
+        [data-theme="14"] .cv-layout { position: relative; z-index: 1; }
+        [data-theme="14"] .cv-sidebar { background: #e5e7eb; border-radius: 20px; margin: 2rem; padding: 2rem; width: 33%; height: fit-content; }
+        [data-theme="14"] .profile-img-container { border: none; box-shadow: none; }
+        [data-theme="14"] .sidebar-name-area { display: none; }
+        [data-theme="14"] .magazine-header { display: flex; flex-direction: column; position: absolute; top: 40px; right: 40px; text-align: right; z-index: 2; align-items: flex-end; }
+        [data-theme="14"] .magazine-header-text h1 { font-size: 2.5rem; font-weight: 700; color: white; margin: 0; letter-spacing: normal; }
+        [data-theme="14"] .magazine-header-text h2 { font-size: 1.25rem; letter-spacing: 2px; color: #d1d5db; margin: 0; }
+        [data-theme="14"] .section-title-sidebar { background: #6b7280; color: white; border-radius: 20px; text-align: center; }
+        [data-theme="14"] .section-title-main { background: transparent; color: #1f2937; border-bottom: 2px solid #4b5563; padding-left: 0; }
+
+        [data-theme="15"] { --bg-page: #e5e7eb; --bg-cv: #e5e7eb; --bg-sidebar: transparent; --text-sidebar: #ffffff; --bg-main: transparent; --text-main: #0f172a; --accent-color: #eab308; }
+        [data-theme="15"] .top-banner-bg { display: block; position: absolute; top: -50px; left: -50px; width: 100px; height: 100px; background: #0f172a; transform: rotate(45deg); z-index: 0; box-shadow: 100px 100px 0 #eab308; }
+        [data-theme="15"] .bottom-banner-bg { display: block; position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: #0f172a; transform: rotate(45deg); z-index: 0; box-shadow: -150px -50px 0 #eab308; }
+        [data-theme="15"] .cv-sidebar { width: 38%; padding: 1.5rem; position: relative; z-index: 2; }
+        [data-theme="15"] .content-columns-wrapper { background: #0f172a; border-radius: 20px; padding: 2rem 1.5rem; color: white; }
+        [data-theme="15"] .sidebar-name-area { display: none; }
+        [data-theme="15"] .magazine-header { display: flex; align-items: center; justify-content: flex-start; gap: 1.5rem; background: #0f172a; border-radius: 50px 0 0 50px; padding: 0.75rem; padding-right: 2rem; margin-left: 10%; margin-top: 1rem; margin-bottom: 2rem; position: relative; z-index: 2; }
+        [data-theme="15"] .profile-img-container { width: 110px; height: 110px; border: 4px solid #eab308; margin: 0; box-shadow: none; }
+        [data-theme="15"] .magazine-header-text { text-align: left; }
+        [data-theme="15"] .magazine-header-text h1 { font-size: 2rem; font-weight: 700; color: white; margin: 0; letter-spacing: normal; }
+        [data-theme="15"] .magazine-header-text h2 { font-size: 1.1rem; letter-spacing: 1px; color: #eab308; margin: 0; font-style: italic; }
+        [data-theme="15"] .section-title-sidebar { background: transparent; color: #eab308; border-bottom: 2px solid #eab308; border-radius: 0; text-align: left; padding: 0; padding-bottom: 5px; margin-top: 1.5rem; }
+        [data-theme="15"] .section-title-main { background: #eab308; color: #0f172a; border-radius: 99px; display: inline-block; padding: 0.5rem 1.5rem; }
+        [data-theme="15"] .timeline-item::before { background-color: #eab308; }
+        [data-theme="15"] .timeline-item::after { background-color: #cbd5e1; }
+
+        /* --- NEW THEMES 16-20 --- */
+
+        /* TEMA 16: Biru Slate (Kartu Putih) */
+        [data-theme="16"] { --bg-cv: #648296; --bg-sidebar: transparent; --bg-main: transparent; --layout-dir: column; --text-main: #1f2937; --accent-color: #4b6b80; }
+        [data-theme="16"] .cv-layout { padding: 2.5rem; gap: 2rem; position: relative; z-index: 2; }
+        [data-theme="16"] .magazine-header { display: flex; text-align: left; margin-bottom: 0.5rem;}
+        [data-theme="16"] .magazine-header-text h1 { color: white; font-family: 'Playfair Display', serif; font-size: 4rem; line-height: 1; margin-bottom: 0.5rem; }
+        [data-theme="16"] .magazine-header-text h2 { background: white; color: #648296; display: inline-block; padding: 0.25rem 1.5rem; border-radius: 99px; font-weight: bold; font-size: 1rem; letter-spacing: 2px; }
+        [data-theme="16"] .sidebar-name-area { display: none; }
+        [data-theme="16"] .sidebar-content-block, [data-theme="16"] .profile-block, [data-theme="16"] .experience-block { background: white; padding: 2rem; border-radius: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 2rem;}
+        [data-theme="16"] .cv-sidebar { width: auto; padding: 0; }
+        [data-theme="16"] .cv-main { padding: 0; }
+        [data-theme="16"] .content-columns { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+        [data-theme="16"] .profile-img-container { width: 100%; height: 300px; border-radius: 1.25rem; margin-bottom: 2rem; border: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        [data-theme="16"] .section-title-sidebar, [data-theme="16"] .section-title-main { background: #648296; color: white; border-radius: 99px; display: inline-block; padding: 0.4rem 1.5rem; }
+
+        /* TEMA 17: Ungu Modern (Pill Border) */
+        [data-theme="17"] { --bg-cv: #9333ea; --text-main: white; --text-sidebar: white; --bg-sidebar: transparent; --bg-main: transparent; --layout-dir: column; --accent-color: #d8b4fe; }
+        [data-theme="17"] .cv-layout { padding: 3rem; }
+        [data-theme="17"] .sidebar-name-area { display: none; }
+        [data-theme="17"] .magazine-header { display: flex; justify-content: space-between; align-items: center; text-align: left; margin-bottom: 3.5rem; }
+        [data-theme="17"] .magazine-header-text h1 { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 5rem; color: white; line-height: 1; letter-spacing: -2px; }
+        [data-theme="17"] .magazine-header-text h2 { font-size: 1.5rem; color: #d8b4fe; font-weight: bold; margin-top: 0.5rem; }
+        [data-theme="17"] .profile-img-container { width: 220px; height: 220px; border-radius: 3rem; border: none; margin: 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        [data-theme="17"] .cv-sidebar, [data-theme="17"] .cv-main { padding: 0; width: 100%; }
+        [data-theme="17"] .sidebar-content-block, [data-theme="17"] .profile-block, [data-theme="17"] .experience-block { border: 2px solid rgba(255,255,255,0.4); border-radius: 2rem; padding: 2.5rem 2rem 2rem 2rem; margin-bottom: 2rem; position: relative; }
+        [data-theme="17"] .section-title-sidebar, [data-theme="17"] .section-title-main { background: white; color: #9333ea; border-radius: 99px; padding: 0.5rem 2rem; position: absolute; top: -1.25rem; left: 2rem; margin: 0; font-size: 1.2rem; }
+        [data-theme="17"] .content-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+        /* TEMA 18: Header Biru Langit (Tengah) */
+        [data-theme="18"] { --bg-cv: #f8fafc; --bg-sidebar: transparent; --text-sidebar: #334155; --bg-main: transparent; --text-main: #334155; --accent-color: #3b82f6; --layout-dir: column;}
+        [data-theme="18"] .top-banner-bg { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 280px; background: linear-gradient(135deg, #2563eb, #38bdf8); border-radius: 0 0 3rem 3rem; z-index: 0; }
+        [data-theme="18"] .cv-layout { padding: 3rem; position: relative; z-index: 1; }
+        [data-theme="18"] .sidebar-name-area { display: none; }
+        [data-theme="18"] .cv-sidebar, [data-theme="18"] .cv-main { padding: 0; width: 100%; }
+        [data-theme="18"] .magazine-header { display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; margin-bottom: 2rem; text-align: center; }
+        [data-theme="18"] .magazine-header-text h1 { color: white; font-size: 3.5rem; font-weight: 800; line-height: 1.1; }
+        [data-theme="18"] .magazine-header-text h2 { color: #e0f2fe; font-size: 1.5rem; letter-spacing: 3px; font-weight: 600; text-transform: uppercase; }
+        [data-theme="18"] .profile-img-container { margin: 0 auto 1.5rem auto; width: 160px; height: 160px; border: 6px solid white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        [data-theme="18"] .content-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; background: white; border-radius: 1.5rem; padding: 3rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); }
+        [data-theme="18"] .section-title-sidebar, [data-theme="18"] .section-title-main { background: linear-gradient(90deg, #3b82f6, #60a5fa); color: white; border-radius: 99px; text-align: center; padding: 0.5rem; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+
+        /* TEMA 19: Biru Dokter Klasik (Dua Kolom) */
+        [data-theme="19"] { --bg-sidebar: #4a72b8; --text-sidebar: white; --bg-main: #f4f0e6; --text-main: #1e3a8a; --accent-color: transparent; }
+        [data-theme="19"] .cv-sidebar { padding-top: 5rem; position: relative; z-index: 2;}
+        [data-theme="19"] .profile-img-container { width: 180px; height: 180px; border: none; border-radius: 50%; position: relative; z-index: 3; margin: 0 auto 3rem auto; }
+        [data-theme="19"] .cv-sidebar::before { content:''; position:absolute; top: 4rem; left: 50%; transform: translateX(-65%); width: 160px; height: 160px; background: #93c5fd; border-radius: 1rem; z-index: 1; }
+        [data-theme="19"] .section-title-sidebar { border-bottom: 2px solid white; border-radius: 0; text-align: left; padding-left: 0; font-size: 1.5rem; font-weight: normal; }
+        [data-theme="19"] .section-title-main { border-bottom: 2px solid #4a72b8; color: #4a72b8; border-radius: 0; text-align: left; padding-left: 0; font-size: 1.5rem; font-weight: normal; }
+        [data-theme="19"] .timeline-item::before { background-color: #4a72b8; }
+        [data-theme="19"] .timeline-item::after { background-color: #93c5fd; }
+        [data-theme="19"] .sidebar-name-area { text-align: left; margin-top: 1rem; }
+        [data-theme="19"] .sidebar-name-area h1 { font-size: 2.5rem; text-transform: capitalize; color: #1e3a8a; } /* move name to right visually via absolute if needed, but lets keep it standard to fit template */
+
+        /* TEMA 20: Maroon Elegan (Garis Tipis) */
+        [data-theme="20"] { --bg-cv: #601424; --text-main: white; --text-sidebar: white; --bg-sidebar: transparent; --bg-main: transparent; --layout-dir: column; --accent-color: #be123c; }
+        [data-theme="20"] .cv-layout { padding: 3rem; }
+        [data-theme="20"] .sidebar-name-area { display: none; }
+        [data-theme="20"] .magazine-header { display: flex; justify-content: space-between; align-items: flex-start; text-align: left; margin-bottom: 3rem; }
+        [data-theme="20"] .magazine-header-text h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 4rem; color: white; line-height: 1.1; margin-bottom: 0.5rem; text-transform: uppercase; }
+        [data-theme="20"] .profile-img-container { width: 220px; height: 300px; border-radius: 1.5rem; border: none; margin: 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        [data-theme="20"] .cv-sidebar, [data-theme="20"] .cv-main { padding: 0; width: 100%; }
+        [data-theme="20"] .sidebar-content-block, [data-theme="20"] .profile-block, [data-theme="20"] .experience-block { border: 1px solid rgba(255,255,255,0.4); border-radius: 1.5rem; padding: 2.5rem 2rem 2rem 2rem; margin-bottom: 2rem; position: relative;}
+        [data-theme="20"] .section-title-sidebar, [data-theme="20"] .section-title-main { background: linear-gradient(90deg, #9f1239, #e11d48); color: white; border-radius: 99px; padding: 0.5rem 2rem; position: absolute; top: -1.25rem; left: 2rem; margin: 0;}
+        [data-theme="20"] .content-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+        /* Magazine Header Default State */
+        .magazine-header { display: none; }
+        [data-theme="10"] .magazine-header, 
+        [data-theme="14"] .magazine-header, 
+        [data-theme="15"] .magazine-header, 
+        [data-theme="16"] .magazine-header, 
+        [data-theme="17"] .magazine-header, 
+        [data-theme="18"] .magazine-header, 
+        [data-theme="20"] .magazine-header { display: flex; }
+
+        [data-theme="16"] .sidebar-name-area,
+        [data-theme="17"] .sidebar-name-area,
+        [data-theme="18"] .sidebar-name-area,
+        [data-theme="20"] .sidebar-name-area { display: none; }
 
         /* Base Layout Rules */
         .cv-wrapper {
@@ -121,7 +254,6 @@
     
         .top-banner-bg { display: none; }
         .bottom-banner-bg { display: none; }
-        .magazine-header { display: none; }
     
         .cv-layout {
             display: flex;
@@ -220,8 +352,17 @@
             body { background-color: white; margin: 0; padding: 0; }
             .no-print { display: none !important; }
             .cv-wrapper { box-shadow: none; width: 100%; height: auto; min-height: 100%; margin: 0; border: none; }
+            
+            /* Background print fixes */
             [data-theme="4"] .cv-wrapper { background-color: #f3f4f6 !important; }
             [data-theme="4"] .cv-sidebar, [data-theme="4"] .cv-main { border: 1px solid #d1d5db !important; }
+            [data-theme="15"] .cv-wrapper { background-color: #e5e7eb !important; }
+            [data-theme="16"] .cv-wrapper { background-color: #648296 !important; }
+            [data-theme="17"] .cv-wrapper { background-color: #9333ea !important; }
+            [data-theme="18"] .cv-wrapper { background-color: #f8fafc !important; }
+            [data-theme="19"] .cv-sidebar { background-color: #4a72b8 !important; }
+            [data-theme="20"] .cv-wrapper { background-color: #601424 !important; }
+
             @page { size: A4; margin: 0; }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -244,7 +385,7 @@
             </h1>
             <div class="flex space-x-6 h-full">
                 <button onclick="switchView('admin')" id="nav-admin" class="py-4 px-2 nav-active transition-colors hover:text-blue-600">Setting</button>
-                <button onclick="switchView('preview')" id="nav-preview" class="py-4 px-2 text-gray-500 transition-colors hover:text-blue-600">Preview CV</button>
+                <button onclick="switchView('preview')" id="nav-preview" class="py-4 px-2 text-gray-500 transition-colors hover:text-blue-600">Preview</button>
             </div>
         </div>
     </div>
@@ -286,7 +427,7 @@
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Profil Profesional (Tentang Saya)</h2>
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Profil (Tentang Saya)</h2>
                 <textarea id="input-profile" rows="5" class="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
             </div>
 
@@ -338,6 +479,16 @@
                                 <option value="8">8. Geometris & Modern</option>
                                 <option value="9">9. Organik Bumi</option>
                                 <option value="10">10. Gaya Majalah (Vogue/Cover)</option>
+                                <option value="11">11. Elegan Emas & Gelap (Kotak Emas)</option>
+                                <option value="12">12. Zig-zag Biru Laut (Header Atas)</option>
+                                <option value="13">13. Monokrom Marmer (2 Kolom)</option>
+                                <option value="14">14. Abu-abu Bergelombang (Bentuk Pil)</option>
+                                <option value="15">15. Blok Navy & Kuning (Modern)</option>
+                                <option value="16">16. Biru Slate (Kartu Putih)</option>
+                                <option value="17">17. Ungu Modern (Pill Border)</option>
+                                <option value="18">18. Header Biru Langit (Tengah)</option>
+                                <option value="19">19. Biru Dokter Klasik (Dua Kolom)</option>
+                                <option value="20">20. Maroon Elegan (Garis Tipis)</option>
                             </select>
                         </div>
                     </div>
@@ -361,8 +512,11 @@
                 <div class="cv-layout">
                     
                     <div class="magazine-header">
-                        <h1 class="cv-dyn-name-upper">NAMA</h1>
-                        <h2 class="cv-dyn-profession">PROFESI</h2>
+                        <!-- Profile Image can dynamically shift into here via JS -->
+                        <div class="magazine-header-text">
+                            <h1 class="cv-dyn-name-upper">NAMA</h1>
+                            <h2 class="cv-dyn-profession">PROFESI</h2>
+                        </div>
                     </div>
 
                     <!-- Sidebar -->
@@ -390,7 +544,7 @@
                         </div>
 
                         <div class="content-columns-wrapper w-full">
-                            <div class="sidebar-content-block">
+                            <div class="sidebar-content-block contact-block">
                                 <h3 class="section-title-sidebar uppercase tracking-wider">Contact</h3>
                                 <div class="space-y-4 text-sm mt-4">
                                     <div class="flex items-start">
@@ -417,7 +571,7 @@
                                 </div>
                             </div>
 
-                            <div class="sidebar-content-block mt-6">
+                            <div class="sidebar-content-block edu-block mt-6">
                                 <h3 class="section-title-sidebar uppercase tracking-wider">Education</h3>
                                 <div class="flex items-start mt-4">
                                     <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L1 7l11 5 9-4.09V17h2V7l-11-5z"/><path d="M4 11v4.333C4 17.9 7.582 20 12 20s8-2.1 8-4.667V11l-8 3.636L4 11z"/></svg>
@@ -432,19 +586,25 @@
                     <!-- Main Content -->
                     <div class="cv-main">
                         <div class="content-columns">
-                            <div class="mb-8 content-left">
-                                <h3 class="section-title-main text-xl uppercase tracking-wider">Profil</h3>
-                                <p class="leading-relaxed text-justify mt-4 cv-dyn-profile">
-                                    -
-                                </p>
+                            
+                            <div class="content-left">
+                                <div class="profile-block mb-8">
+                                    <h3 class="section-title-main text-xl uppercase tracking-wider">Profil</h3>
+                                    <p class="leading-relaxed text-justify mt-4 cv-dyn-profile">
+                                        -
+                                    </p>
+                                </div>
                             </div>
 
                             <div class="content-right">
-                                <h3 class="section-title-main text-xl uppercase tracking-wider">Pengalaman (Experience)</h3>
-                                <div class="mt-6 cv-dyn-experience">
-                                    <!-- Exp list inject -->
+                                <div class="experience-block">
+                                    <h3 class="section-title-main text-xl uppercase tracking-wider">Pengalaman (Experience)</h3>
+                                    <div class="mt-6 cv-dyn-experience">
+                                        <!-- Exp list inject -->
+                                    </div>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -632,22 +792,73 @@
             });
         }
 
-        // --- 5. THEME LOGIC (EXISTING) ---
+        // --- 5. ADVANCED THEME LOGIC ---
         function setTheme(themeNumber) {
             const body = document.getElementById('body-theme');
             body.setAttribute('data-theme', themeNumber);
             
-            const contentColumns = document.querySelector('.content-columns');
+            // Elements
             const sidebarContentWrapper = document.querySelector('.content-columns-wrapper');
-            const contactBlock = document.querySelector('.sidebar-content-block');
-            const eduBlock = document.querySelectorAll('.sidebar-content-block')[1];
+            const contactBlock = document.querySelector('.contact-block');
+            const eduBlock = document.querySelector('.edu-block');
+            const magazineHeader = document.querySelector('.magazine-header');
+            const magazineHeaderText = document.querySelector('.magazine-header-text');
+            const sidebar = document.querySelector('.cv-sidebar');
+            const profileImg = document.querySelector('.profile-img-container');
+            const sidebarNameArea = document.querySelector('.sidebar-name-area');
             
+            const contentLeft = document.querySelector('.content-left');
+            const contentRight = document.querySelector('.content-right');
+            const profileBlock = document.querySelector('.profile-block');
+            const experienceBlock = document.querySelector('.experience-block');
+
+            // --- 1. RESET POSITIONS TO DEFAULT KEMBALI KE ASAL ---
+            sidebarContentWrapper.appendChild(contactBlock);
+            sidebarContentWrapper.appendChild(eduBlock);
+            sidebar.insertBefore(profileImg, sidebarNameArea);
+            contentLeft.appendChild(profileBlock);
+            contentRight.appendChild(experienceBlock);
+            magazineHeader.appendChild(magazineHeaderText);
+
+            // --- 2. APPLY THEME SPECIFIC DOM SHIFTS (TATA LETAK DINAMIS) ---
             if (themeNumber === 10) {
-                contentColumns.appendChild(contactBlock);
-                contentColumns.appendChild(eduBlock);
-            } else {
-                sidebarContentWrapper.appendChild(contactBlock);
-                sidebarContentWrapper.appendChild(eduBlock);
+                // T10: Magazine - blocks shift to main columns
+                contentLeft.appendChild(contactBlock);
+                contentRight.appendChild(eduBlock);
+            } else if (themeNumber === 12) {
+                // T12: ZigZag - Experience Kiri, Edu/Contact Kanan
+                contentLeft.appendChild(experienceBlock);
+                contentRight.appendChild(contactBlock);
+                contentRight.appendChild(eduBlock);
+            } else if (themeNumber === 13) {
+                // T13: Marmer - Edu/Contact Kiri, Profile/Exp Kanan
+                contentLeft.appendChild(eduBlock);
+                contentLeft.appendChild(contactBlock);
+                contentRight.appendChild(profileBlock);
+                contentRight.appendChild(experienceBlock);
+            } else if (themeNumber === 15) {
+                // T15: Foto pindah ke dalam Header
+                magazineHeader.insertBefore(profileImg, magazineHeader.firstChild);
+            } else if (themeNumber === 16) {
+                // T16: Blue Slate Cards
+                contentLeft.appendChild(profileBlock);
+                contentLeft.appendChild(contactBlock);
+                contentRight.appendChild(experienceBlock);
+                contentRight.appendChild(eduBlock);
+            } else if (themeNumber === 17 || themeNumber === 20) {
+                // T17 & T20: Foto pindah ke Magazine Header Kanan, konten menyebar 2 kolom
+                magazineHeader.appendChild(profileImg);
+                contentLeft.appendChild(contactBlock);
+                contentLeft.appendChild(eduBlock);
+                contentRight.appendChild(profileBlock);
+                contentRight.appendChild(experienceBlock);
+            } else if (themeNumber === 18) {
+                // T18: Foto pindah ke Magazine Header Tengah Atas
+                magazineHeader.insertBefore(profileImg, magazineHeader.firstChild);
+                contentLeft.appendChild(profileBlock);
+                contentLeft.appendChild(experienceBlock);
+                contentRight.appendChild(eduBlock);
+                contentRight.appendChild(contactBlock);
             }
 
             // Simpan preferensi tema ke local storage
