@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Ami Fitriyanti - 10 Tema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Default variables */
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --bg-page: #f3f4f6;
+            --bg-cv: #ffffff;
+            --bg-sidebar: #1e293b;
+            --text-sidebar: #ffffff;
+            --bg-main: #ffffff;
+            --text-main: #1f2937;
+            --accent-color: #64748b;
+            --header-bg: transparent;
+            --header-text: inherit;
+            --layout-dir: row;
+            --sidebar-width: 35%;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            font-family: var(--font-main);
+            color: var(--text-main);
+        }
+
+        /* THEME 1: Modern Navy (Mirip Asli) */
+        [data-theme="1"] {
+            --font-main: 'Poppins', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-sidebar: #1a202c;
+            --text-sidebar: #f7fafc;
+            --accent-color: #718096;
+            --layout-dir: row;
+        }
+
+        /* THEME 2: Klasik Elegan */
+        [data-theme="2"] {
+            --font-main: 'Lora', serif;
+            --font-heading: 'Playfair Display', serif;
+            --bg-sidebar: #ffffff;
+            --text-sidebar: #1a202c;
+            --bg-main: #ffffff;
+            --accent-color: #2d3748;
+            --layout-dir: row-reverse;
+            --sidebar-width: 30%;
+        }
+        [data-theme="2"] .cv-sidebar { border-left: 2px solid #e2e8f0; }
+
+        /* THEME 3: Medis Profesional (Teal) */
+        [data-theme="3"] {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --bg-sidebar: #0f766e;
+            --text-sidebar: #ffffff;
+            --accent-color: #14b8a6;
+            --layout-dir: row;
+        }
+
+        /* THEME 4: Minimalis Bersih */
+        [data-theme="4"] {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-sidebar: #ffffff;
+            --text-sidebar: #4a5568;
+            --bg-main: #ffffff;
+            --accent-color: #cbd5e0;
+            --layout-dir: column;
+        }
+        [data-theme="4"] .cv-layout { flex-direction: column; }
+        [data-theme="4"] .cv-sidebar { width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; }
+        [data-theme="4"] .cv-main { width: 100%; }
+
+        /* THEME 5: Feminin & Lembut */
+        [data-theme="5"] {
+            --font-main: 'Poppins', sans-serif;
+            --font-heading: 'Playfair Display', serif;
+            --bg-sidebar: #fdf2f8;
+            --text-sidebar: #831843;
+            --bg-main: #ffffff;
+            --text-main: #4c1d95;
+            --accent-color: #fbcfe8;
+            --layout-dir: row;
+        }
+
+        /* THEME 6: Monokrom Kuat */
+        [data-theme="6"] {
+            --font-main: 'Montserrat', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-sidebar: #000000;
+            --text-sidebar: #ffffff;
+            --bg-main: #ffffff;
+            --text-main: #000000;
+            --accent-color: #4a4a4a;
+            --layout-dir: row;
+        }
+
+        /* THEME 7: Kreatif (Split 50/50) */
+        [data-theme="7"] {
+            --font-main: 'Poppins', sans-serif;
+            --font-heading: 'Poppins', sans-serif;
+            --bg-sidebar: #312e81;
+            --text-sidebar: #ffffff;
+            --bg-main: #eef2ff;
+            --text-main: #312e81;
+            --accent-color: #c7d2fe;
+            --layout-dir: row;
+            --sidebar-width: 45%;
+        }
+
+        /* THEME 8: Nature / Hijau Bumi */
+        [data-theme="8"] {
+            --font-main: 'Lora', serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-sidebar: #3f6212;
+            --text-sidebar: #f7fee7;
+            --bg-main: #fefce8;
+            --text-main: #3f6212;
+            --accent-color: #bef264;
+            --layout-dir: row;
+        }
+
+        /* THEME 9: Dark Mode Elegan */
+        [data-theme="9"] {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Playfair Display', serif;
+            --bg-sidebar: #121212;
+            --text-sidebar: #e5e5e5;
+            --bg-main: #1e1e1e;
+            --text-main: #e5e5e5;
+            --accent-color: #d4af37; /* Gold */
+            --layout-dir: row;
+        }
+
+        /* THEME 10: Header Atas Penuh (Corporate) */
+        [data-theme="10"] {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-sidebar: #f8fafc;
+            --text-sidebar: #1e293b;
+            --bg-main: #ffffff;
+            --text-main: #334155;
+            --accent-color: #2563eb;
+        }
+        [data-theme="10"] .cv-header-area { background-color: #1e293b; color: white; padding: 2rem; text-align: center; width: 100%; display: block; }
+        [data-theme="10"] .cv-layout { flex-direction: row; }
+
+        /* Base Layout Rules */
+        .cv-wrapper {
+            background-color: var(--bg-cv);
+            width: 210mm; /* A4 Width */
+            min-height: 297mm; /* A4 Height */
+            margin: 0 auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .cv-layout {
+            display: flex;
+            flex-direction: var(--layout-dir);
+            flex: 1;
+        }
+
+        .cv-sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            color: var(--text-sidebar);
+            padding: 2.5rem 2rem;
+        }
+
+        .cv-main {
+            flex: 1;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 3rem;
+        }
+
+        .section-title-sidebar {
+            background-color: var(--accent-color);
+            color: var(--text-sidebar);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-family: var(--font-heading);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+        
+        /* Fallback for themes that don't look good with colored box headings */
+        [data-theme="2"] .section-title-sidebar, 
+        [data-theme="4"] .section-title-sidebar, 
+        [data-theme="9"] .section-title-sidebar {
+            background-color: transparent;
+            border-bottom: 2px solid var(--accent-color);
+            border-radius: 0;
+            padding-left: 0;
+            padding-right: 0;
+            text-align: left;
+            color: inherit;
+        }
+
+        .section-title-main {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-family: var(--font-heading);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        [data-theme="2"] .section-title-main, 
+        [data-theme="4"] .section-title-main, 
+        [data-theme="5"] .section-title-main, 
+        [data-theme="8"] .section-title-main, 
+        [data-theme="9"] .section-title-main {
+            background-color: transparent;
+            border-bottom: 2px solid var(--accent-color);
+            color: inherit;
+            padding-left: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.3rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0.8rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background-color: var(--accent-color);
+            opacity: 0.5;
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        h1, h2 { font-family: var(--font-heading); }
+
+        @media print {
+            body { background-color: white; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            .cv-wrapper { box-shadow: none; width: 100%; height: auto; min-height: 100%; margin: 0; }
+            @page { size: A4; margin: 0; }
+            /* Memaksa browser mencetak semua warna dan background */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="py-10" data-theme="1" id="body-theme">
+
+    <!-- Control Panel (Hidden on Print) -->
+    <div class="no-print max-w-5xl mx-auto mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200 sticky top-4 z-50">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Pilih Tema CV</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setTheme(1)" class="theme-btn px-3 py-1 bg-slate-800 text-white rounded text-sm hover:bg-slate-700">1. Modern Navy</button>
+                    <button onclick="setTheme(2)" class="theme-btn px-3 py-1 bg-white border border-gray-300 text-gray-800 rounded text-sm hover:bg-gray-100">2. Klasik Elegan</button>
+                    <button onclick="setTheme(3)" class="theme-btn px-3 py-1 bg-teal-700 text-white rounded text-sm hover:bg-teal-600">3. Medis Profesional</button>
+                    <button onclick="setTheme(4)" class="theme-btn px-3 py-1 bg-gray-100 border border-gray-300 text-gray-800 rounded text-sm hover:bg-gray-200">4. Minimalis Bersih</button>
+                    <button onclick="setTheme(5)" class="theme-btn px-3 py-1 bg-pink-100 text-pink-900 border border-pink-200 rounded text-sm hover:bg-pink-200">5. Feminin Lembut</button>
+                    <button onclick="setTheme(6)" class="theme-btn px-3 py-1 bg-black text-white rounded text-sm hover:bg-gray-800">6. Monokrom Kuat</button>
+                    <button onclick="setTheme(7)" class="theme-btn px-3 py-1 bg-indigo-900 text-white rounded text-sm hover:bg-indigo-800">7. Kreatif</button>
+                    <button onclick="setTheme(8)" class="theme-btn px-3 py-1 bg-lime-800 text-white rounded text-sm hover:bg-lime-700">8. Nature Earth</button>
+                    <button onclick="setTheme(9)" class="theme-btn px-3 py-1 bg-gray-900 text-yellow-500 rounded text-sm hover:bg-gray-800 border border-yellow-600">9. Dark Mode</button>
+                    <button onclick="setTheme(10)" class="theme-btn px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-500">10. Corporate</button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak / Simpan PDF
+                </button>
+                <p class="text-xs text-gray-500 text-center">Simpan sebagai PDF dengan margin: None</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CV Document -->
+    <div class="cv-wrapper" id="cv-document">
+        
+        <div class="cv-header-area hidden">
+            <h1 class="text-5xl font-bold tracking-wider uppercase mb-2">Ami Fitriyanti</h1>
+            <h2 class="text-2xl tracking-widest uppercase opacity-90">Perawat</h2>
+        </div>
+
+        <div class="cv-layout">
+            <!-- Sidebar -->
+            <div class="cv-sidebar flex flex-col">
+                <!-- Profile Image Area (Optional based on theme, styled as circle) -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-40 h-40 bg-gray-300 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center">
+                       <img src="https://raw.githubusercontent.com/dheonz666/dheonz666.github.io/refs/heads/main/assets/img/ami2.jpg" alt="Foto Ami Fitriyanti" class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <div class="text-center mb-8 sidebar-name-area">
+                    <h1 class="text-3xl font-bold tracking-wide uppercase mb-1">Ami<br>Fitriyanti</h1>
+                    <h2 class="text-lg tracking-wider uppercase opacity-80" style="font-family: var(--font-main);">Perawat</h2>
+                </div>
+
+                <div class="sidebar-content-block">
+                    <h3 class="section-title-sidebar uppercase tracking-wider">Contact</h3>
+                    <div class="space-y-4 text-sm mt-4">
+                        <div>
+                            <p class="font-bold mb-1">Phone</p>
+                            <p>+62 878-7993-2221</p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">Email</p>
+                            <p class="break-all">dityaameliaputri3@gmail.com</p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">Address</p>
+                            <p class="leading-relaxed">Kp awi mekar Rt 012/006 Kec. Bungursari<br>Desa bungursari Kab. Purwakarta</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-content-block mt-4">
+                    <h3 class="section-title-sidebar uppercase tracking-wider">Education</h3>
+                    <ul class="space-y-4 text-sm mt-4 list-disc pl-5">
+                        <li>D3 Kep di Akper Efarina Etaham</li>
+                        <li>S1 Stikes Cirebon</li>
+                        <li>Profesi Stikes Cirebon</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="cv-main">
+                <div class="mb-10">
+                    <h3 class="section-title-main text-2xl uppercase tracking-wider">Profil</h3>
+                    <p class="leading-relaxed text-justify mt-4">
+                        Saya adalah seorang perawat profesional yang berdedikasi dan berpengalaman bekerja di RSU Hospital Radjak. Dengan latar belakang pendidikan keperawatan dan pengalaman kerja lebih dari 14 tahun, saya memiliki keterampilan klinis yang kuat serta kemampuan komunikasi yang baik dalam memberikan pelayanan kesehatan yang holistik dan empatik kepada pasien. Saya terbiasa bekerja dalam tim multidisiplin, serta selalu mengutamakan keselamatan dan kenyamanan pasien. Komitmen saya adalah untuk terus belajar dan berkembang demi meningkatkan mutu pelayanan kesehatan.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="section-title-main text-2xl uppercase tracking-wider">Experience</h3>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-xl font-bold mb-4" style="font-family: var(--font-heading);">RSU Radjak Hospital</h4>
+                        
+                        <div class="timeline-item">
+                            <span class="font-bold text-sm block mb-1">2011 - 2013</span>
+                            <span class="text-lg">Perawat Rawat Inap</span>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="font-bold text-sm block mb-1">2013 - 2015</span>
+                            <span class="text-lg">Penanggung Jawab Nicu</span>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="font-bold text-sm block mb-1">2015 - 2020</span>
+                            <span class="text-lg">Kepala Ruang Rawat Inap Anak</span>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="font-bold text-sm block mb-1">2020 - Sekarang</span>
+                            <span class="text-lg font-semibold">Kepala Ruang Nicu/Picu/Perinatologi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(themeNumber) {
+            const body = document.getElementById('body-theme');
+            body.setAttribute('data-theme', themeNumber);
+            
+            // Logic khusus untuk Tema 10 (Header diatas)
+            const headerArea = document.querySelector('.cv-header-area');
+            const sidebarName = document.querySelector('.sidebar-name-area');
+            
+            if(themeNumber === 10 || themeNumber === 4) {
+                headerArea.classList.remove('hidden');
+                sidebarName.classList.add('hidden');
+            } else {
+                headerArea.classList.add('hidden');
+                sidebarName.classList.remove('hidden');
+            }
+
+            // Visual feedback pada tombol aktif
+            const buttons = document.querySelectorAll('.theme-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.6';
+                btn.style.transform = 'scale(1)';
+            });
+            event.target.style.opacity = '1';
+            event.target.style.transform = 'scale(1.05)';
+        }
+
+        // Set default active button on load
+        window.onload = () => {
+            document.querySelectorAll('.theme-btn')[0].style.opacity = '1';
+            document.querySelectorAll('.theme-btn')[0].style.transform = 'scale(1.05)';
+        }
+    </script>
+</body>
+</html>
