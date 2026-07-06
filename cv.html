@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Builder 10 Tema</title>
-    <link href="assets/img/favicon.png" rel="icon">
-    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <title>CV Builder & 10 Tema CV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -453,7 +451,7 @@
 
     <script>
         // --- 1. STATE MANAGEMENT ---
-        let cvData = {
+        const defaultCvData = {
             name: "Ami Fitriyanti",
             profession: "Perawat",
             phone: "+62 878-7993-2221",
@@ -473,6 +471,9 @@
                 { period: "2020 - Sekarang", title: "Kepala Ruang Nicu/Picu/Perinatologi" }
             ]
         };
+
+        // Mengambil data dari localStorage jika ada, jika tidak pakai data default
+        let cvData = JSON.parse(localStorage.getItem('cvBuilderData')) || defaultCvData;
 
         // --- 2. VIEW TOGGLER ---
         function switchView(view) {
@@ -578,10 +579,12 @@
             cvData.image = document.getElementById('input-image').value;
             cvData.profile = document.getElementById('input-profile').value;
             
+            // Simpan ke localStorage browser
+            localStorage.setItem('cvBuilderData', JSON.stringify(cvData));
+
             // Switch to preview mode (which automatically calls renderCV)
             switchView('preview');
         }
-
 
         // --- 4. RENDER CV LOGIC ---
         function renderCV() {
@@ -642,16 +645,20 @@
                 sidebarContentWrapper.appendChild(contactBlock);
                 sidebarContentWrapper.appendChild(eduBlock);
             }
+
+            // Simpan preferensi tema ke local storage
+            localStorage.setItem('cvBuilderTheme', themeNumber);
         }
 
-        // --- 6. INITIALIZATION --- 
+        // --- 6. INITIALIZATION ---
         window.onload = () => {
             // Load admin forms data on start
             populateAdminForm();
             
-            // Set initial theme
-            document.getElementById('themeSelector').value = '1';
-            setTheme(1);
+            // Set initial theme dari localStorage
+            let savedTheme = localStorage.getItem('cvBuilderTheme') || '1';
+            document.getElementById('themeSelector').value = savedTheme;
+            setTheme(parseInt(savedTheme));
         }
     </script>
 </body>
