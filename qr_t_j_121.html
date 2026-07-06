@@ -102,12 +102,14 @@
                 </div>
                 
                 <!-- Kolom 2: Ukuran Elemen -->
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-1">
                     <span class="font-semibold text-gray-700 text-xs uppercase border-b border-gray-300 pb-1 mb-1">2. Ukuran Elemen</span>
-                    <label class="text-xs text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Ukuran Kotak QR (mm): <input type="number" id="qrSize" step="1" class="w-16 px-2 py-1 border rounded text-right focus:ring-blue-500"></label>
-                    <label class="text-xs text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Perusahaan (pt): <input type="number" id="fontCompany" step="1" class="w-16 px-2 py-1 border rounded text-right focus:ring-blue-500"></label>
-                    <label class="text-xs text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Produk (pt): <input type="number" id="fontProduct" step="1" class="w-16 px-2 py-1 border rounded text-right focus:ring-blue-500"></label>
-                    <label class="text-xs text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Batas Tepi Putih (mm): <input type="number" id="stickerPadding" step="0.5" class="w-16 px-2 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Lebar Kotak (mm): <input type="number" id="labelWidth" step="0.5" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Tinggi Kotak (mm): <input type="number" id="labelHeight" step="0.5" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Ukuran QR (mm): <input type="number" id="qrSize" step="1" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Persh. (pt): <input type="number" id="fontCompany" step="1" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Produk (pt): <input type="number" id="fontProduct" step="1" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Padding/Tepi (mm): <input type="number" id="stickerPadding" step="0.5" class="w-14 px-1 py-1 border rounded text-right focus:ring-blue-500"></label>
                 </div>
 
                 <!-- Kolom 3: Posisi/Offset -->
@@ -157,6 +159,7 @@
 
         const defaultSettings = {
             marginTop: 15, marginLeft: 28, gapX: 3, gapY: 2,
+            labelWidth: 75, labelHeight: 38,
             qrSize: 25, fontCompany: 10, fontProduct: 9, stickerPadding: 4,
             qrOffsetX: 0, qrOffsetY: 0, textOffsetX: 0, textOffsetY: 0
         };
@@ -283,9 +286,9 @@
                 const a4WidthPx = 210 * mm2px;
                 const a4HeightPx = 297 * mm2px;
 
-                // Ukuran Stiker Baku (T&J 121)
-                const labelWPx = 75 * mm2px;
-                const labelHPx = 38 * mm2px;
+                // Ukuran Stiker (Dinamis dari Input User)
+                const labelWPx = settings.labelWidth * mm2px;
+                const labelHPx = settings.labelHeight * mm2px;
 
                 // Pengaturan dari User
                 const marginTPx = settings.marginTop * mm2px;
