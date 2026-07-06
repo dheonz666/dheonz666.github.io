@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Ami Fitriyanti - 10 Tema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --bg-page: #e2e8f0;
+            --bg-cv: #ffffff;
+            --bg-sidebar: #1e293b;
+            --text-sidebar: #ffffff;
+            --bg-main: #ffffff;
+            --text-main: #1f2937;
+            --accent-color: #64748b;
+            --layout-dir: row;
+            --sidebar-width: 35%;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            font-family: var(--font-main);
+            color: var(--text-main);
+        }
+
+        /* --- TEMA 1: Profesional Klasik (Pill Sidebar) --- */
+        [data-theme="1"] {
+            --bg-sidebar: #263252;
+            --text-sidebar: #ffffff;
+            --accent-color: #4b5d84;
+            --text-main: #333333;
+        }
+        [data-theme="1"] .cv-sidebar { border-radius: 0 40px 0 0; }
+        [data-theme="1"] .section-title-sidebar { background: #576b95; color: white; border-radius: 20px; }
+
+        /* --- TEMA 2: Kreatif Minimalis (Teal Border) --- */
+        [data-theme="2"] {
+            --bg-sidebar: #ffffff;
+            --text-sidebar: #0f766e;
+            --bg-main: #ffffff;
+            --accent-color: #0f766e;
+        }
+        [data-theme="2"] .cv-sidebar { border-left: 15px solid #0f766e; padding-left: 1.5rem; }
+        [data-theme="2"] .section-title-sidebar { background: #0f766e; color: white; border-radius: 0; }
+        [data-theme="2"] .section-title-main { background: transparent; color: #0f766e; border-bottom: 2px solid #0f766e; padding-left: 0; }
+
+        /* --- TEMA 3: Infografis & Visual --- */
+        [data-theme="3"] {
+            --bg-sidebar: #0ea5e9;
+            --text-sidebar: #ffffff;
+            --accent-color: #0284c7;
+        }
+        [data-theme="3"] .icon-svg { display: inline-block; width: 16px; height: 16px; margin-right: 8px; fill: currentColor; }
+
+        /* --- TEMA 4: Tipografi-Sentris (Cream & Maroon) --- */
+        [data-theme="4"] {
+            --font-main: 'Lora', serif;
+            --font-heading: 'Playfair Display', serif;
+            --bg-sidebar: transparent;
+            --text-sidebar: #4a0404;
+            --bg-main: transparent;
+            --text-main: #2d1818;
+            --accent-color: #800000;
+            --layout-dir: column;
+            --bg-cv: #fdfbf7;
+        }
+        [data-theme="4"] .cv-layout { flex-direction: column; }
+        [data-theme="4"] .cv-sidebar { width: 100%; display: flex; flex-direction: row; justify-content: space-between; border-bottom: 3px solid #800000; padding-bottom: 1rem; }
+        [data-theme="4"] .profile-img-container { width: 120px; height: 120px; border-radius: 0; border: 2px solid #800000; }
+        [data-theme="4"] .sidebar-name-area { text-align: right; display: flex; flex-direction: column; justify-content: center; }
+        [data-theme="4"] .sidebar-content-block { width: 45%; }
+        [data-theme="4"] .section-title-sidebar, [data-theme="4"] .section-title-main { background: transparent; color: #800000; border-bottom: 1px solid #800000; padding-left: 0; text-align: left; }
+
+        /* --- TEMA 5: Pusat Media Sosial (Curved Header) --- */
+        [data-theme="5"] {
+            --font-main: 'Poppins', sans-serif;
+            --accent-color: #2563eb;
+        }
+        [data-theme="5"] .cv-wrapper { position: relative; }
+        [data-theme="5"] .top-banner-bg { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 220px; background: #2563eb; z-index: 0; border-radius: 0 0 50% 50% / 20%; }
+        [data-theme="5"] .cv-layout { position: relative; z-index: 1; margin-top: 40px; }
+        [data-theme="5"] .cv-sidebar { background: transparent; color: #1e293b; padding-top: 0; }
+        [data-theme="5"] .profile-img-container { border-color: white; width: 160px; height: 160px; margin: 0 auto; }
+        [data-theme="5"] .sidebar-name-area h1, [data-theme="5"] .sidebar-name-area h2 { color: white; }
+        [data-theme="5"] .section-title-sidebar { background: #e2e8f0; color: #2563eb; }
+
+        /* --- TEMA 6: Ilustratif & Artistik (Floral Pink) --- */
+        [data-theme="6"] {
+            --bg-cv: #fff5f5;
+            --text-main: #831843;
+            --accent-color: #f43f5e;
+            --font-heading: 'Playfair Display', serif;
+        }
+        [data-theme="6"] .cv-wrapper {
+            background-image: radial-gradient(circle at top left, #fce7f3 0%, transparent 40%), radial-gradient(circle at bottom right, #fbcfe8 0%, transparent 40%);
+        }
+        [data-theme="6"] .cv-sidebar { background: rgba(255, 255, 255, 0.6); color: #831843; border-right: 1px dashed #f9a8d4; }
+        [data-theme="6"] .section-title-sidebar, [data-theme="6"] .section-title-main { background: transparent; color: #be123c; border-bottom: 2px solid #fbcfe8; border-radius: 0; text-align: left; padding-left: 0; }
+        [data-theme="6"] .profile-img-container { border: 4px solid #fbcfe8; }
+
+        /* --- TEMA 7: Split-Screen Kontras Tinggi --- */
+        [data-theme="7"] {
+            --bg-sidebar: #121212;
+            --text-sidebar: #e5e5e5;
+            --bg-main: #f8f9fa;
+            --accent-color: #d4af37; /* Gold */
+            --sidebar-width: 45%;
+        }
+        [data-theme="7"] .section-title-sidebar { background: #d4af37; color: #000; border-radius: 0; }
+        [data-theme="7"] .section-title-main { background: #121212; color: #d4af37; border-radius: 0; }
+        [data-theme="7"] .profile-img-container { border-color: #d4af37; }
+
+        /* --- TEMA 8: Geometris & Modern --- */
+        [data-theme="8"] {
+            --accent-color: #3b82f6;
+            --bg-sidebar: #1e3a8a;
+        }
+        [data-theme="8"] .top-banner-bg { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 250px; background: #1e40af; clip-path: polygon(0 0, 100% 0, 100% 70%, 0% 100%); z-index: 0; }
+        [data-theme="8"] .cv-layout { position: relative; z-index: 1; }
+        [data-theme="8"] .cv-sidebar { background: transparent; color: white; }
+        [data-theme="8"] .cv-main { padding-top: 5rem; }
+        [data-theme="8"] .section-title-sidebar { background: rgba(255,255,255,0.2); }
+
+        /* --- TEMA 9: Organik & Alami --- */
+        [data-theme="9"] {
+            --bg-sidebar: #3f6212;
+            --text-sidebar: #ecfccb;
+            --bg-main: #fefce8;
+            --text-main: #3f6212;
+            --accent-color: #65a30d;
+        }
+        [data-theme="9"] .cv-sidebar { border-radius: 0 0 60px 0; }
+        [data-theme="9"] .section-title-sidebar, [data-theme="9"] .section-title-main { border-radius: 20px; text-align: center; }
+
+        /* --- TEMA 10: Gaya Majalah (Vogue/Cover) --- */
+        [data-theme="10"] {
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Playfair Display', serif;
+            --bg-cv: #1a1518;
+            --text-main: #fdfbf7;
+            --layout-dir: column;
+        }
+        [data-theme="10"] .cv-layout { flex-direction: column; padding: 2rem; position: relative; }
+        [data-theme="10"] .cv-sidebar, [data-theme="10"] .cv-main { width: 100%; background: transparent; color: #fdfbf7; padding: 0; }
+        
+        [data-theme="10"] .magazine-header { display: block; text-align: center; margin-bottom: 1rem; position: relative; z-index: 2; }
+        [data-theme="10"] .magazine-header h1 { font-size: 4.5rem; font-weight: 900; letter-spacing: 2px; line-height: 1; color: #ffffff; }
+        [data-theme="10"] .magazine-header h2 { font-size: 1.5rem; letter-spacing: 5px; color: #9ca3af; margin-top: 0.5rem; }
+        
+        [data-theme="10"] .sidebar-name-area { display: none; }
+        
+        [data-theme="10"] .profile-img-container { width: 100%; height: 450px; border-radius: 0; border: none; margin-bottom: 2rem; position: relative; z-index: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        [data-theme="10"] .profile-img-container img { object-position: top; }
+        
+        [data-theme="10"] .content-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        [data-theme="10"] .section-title-sidebar, [data-theme="10"] .section-title-main { background: transparent; color: #fca5a5; border-bottom: 1px solid #4b3240; text-align: left; padding-left: 0; font-size: 1.5rem; }
+        [data-theme="10"] .timeline-item::before { background-color: #fca5a5; }
+        [data-theme="10"] .timeline-item::after { background-color: #fca5a5; }
+
+        /* Base Layout Rules */
+        .cv-wrapper {
+            background-color: var(--bg-cv);
+            width: 210mm; /* A4 Width */
+            min-height: 297mm; /* A4 Height */
+            margin: 0 auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .top-banner-bg { display: none; }
+        .magazine-header { display: none; }
+        
+        .cv-layout {
+            display: flex;
+            flex-direction: var(--layout-dir);
+            flex: 1;
+            width: 100%;
+        }
+
+        .cv-sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            color: var(--text-sidebar);
+            padding: 2.5rem 2rem;
+            z-index: 2;
+        }
+
+        .cv-main {
+            flex: 1;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 3rem;
+            z-index: 2;
+        }
+
+        .profile-img-container {
+            width: 10rem;
+            height: 10rem;
+            border-radius: 9999px;
+            border: 4px solid white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            transition: all 0.3s ease;
+        }
+
+        .section-title-sidebar {
+            background-color: var(--accent-color);
+            color: var(--text-sidebar);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-family: var(--font-heading);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .section-title-main {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-family: var(--font-heading);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.3rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0.8rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background-color: var(--accent-color);
+            opacity: 0.5;
+        }
+        .timeline-item:last-child::after { display: none; }
+
+        h1, h2, h3 { font-family: var(--font-heading); }
+        .icon-svg { display: none; } /* Hidden by default, shown in T3 */
+
+        @media print {
+            body { background-color: white; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            .cv-wrapper { box-shadow: none; width: 100%; height: auto; min-height: 100%; margin: 0; }
+            @page { size: A4; margin: 0; }
+            /* Force print colors/backgrounds */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="py-10" data-theme="1" id="body-theme">
+
+    <!-- Control Panel -->
+    <div class="no-print max-w-5xl mx-auto mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200 sticky top-4 z-50">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex-1">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Pilih Tema Visual CV</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setTheme(1)" class="theme-btn px-3 py-1 bg-slate-800 text-white rounded text-sm hover:bg-slate-700">1. Klasik (Pill)</button>
+                    <button onclick="setTheme(2)" class="theme-btn px-3 py-1 bg-teal-600 text-white rounded text-sm hover:bg-teal-700">2. Minimalis (Garis)</button>
+                    <button onclick="setTheme(3)" class="theme-btn px-3 py-1 bg-sky-500 text-white rounded text-sm hover:bg-sky-600">3. Infografis (Ikon)</button>
+                    <button onclick="setTheme(4)" class="theme-btn px-3 py-1 bg-[#fdfbf7] border border-red-900 text-red-900 rounded text-sm hover:bg-red-50">4. Tipografi</button>
+                    <button onclick="setTheme(5)" class="theme-btn px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">5. Sosmed (Kurva)</button>
+                    <button onclick="setTheme(6)" class="theme-btn px-3 py-1 bg-pink-200 text-pink-900 rounded text-sm hover:bg-pink-300">6. Ilustratif</button>
+                    <button onclick="setTheme(7)" class="theme-btn px-3 py-1 bg-black text-yellow-500 rounded text-sm hover:bg-gray-800 border border-yellow-500">7. Split Screen</button>
+                    <button onclick="setTheme(8)" class="theme-btn px-3 py-1 bg-blue-800 text-white rounded text-sm hover:bg-blue-900">8. Geometris</button>
+                    <button onclick="setTheme(9)" class="theme-btn px-3 py-1 bg-lime-800 text-white rounded text-sm hover:bg-lime-900">9. Organik Bumi</button>
+                    <button onclick="setTheme(10)" class="theme-btn px-3 py-1 bg-[#1a1518] text-white rounded text-sm hover:bg-gray-900 border border-gray-600 font-serif">10. Gaya Majalah</button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak PDF
+                </button>
+                <p class="text-xs text-gray-500 text-center">Margin: None | Aktifkan Background</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CV Document -->
+    <div class="cv-wrapper" id="cv-document">
+        
+        <!-- Element Latar Belakang Khusus (Tema 5, 8) -->
+        <div class="top-banner-bg"></div>
+
+        <div class="cv-layout">
+            
+            <!-- Header Majalah Khusus (Tema 10) -->
+            <div class="magazine-header">
+                <h1>AMI FITRIYANTI</h1>
+                <h2>PERAWAT</h2>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="cv-sidebar flex flex-col">
+                
+                <div class="profile-img-container">
+                    <img src="https://raw.githubusercontent.com/dheonz666/dheonz666.github.io/refs/heads/main/assets/img/ami2.jpg" alt="Foto Ami Fitriyanti" class="w-full h-full object-cover">
+                </div>
+
+                <div class="text-center mb-6 sidebar-name-area">
+                    <h1 class="text-3xl font-bold tracking-wide uppercase mb-1">Ami<br>Fitriyanti</h1>
+                    <h2 class="text-lg tracking-wider uppercase opacity-90" style="font-family: var(--font-main);">Perawat</h2>
+                </div>
+
+                <!-- Wrapper Khusus Tema 4 & 10 untuk memisahkan grid -->
+                <div class="content-columns-wrapper w-full">
+                    
+                    <div class="sidebar-content-block">
+                        <h3 class="section-title-sidebar uppercase tracking-wider">Contact</h3>
+                        <div class="space-y-4 text-sm mt-4">
+                            <div class="flex items-start">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 10.999h2C22 5.869 18.127 2 12.99 2v2C17.052 4 20 6.943 20 10.999z"/><path d="M13 8c2.103 0 3 .897 3 3h2c0-3.225-1.775-5-5-5v2zm3.422 5.443a1.001 1.001 0 0 0-1.391.043l-2.393 2.461c-.576-.11-1.734-.471-2.926-1.66-1.192-1.193-1.553-2.354-1.66-2.926l2.459-2.394a1 1 0 0 0 .043-1.391L6.859 3.513a1 1 0 0 0-1.391-.087l-2.17 1.861a1 1 0 0 0-.29.649c-.015.25-.301 6.172 4.291 10.766C11.305 20.707 16.323 21 17.705 21c.202 0 .326-.006.359-.008a.992.992 0 0 0 .648-.291l1.86-2.171a1 1 0 0 0-.086-1.391l-4.064-3.696z"/></svg>
+                                <div>
+                                    <p class="font-bold mb-1">Phone</p>
+                                    <p>+62 878-7993-2221</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm0 2v.511l-8 6.223-8-6.222V6h16zM4 18V9.044l7.386 5.745a.994.994 0 0 0 1.228 0L20 9.044 20.002 18H4z"/></svg>
+                                <div>
+                                    <p class="font-bold mb-1">Email</p>
+                                    <p class="break-all">dityaameliaputri3@gmail.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C7.589 2 4 5.589 4 9.995 3.971 16.44 11.696 21.784 12 22c0 0 8.029-5.56 8-12.005C20 5.589 16.411 2 12 2zm0 11.114a3.611 3.611 0 1 1 0-7.222 3.611 3.611 0 0 1 0 7.222z"/></svg>
+                                <div>
+                                    <p class="font-bold mb-1">Address</p>
+                                    <p class="leading-relaxed">Kp awi mekar Rt 012/006 Kec. Bungursari<br>Desa bungursari Kab. Purwakarta</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-content-block mt-6">
+                        <h3 class="section-title-sidebar uppercase tracking-wider">Education</h3>
+                        <div class="flex items-start mt-4">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L1 7l11 5 9-4.09V17h2V7l-11-5z"/><path d="M4 11v4.333C4 17.9 7.582 20 12 20s8-2.1 8-4.667V11l-8 3.636L4 11z"/></svg>
+                            <ul class="space-y-4 text-sm list-disc pl-5 w-full">
+                                <li>D3 Kep di Akper Efarina Etaham</li>
+                                <li>S1 Stikes Cirebon</li>
+                                <li>Profesi Stikes Cirebon</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="cv-main">
+                <div class="content-columns">
+                    
+                    <div class="mb-8 content-left">
+                        <h3 class="section-title-main text-xl uppercase tracking-wider">Profil Profesional</h3>
+                        <p class="leading-relaxed text-justify mt-4">
+                            Saya adalah seorang perawat profesional yang berdedikasi dan berpengalaman bekerja di RSU Hospital Radjak. Dengan latar belakang pendidikan keperawatan dan pengalaman kerja lebih dari 14 tahun, saya memiliki keterampilan klinis yang kuat serta kemampuan komunikasi yang baik dalam memberikan pelayanan kesehatan yang holistik dan empatik kepada pasien. Saya terbiasa bekerja dalam tim multidisiplin, serta selalu mengutamakan keselamatan dan kenyamanan pasien. Komitmen saya adalah untuk terus belajar dan berkembang demi meningkatkan mutu pelayanan kesehatan.
+                        </p>
+                    </div>
+
+                    <div class="content-right">
+                        <h3 class="section-title-main text-xl uppercase tracking-wider">Pengalaman (Experience)</h3>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-xl font-bold mb-4" style="font-family: var(--font-heading);">RSU Radjak Hospital</h4>
+                            
+                            <div class="timeline-item">
+                                <span class="font-bold text-sm block mb-1 opacity-80">2011 - 2013</span>
+                                <span class="text-lg font-medium">Perawat Rawat Inap</span>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span class="font-bold text-sm block mb-1 opacity-80">2013 - 2015</span>
+                                <span class="text-lg font-medium">Penanggung Jawab Nicu</span>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span class="font-bold text-sm block mb-1 opacity-80">2015 - 2020</span>
+                                <span class="text-lg font-medium">Kepala Ruang Rawat Inap Anak</span>
+                            </div>
+
+                            <div class="timeline-item">
+                                <span class="font-bold text-sm block mb-1 opacity-80">2020 - Sekarang</span>
+                                <span class="text-lg font-bold">Kepala Ruang Nicu/Picu/Perinatologi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(themeNumber) {
+            const body = document.getElementById('body-theme');
+            body.setAttribute('data-theme', themeNumber);
+            
+            // Penyesuaian layout DOM untuk Tema 4 (Tipografi)
+            const sidebarContentWrapper = document.querySelector('.content-columns-wrapper');
+            const sidebar = document.querySelector('.cv-sidebar');
+            const main = document.querySelector('.cv-main');
+            
+            if (themeNumber === 4) {
+                // Di tema 4, jadikan konten sidebar flex row (menyamping)
+                sidebarContentWrapper.classList.add('flex', 'justify-between', 'gap-4');
+                sidebarContentWrapper.classList.remove('w-full');
+            } else {
+                sidebarContentWrapper.classList.remove('flex', 'justify-between', 'gap-4');
+                sidebarContentWrapper.classList.add('w-full');
+            }
+
+            // Penyesuaian Layout untuk Tema 10 (Magazine)
+            const contentColumns = document.querySelector('.content-columns');
+            const contactBlock = document.querySelector('.sidebar-content-block');
+            const eduBlock = document.querySelectorAll('.sidebar-content-block')[1];
+            
+            if (themeNumber === 10) {
+                // Pindahkan elemen kontak & edukasi ke bawah bagian utama agar bisa 2 kolom
+                contentColumns.appendChild(contactBlock);
+                contentColumns.appendChild(eduBlock);
+            } else {
+                // Kembalikan ke sidebar
+                sidebarContentWrapper.appendChild(contactBlock);
+                sidebarContentWrapper.appendChild(eduBlock);
+            }
+
+            // Visual feedback pada tombol aktif
+            const buttons = document.querySelectorAll('.theme-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.6';
+                btn.style.transform = 'scale(1)';
+                btn.classList.remove('ring-4', 'ring-offset-2', 'ring-blue-400');
+            });
+            event.target.style.opacity = '1';
+            event.target.style.transform = 'scale(1.05)';
+            event.target.classList.add('ring-4', 'ring-offset-2', 'ring-blue-400');
+        }
+
+        // Inisialisasi tema pertama kali dimuat
+        window.onload = () => {
+            const firstBtn = document.querySelectorAll('.theme-btn')[0];
+            firstBtn.style.opacity = '1';
+            firstBtn.style.transform = 'scale(1.05)';
+            firstBtn.classList.add('ring-4', 'ring-offset-2', 'ring-blue-400');
+        }
+    </script>
+</body>
+</html>
