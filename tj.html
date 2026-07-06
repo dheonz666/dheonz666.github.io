@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Stiker T&J (All-in-One)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Area Canvas untuk Print */
+        .a4-canvas {
+            width: 210mm !important;
+            height: 297mm !important;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        /* Pengaturan Cetak (Print) Absolut */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0; /* Menghilangkan margin bawaan browser */
+            }
+            body { 
+                background-color: white; 
+                margin: 0;
+                padding: 0;
+            }
+            .no-print { 
+                display: none !important; 
+            }
+            #preview-container {
+                padding: 0 !important;
+                background: none !important;
+            }
+            .a4-canvas {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always; 
+                width: 210mm !important;
+                height: 297mm !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen font-sans">
+
+    <header class="bg-white border-b border-gray-200 p-4 md:p-6 shadow-sm z-10 no-print pb-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Cetak Stiker T&J (Resolusi Tinggi)</h1>
+                    <p class="text-sm text-gray-500">Render Berbasis Canvas (Presisi 300 DPI untuk Print)</p>
+                </div>
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow flex items-center gap-2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print Stiker
+                </button>
+            </div>
+
+            <!-- Panel Template & Mode (BARU) -->
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex-1 flex justify-between items-center gap-3 shadow-inner">
+                    <label class="font-bold text-emerald-800 text-sm whitespace-nowrap">📜 Template Ukuran:</label>
+                    <select id="templateSelect" class="border border-emerald-300 rounded px-3 py-1.5 text-sm bg-white font-medium focus:ring-emerald-500 w-full">
+                        <option value="custom">🛠️ Custom (Atur Sendiri)</option>
+                        <option value="121">📄 T&J 121 (38 x 75 mm) - 14 Pcs</option>
+                        <option value="103">📄 T&J 103 (32 x 64 mm) - 12 Pcs</option>
+                        <option value="109">📄 T&J 109 (38 x 100 mm) - 11 Pcs</option>
+                        <option value="107">📄 T&J 107 (18 x 50 mm) - 30 Pcs</option>
+                    </select>
+                </div>
+                
+                <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-lg flex-1 flex justify-between items-center gap-3 shadow-inner">
+                    <label class="font-bold text-indigo-800 text-sm whitespace-nowrap">⚙️ Mode Cetak:</label>
+                    <select id="modeSelect" class="border border-indigo-300 rounded px-3 py-1.5 text-sm bg-white font-medium focus:ring-indigo-500 w-full">
+                        <option value="qr">📷 Pakai QR Code & Teks</option>
+                        <option value="address">📝 Hanya Teks (Alamat / Ekspedisi)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-semibold text-blue-800 text-sm uppercase tracking-wider">Daftar Data Stiker</h2>
+                    <button onclick="addDataRow()" class="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 py-1 px-3 rounded border border-blue-300 transition font-bold">
+                        + Tambah Data
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-12 gap-2 mb-2 text-xs font-semibold text-gray-700 text-center bg-blue-100 p-2 rounded">
+                    <div id="th-field1" class="col-span-3 text-left">Nama Perusahaan</div>
+                    <div id="th-field2" class="col-span-3 text-left">Detail Produk</div>
+                    <div id="th-field3" class="col-span-3 text-left">Data dalam QR</div>
+                    <div class="col-span-2">Jumlah Cetak (Pcs)</div>
+                    <div class="col-span-1">Hapus</div>
+                </div>
+
+                <div id="data-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <!-- Baris Form Injeksi JS -->
+                </div>
+            </div>
+
+            <!-- Panel Kalibrasi & Ukuran -->
+            <div id="calibration-panel" class="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-inner transition-opacity">
+                <!-- Kolom 1: Kertas -->
+                <div class="flex flex-col gap-1.5">
+                    <span class="font-semibold text-gray-700 text-xs uppercase border-b border-gray-300 pb-1 mb-1">1. Layout Kertas</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="text-[11px] text-gray-700 flex justify-between items-center">Kolom: <input type="number" id="cols" min="1" class="w-12 px-1 py-1 border rounded text-center"></label>
+                        <label class="text-[11px] text-gray-700 flex justify-between items-center">Baris: <input type="number" id="rowsPerPage" min="1" class="w-12 px-1 py-1 border rounded text-center"></label>
+                    </div>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Margin Atas (mm): <input type="number" id="marginTop" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Margin Kiri (mm): <input type="number" id="marginLeft" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Jarak X/Kanan (mm): <input type="number" id="gapX" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Jarak Y/Bawah (mm): <input type="number" id="gapY" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                </div>
+                
+                <!-- Kolom 2: Ukuran Elemen -->
+                <div class="flex flex-col gap-1.5">
+                    <span class="font-semibold text-gray-700 text-xs uppercase border-b border-gray-300 pb-1 mb-1">2. Dimensi Stiker</span>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Lebar Kotak (mm): <input type="number" id="labelWidth" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Tinggi Kotak (mm): <input type="number" id="labelHeight" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Ukuran QR (mm): <input type="number" id="qrSize" step="1" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Baris 1 (pt): <input type="number" id="fontCompany" step="1" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Font Baris 2/3 (pt): <input type="number" id="fontProduct" step="1" class="w-14 px-1 py-1 border rounded text-right"></label>
+                    <label class="text-[11px] text-gray-700 flex justify-between items-center hover:bg-gray-100 p-1 rounded">Jarak Tepi Dalam (mm): <input type="number" id="stickerPadding" step="0.5" class="w-14 px-1 py-1 border rounded text-right"></label>
+                </div>
+
+                <!-- Kolom 3: Posisi/Offset -->
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-end border-b border-gray-300 pb-1 mb-1">
+                        <span class="font-semibold text-gray-700 text-xs uppercase">3. Geser Kalibrasi</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <label class="text-[11px] text-gray-600 flex flex-col font-medium">QR Geser X (↔) <input type="number" id="qrOffsetX" step="0.5" class="w-full px-1 py-1 border rounded text-center mt-1"></label>
+                        <label class="text-[11px] text-gray-600 flex flex-col font-medium">QR Geser Y (↕) <input type="number" id="qrOffsetY" step="0.5" class="w-full px-1 py-1 border rounded text-center mt-1"></label>
+                        <label class="text-[11px] text-gray-600 flex flex-col font-medium">Teks Geser X (↔) <input type="number" id="textOffsetX" step="0.5" class="w-full px-1 py-1 border rounded text-center mt-1"></label>
+                        <label class="text-[11px] text-gray-600 flex flex-col font-medium">Teks Geser Y (↕) <input type="number" id="textOffsetY" step="0.5" class="w-full px-1 py-1 border rounded text-center mt-1"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="preview-container" class="w-full flex flex-col items-center py-10">
+        <!-- Canvas Akan Digenerate Disini -->
+    </main>
+
+    <!-- Custom Toast Message -->
+    <div id="custom-toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-red-600 text-white font-medium px-6 py-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+        Pesan Notifikasi
+    </div>
+
+    <!-- Hidden div untuk generate temporary QR codes sebelum dipindah ke Canvas -->
+    <div id="qr-temp" class="hidden"></div>
+
+    <script>
+        
+        // Pustaka Template Standar Tom & Jerry
+        const TEMPLATES = {
+            '121': { labelWidth: 75, labelHeight: 38, cols: 2, rowsPerPage: 7, marginTop: 15, marginLeft: 28, gapX: 3, gapY: 2, qrSize: 25 },
+            '103': { labelWidth: 64, labelHeight: 32, cols: 3, rowsPerPage: 4, marginTop: 10, marginLeft: 5, gapX: 2, gapY: 2, qrSize: 22 },
+            '109': { labelWidth: 100, labelHeight: 38, cols: 2, rowsPerPage: 7, marginTop: 15, marginLeft: 3, gapX: 3, gapY: 2, qrSize: 25 },
+            '107': { labelWidth: 50, labelHeight: 18, cols: 4, rowsPerPage: 14, marginTop: 10, marginLeft: 5, gapX: 2, gapY: 2, qrSize: 14 }
+        };
+
+        const defaultData = [
+            { id: 1, field1: "PT. Eka Maju Mesinindo", field2: "T: Rak Besi", field3: "Rak Besi", qty: 1 },
+            { id: 2, field1: "Budi Santoso", field2: "Jl. Sudirman No. 45, Jakarta Pusat", field3: "081234567890", qty: 1 } // Contoh format alamat
+        ];
+
+        const defaultSettings = {
+            template: '121', mode: 'qr',
+            cols: 2, rowsPerPage: 7,
+            marginTop: 15, marginLeft: 28, gapX: 3, gapY: 2,
+            labelWidth: 75, labelHeight: 38,
+            qrSize: 25, fontCompany: 10, fontProduct: 9, stickerPadding: 4,
+            qrOffsetX: 0, qrOffsetY: 0, textOffsetX: 0, textOffsetY: 0
+        };
+
+        // Migrasi & Load Storage
+        let stickerData = JSON.parse(localStorage.getItem('tj_all_data'));
+        if (!stickerData || stickerData.length === 0) {
+            // Coba ambil dari cache lama jika ada
+            let oldData = JSON.parse(localStorage.getItem('tj121_data_canvas'));
+            if(oldData && oldData.length > 0) {
+                stickerData = oldData.map(d => ({
+                    id: d.id, field1: d.company || "", field2: d.product || "", field3: d.qr || "", qty: d.qty || 1
+                }));
+            } else {
+                stickerData = JSON.parse(JSON.stringify(defaultData)); 
+            }
+        }
+
+        let settings = JSON.parse(localStorage.getItem('tj_all_settings')) || { ...defaultSettings };
+        settings = { ...defaultSettings, ...settings };
+
+        const elMap = {};
+
+        // Custom Toast Box
+        function showToast(message) {
+            const toast = document.getElementById('custom-toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataContainer = document.getElementById('data-container');
+            const elTemplate = document.getElementById('templateSelect');
+            const elMode = document.getElementById('modeSelect');
+            
+            // Set Initial Select Values
+            elTemplate.value = settings.template;
+            elMode.value = settings.mode;
+
+            // Bind Input Setting ke Variabel & Event Listener
+            const settingKeys = Object.keys(defaultSettings).filter(k => k !== 'template' && k !== 'mode');
+            settingKeys.forEach(key => {
+                elMap[key] = document.getElementById(key);
+                if(elMap[key]) {
+                    elMap[key].value = settings[key];
+                    elMap[key].addEventListener('input', (e) => {
+                        settings[key] = parseFloat(e.target.value) || 0;
+                        elTemplate.value = 'custom'; // Otomatis pindah ke custom jika user otak-atik manual
+                        settings.template = 'custom';
+                        saveSettingsToLocal();
+                        renderCanvasPages(); 
+                    });
+                }
+            });
+
+            // Handle Template Dropdown Change
+            elTemplate.addEventListener('change', (e) => {
+                const tmpl = e.target.value;
+                settings.template = tmpl;
+                if(TEMPLATES[tmpl]) {
+                    // Timpa ukuran & margin sesuai preset
+                    const preset = TEMPLATES[tmpl];
+                    Object.keys(preset).forEach(k => {
+                        settings[k] = preset[k];
+                        if(elMap[k]) elMap[k].value = preset[k];
+                    });
+                }
+                saveSettingsToLocal();
+                renderCanvasPages();
+                showToast(`Template diubah ke ${e.target.options[e.target.selectedIndex].text}`);
+            });
+
+            // Handle Mode Dropdown Change (QR vs Alamat)
+            elMode.addEventListener('change', (e) => {
+                settings.mode = e.target.value;
+                saveSettingsToLocal();
+                updateFormUI(); // Ganti judul tabel
+                renderFormRows();
+                renderCanvasPages();
+            });
+
+            window.saveDataToLocal = () => localStorage.setItem('tj_all_data', JSON.stringify(stickerData));
+            window.saveSettingsToLocal = () => localStorage.setItem('tj_all_settings', JSON.stringify(settings));
+
+            window.updateFormUI = function() {
+                const isAddr = settings.mode === 'address';
+                document.getElementById('th-field1').textContent = isAddr ? "Nama Penerima/PT" : "Nama Perusahaan";
+                document.getElementById('th-field2').textContent = isAddr ? "Alamat Lengkap" : "Detail Produk";
+                document.getElementById('th-field3').textContent = isAddr ? "No Telp / Info" : "Data dalam QR";
+            };
+
+            window.renderFormRows = function() {
+                dataContainer.innerHTML = '';
+                const isAddr = settings.mode === 'address';
+
+                stickerData.forEach((data, index) => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'grid grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-gray-200 shadow-sm hover:shadow transition-shadow';
+                    
+                    rowDiv.innerHTML = `
+                        <div class="col-span-3">
+                            <input type="text" value="${data.field1}" oninput="updateData(${index}, 'field1', this.value)" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-semibold focus:ring-blue-500" placeholder="${isAddr ? 'Cth: Bpk Andi' : 'Perusahaan'}">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="text" value="${data.field2}" oninput="updateData(${index}, 'field2', this.value)" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-blue-500" placeholder="${isAddr ? 'Jl. Mawar No. 1' : 'Produk'}">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="text" value="${data.field3}" oninput="updateData(${index}, 'field3', this.value)" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-blue-500" placeholder="${isAddr ? '0812xxx' : 'Isi QR'}">
+                        </div>
+                        <div class="col-span-2">
+                            <input type="number" value="${data.qty}" min="1" oninput="updateData(${index}, 'qty', this.value)" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-center focus:ring-blue-500">
+                        </div>
+                        <div class="col-span-1 text-center">
+                            <button onclick="removeDataRow(${index})" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded hover:bg-red-100 transition" title="Hapus Baris">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                    `;
+                    dataContainer.appendChild(rowDiv);
+                });
+                renderCanvasPages(); 
+            };
+
+            window.addDataRow = function() {
+                stickerData.push({ id: Date.now(), field1: "Baru", field2: "Detail", field3: "Info", qty: 1 });
+                saveDataToLocal();
+                renderFormRows();
+            };
+
+            window.removeDataRow = function(index) {
+                if (stickerData.length > 1) {
+                    stickerData.splice(index, 1);
+                    saveDataToLocal();
+                    renderFormRows();
+                } else {
+                    showToast("Peringatan: Minimal harus ada 1 data stiker!");
+                }
+            };
+
+            window.updateData = function(index, field, value) {
+                if (field === 'qty') stickerData[index][field] = parseInt(value) || 1;
+                else stickerData[index][field] = value;
+                saveDataToLocal();
+                
+                // Gunakan debounce kecil agar render canvas tidak lag saat mengetik cepat
+                clearTimeout(window.renderTimeout);
+                window.renderTimeout = setTimeout(() => renderCanvasPages(), 100);
+            };
+
+            window.renderCanvasPages = function() {
+                const container = document.getElementById('preview-container');
+                const qrTemp = document.getElementById('qr-temp');
+                container.innerHTML = ''; 
+                qrTemp.innerHTML = '';
+
+                // Resolusi Cetak: 300 DPI (Sangat Tajam)
+                const DPI = 300;
+                const mm2px = DPI / 25.4; 
+                const pt2px = DPI / 72;   
+
+                const a4WidthPx = 210 * mm2px;
+                const a4HeightPx = 297 * mm2px;
+
+                const labelWPx = settings.labelWidth * mm2px;
+                const labelHPx = settings.labelHeight * mm2px;
+
+                const marginTPx = settings.marginTop * mm2px;
+                const marginLPx = settings.marginLeft * mm2px;
+                const gapXPx = settings.gapX * mm2px;
+                const gapYPx = settings.gapY * mm2px;
+                const paddingPx = settings.stickerPadding * mm2px;
+
+                const qrSizePx = settings.qrSize * mm2px;
+                const fontCompanyPx = settings.fontCompany * pt2px;
+                const fontProductPx = settings.fontProduct * pt2px;
+
+                const qrOffXPx = settings.qrOffsetX * mm2px;
+                const qrOffYPx = settings.qrOffsetY * mm2px;
+                const txtOffXPx = settings.textOffsetX * mm2px;
+                const txtOffYPx = settings.textOffsetY * mm2px;
+
+                // Hitung Flat Array Barang yang Akan Dicetak
+                let flatLabels = [];
+                stickerData.forEach(item => {
+                    for(let i=0; i < item.qty; i++) { flatLabels.push(item); }
+                });
+
+                // Layout Kertas Dinamis
+                const cols = Math.max(1, settings.cols);
+                const rowsPerPage = Math.max(1, settings.rowsPerPage); 
+                const labelsPerPage = cols * rowsPerPage;
+
+                let ctx = null;
+
+                flatLabels.forEach((item, index) => {
+                    // Buat Halaman (Canvas) Baru
+                    if (index % labelsPerPage === 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = a4WidthPx;
+                        canvas.height = a4HeightPx;
+                        canvas.className = 'a4-canvas';
+                        container.appendChild(canvas);
+
+                        ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, a4WidthPx, a4HeightPx);
+                        ctx.textBaseline = 'top';
+                    }
+
+                    const pageIndex = index % labelsPerPage;
+                    const col = pageIndex % cols;
+                    const row = Math.floor(pageIndex / cols);
+
+                    const x = marginLPx + col * (labelWPx + gapXPx);
+                    const y = marginTPx + row * (labelHPx + gapYPx);
+
+                    // Garis Tepi Hitam (Border)
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 1.5 * (DPI / 96);
+                    ctx.strokeRect(x, y, labelWPx, labelHPx);
+
+                    // Area Clipping (Cegah overspill)
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(x, y, labelWPx, labelHPx);
+                    ctx.clip();
+
+                    ctx.fillStyle = '#000000';
+
+                    if (settings.mode === 'qr') {
+                        // ==== MODE QR ====
+                        const qrActualX = x + paddingPx + qrOffXPx;
+                        const qrActualY = y + (labelHPx - qrSizePx) / 2 + qrOffYPx;
+                        
+                        const tempId = `qr-${index}`;
+                        const tempDiv = document.createElement('div');
+                        tempDiv.id = tempId;
+                        qrTemp.appendChild(tempDiv);
+
+                        try {
+                            new QRCode(tempDiv, {
+                                text: item.field3 || ' ',
+                                width: 256, height: 256,
+                                colorDark : "#000000", colorLight : "#ffffff",
+                                correctLevel : QRCode.CorrectLevel.M
+                            });
+                            
+                            const qrGeneratedCanvas = tempDiv.querySelector('canvas');
+                            if (qrGeneratedCanvas) {
+                                ctx.drawImage(qrGeneratedCanvas, qrActualX, qrActualY, qrSizePx, qrSizePx);
+                            }
+                        } catch (e) {}
+
+                        // Teks Kanan
+                        const textStartX = qrActualX + qrSizePx + paddingPx + txtOffXPx;
+                        const lineSpacing = 1.5 * mm2px;
+                        const totalTextHeight = fontCompanyPx + lineSpacing + fontProductPx;
+                        const textStartY = y + (labelHPx - totalTextHeight) / 2 + txtOffYPx;
+
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        ctx.fillText(item.field1, textStartX, textStartY);
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        ctx.fillText(item.field2, textStartX, textStartY + fontCompanyPx + lineSpacing);
+
+                    } else {
+                        // ==== MODE ALAMAT (Tanpa QR) ====
+                        const textStartX = x + paddingPx + txtOffXPx;
+                        const lineSpacing = 1.8 * mm2px;
+                        
+                        // Render 3 Baris Text
+                        // 1. Nama Perusahaan/Orang (Bold)
+                        // 2. Alamat (Normal)
+                        // 3. Telp (Normal)
+                        const totalTextHeight = fontCompanyPx + (fontProductPx * 2) + (lineSpacing * 2);
+                        const textStartY = y + (labelHPx - totalTextHeight) / 2 + txtOffYPx;
+
+                        ctx.font = `bold ${fontCompanyPx}px Arial`;
+                        ctx.fillText(item.field1, textStartX, textStartY);
+                        
+                        ctx.font = `normal ${fontProductPx}px Arial`;
+                        ctx.fillText(item.field2, textStartX, textStartY + fontCompanyPx + lineSpacing);
+                        
+                        ctx.fillText(item.field3, textStartX, textStartY + fontCompanyPx + fontProductPx + (lineSpacing * 2));
+                    }
+
+                    ctx.restore();
+                });
+            };
+
+            // Init aplikasi
+            updateFormUI();
+            renderFormRows();
+        });
+    </script>
+</body>
+</html>
