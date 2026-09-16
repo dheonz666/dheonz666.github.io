@@ -458,7 +458,7 @@
                 Swal.fire('Oops!', 'Tidak ada data untuk diekspor.', 'info');
                 return;
             }
-            const data = inventoryData.map(i => ({ Area: i.area.toUpperCase(), Barcode: i.barcode, Qty: i.qty, Waktu: i.created_at }));
+            const data = inventoryData.map(i => ({ Area: i.area.toUpperCase(), Barcode: i.barcode, QTY: i.qty, Satuan: "PCS", Waktu: i.created_at }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventory");
