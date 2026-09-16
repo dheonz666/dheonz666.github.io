@@ -543,47 +543,59 @@
         }
 
         async function handleFileImport(event) {
-            const file = event.target.files[0];
+            const file = input.files[0];
             if (!file) return;
 
-            toggleLoading(true, "Membaca Excel...");
+            toggleLoading(true);
             const reader = new FileReader();
+
             reader.onload = async (e) => {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    const firstSheet = workbook.SheetNames[0];
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
 
-                    if (jsonData.length === 0) throw new Error("File Kosong");
-
-                    toggleLoading(true, `Import ${jsonData.length} data...`);
-                    for (let row of jsonData) {
-                        const area = (row.Area || row.Lokasi || "AREA TIDAK DISET").toString();
-                        const barcode = (row.Barcode || "").toString();
-                        const qty = parseInt(row.Qty || row.Jumlah || 0);
-
-                        if (barcode && qty > 0) {
-                            const { data: existing } = await supabaseClient
-                                .from(TABLE_NAME).select('id, qty').eq('area', area).eq('barcode', barcode).maybeSingle();
-
-                            if (existing) {
-                                await supabaseClient.from(TABLE_NAME).update({ qty: existing.qty + qty }).eq('id', existing.id);
-                            } else {
-                                await supabaseClient.from(TABLE_NAME).insert([{ area, barcode, qty }]);
-                            }
-                        }
+                    if (rows.length === 0) {
+                        showToast('File Excel yang diunggah kosong', 'error');
+                        return;
                     }
-                    await loadData();
+
+                    // Mapping Data: Menerima berbagai macam nama kolom agar fleksibel
+                    const mappedData = rows.map(row => {
+                        return {
+                            area: (row.Area || row.area || row.AREA || '').toString().toUpperCase(),
+                            barcode: (row.Barcode || row.barcode || row.BARCODE || row['ID Barcode'] || '').toString(),
+                            qty: parseInt(row.QTY || row.qty || row.Jumlah || 0)
+                        };
+                    }).filter(item => item.area && item.barcode && !isNaN(item.qty));
+
+                    if (mappedData.length === 0) {
+                        showToast('Gagal memproses data. Pastikan kolom: Area, Barcode, QTY ada.', 'error');
+                        return;
+                    }
+
+                    // Insert ke Supabase menggunakan variabel TABLE_NAME (stock_opname)
+                    const { error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .insert(mappedData);
+
+                    if (error) throw error;
+
+                    showToast(`Berhasil import ${mappedData.length} baris data warehouse`);
+                    await loadData(); // Refresh UI
                 } catch (err) {
-                    alert("Error: Pastikan kolom adalah 'Area', 'Barcode', dan 'Qty'");
+                    console.error(err);
+                    showToast('Gagal import data dari file Excel', 'error');
                 } finally {
                     toggleLoading(false);
-                    event.target.value = "";
+                    input.value = ''; // Mengizinkan file yang sama dipilih lagi
                 }
             };
+
             reader.readAsArrayBuffer(file);
         }
-
+            
         function openEditModal(id, qty, barcode) {
             document.getElementById('editItemId').value = id;
             document.getElementById('editQtyInput').value = qty;
