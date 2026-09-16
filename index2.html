@@ -739,7 +739,7 @@
         function exportExcel() {
             const data = getFilteredAndSortedData();
             if (data.length === 0) return;
-            const ws = XLSX.utils.json_to_sheet(data.map(item => ({ "Area": item.area, "Barcode": item.barcode, "Qty": item.qty, "Waktu": new Date(item.created_at).toLocaleString() })));
+            const ws = XLSX.utils.json_to_sheet(data.map(item => ({ "Area": item.area, "Barcode": item.barcode, "Qty": item.qty, "Satuan": "Unit", "Waktu": new Date(item.created_at).toLocaleString() })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventory");
             XLSX.writeFile(wb, `Warehouse_Export_${new Date().getTime()}.xlsx`);
