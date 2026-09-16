@@ -932,7 +932,8 @@
             const flatData = dataToExport.map(item => ({
                 "Area": item.area.toUpperCase(), 
                 "Barcode": item.barcode, 
-                "Jumlah (Qty)": item.qty, 
+                "Qty": item.qty, 
+                "Satuan": "PCS",
                 "Waktu Input": new Date(item.created_at).toLocaleString('id-ID') 
             }));
             const ws = XLSX.utils.json_to_sheet(flatData);
