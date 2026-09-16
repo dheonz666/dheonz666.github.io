@@ -933,7 +933,7 @@
                 "Area": item.area.toUpperCase(), 
                 "Barcode": item.barcode, 
                 "Qty": item.qty, 
-                "Satuan": "PCS",
+                "Satuan": "Unit",
                 "Waktu Input": new Date(item.created_at).toLocaleString('id-ID') 
             }));
             const ws = XLSX.utils.json_to_sheet(flatData);
